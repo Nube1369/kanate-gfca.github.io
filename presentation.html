@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Helpdesk System - คู่มือการใช้งาน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        :root {
+            --primary: #22c55e;
+            --primary-dark: #16a34a;
+            --secondary: #3b82f6;
+            --accent: #8b5cf6;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: rgba(148, 163, 184, 0.2);
+            --gold: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+            background: var(--darker);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* Background Effects */
+        .bg-effects {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: var(--dark);
+            background-image:
+                radial-gradient(at 20% 20%, hsla(160, 95%, 50%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 80% 20%, hsla(212, 95%, 60%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 80%, hsla(280, 95%, 60%, 0.15) 0px, transparent 50%);
+        }
+
+        .floating-orbs {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(34, 197, 94, 0.2);
+            top: -100px;
+            left: -100px;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: rgba(59, 130, 246, 0.2);
+            bottom: -50px;
+            right: -50px;
+            animation-delay: -7s;
+        }
+
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: rgba(139, 92, 246, 0.2);
+            top: 50%;
+            left: 50%;
+            animation-delay: -14s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -30px) scale(1.05);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.95);
+            }
+        }
+
+        /* Slides Container */
+        .slides-container {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 80px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(100px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .slide.exit {
+            opacity: 0;
+            transform: translateX(-100px);
+        }
+
+        /* Slide Content */
+        .slide-content {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .slide-number {
+            font-size: 0.9rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .slide-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .slide-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+            border-color: var(--primary);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .icon-green {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--primary);
+        }
+
+        .icon-blue {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--secondary);
+        }
+
+        .icon-purple {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--accent);
+        }
+
+        .icon-gold {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--gold);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-desc {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Steps Flow */
+        .steps-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem 2rem;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .step-item:hover {
+            border-color: var(--primary);
+            transform: translateX(10px);
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            box-shadow: 0 8px 20px -5px rgba(34, 197, 94, 0.4);
+        }
+
+        .step-content h3 {
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Two Column Layout */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .column-visual {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Mock Screenshots */
+        .mock-screen {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+
+        .mock-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .mock-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .mock-dot.red {
+            background: #ef4444;
+        }
+
+        .mock-dot.yellow {
+            background: #eab308;
+        }
+
+        .mock-dot.green {
+            background: #22c55e;
+        }
+
+        .mock-content {
+            padding: 1.5rem;
+        }
+
+        .form-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-field {
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .form-field i {
+            color: var(--primary);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            margin-top: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary), var(--accent));
+            border-radius: 3px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .timeline-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 3px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.25rem 1.5rem;
+            flex: 1;
+        }
+
+        .timeline-content h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Rating Stars */
+        .rating-demo {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 2rem;
+            margin: 1rem 0;
+        }
+
+        .rating-demo i {
+            color: var(--gold);
+            animation: pulse 1.5s infinite;
+        }
+
+        .rating-demo i:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .rating-demo i:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .rating-demo i:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .rating-demo i:nth-child(5) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Navigation */
+        .nav-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            border-radius: 100px;
+            backdrop-filter: blur(20px);
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px -5px rgba(34, 197, 94, 0.5);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-indicators {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .indicator.active {
+            background: var(--primary);
+            width: 30px;
+            border-radius: 10px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            transition: width 0.4s ease;
+            z-index: 100;
+        }
+
+        /* Logo */
+        .logo {
+            position: fixed;
+            top: 30px;
+            left: 40px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .logo img {
+            height: 50px;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Center Content for Title Slide */
+        .center-content {
+            text-align: center;
+            max-width: 900px;
+        }
+
+        .center-content .slide-title {
+            font-size: clamp(3rem, 6vw, 5rem);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .cta-text {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-top: 2rem;
+        }
+
+        .cta-text i {
+            color: var(--primary);
+            margin-left: 0.5rem;
+            animation: slideRight 1s infinite;
+        }
+
+        @keyframes slideRight {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(10px);
+            }
+        }
+
+        /* Evaluation Questions */
+        .eval-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .eval-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .eval-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold);
+        }
+
+        .eval-letter {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), #f59e0b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+            color: #1a1a1a;
+        }
+
+        .eval-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .eval-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Thank You Slide */
+        .thank-you-icon {
+            font-size: 6rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            25% {
+                transform: scale(1.1);
+            }
+
+            50% {
+                transform: scale(1);
+            }
+
+            75% {
+                transform: scale(1.1);
+            }
+        }
+
+        .contact-info {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            border-radius: 100px;
+        }
+
+        .contact-item i {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px 30px;
+            }
+
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .eval-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-controls {
+                bottom: 20px;
+                padding: 0.5rem 1rem;
+            }
+
+            .logo {
+                top: 15px;
+                left: 20px;
+            }
+
+            .logo img {
+                height: 35px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Effects -->
+    <div class="bg-effects"></div>
+    <div class="floating-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Logo -->
+    <div class="logo">
+        <img src="https://res.cloudinary.com/dqveqz8cy/image/upload/v1753430042/IT_Logo_ptq112.png" alt="IT Logo">
+        <span class="logo-text">IT Helpdesk</span>
+    </div>
+
+    <!-- Slides Container -->
+    <div class="slides-container" id="slidesContainer">
+
+        <!-- Slide 1: Title -->
+        <div class="slide active" data-slide="1">
+            <div class="slide-content center-content">
+                <div class="hero-icon">
+                    <i class="bi bi-headset"></i>
+                </div>
+                <h1 class="slide-title">IT Helpdesk System</h1>
+                <p class="slide-subtitle">ระบบแจ้งปัญหาและติดตามการดำเนินงานด้าน IT</p>
+                <p class="cta-text">กด <strong>ลูกศรขวา</strong> หรือคลิกปุ่มด้านล่างเพื่อเริ่มต้น <i
+                        class="bi bi-arrow-right"></i></p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Overview -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <span class="slide-number">ภาพรวมระบบ</span>
+                <h2 class="slide-title">ระบบนี้ทำอะไรได้บ้าง?</h2>
+                <p class="slide-subtitle">ฟีเจอร์หลักที่ช่วยให้การแจ้งปัญหา IT เป็นเรื่องง่าย</p>
+
+                <div class="cards-grid">
+                    <div class="feature-card">
+                        <div class="card-icon icon-green">
+                            <i class="bi bi-send-check"></i>
+                        </div>
+                        <h3 class="card-title">แจ้งปัญหาออนไลน์</h3>
+                        <p class="card-desc">กรอกแบบฟอร์มง่ายๆ เพื่อแจ้งปัญหาด้าน IT ได้ตลอด 24 ชั่วโมง</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="card-icon icon-blue">
+                            <i class="bi bi-bell"></i>
+                        </div>
+                        <h3 class="card-title">แจ้งเตือนอัตโนมัติ</h3>
+                        <p class="card-desc">ทีม IT ได้รับแจ้งเตือนผ่าน Microsoft Teams ทันที</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="card-icon icon-purple">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <h3 class="card-title">ติดตามสถานะ</h3>
+                        <p class="card-desc">Admin สามารถดูสถิติและจัดการเคสได้ผ่าน Dashboard</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="card-icon icon-gold">
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <h3 class="card-title">ประเมินความพึงพอใจ</h3>
+                        <p class="card-desc">ให้คะแนนการบริการหลังแก้ไขปัญหาเสร็จสิ้น</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: How to Submit -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content two-columns">
+                <div class="column-text">
+                    <span class="slide-number">ขั้นตอนที่ 1</span>
+                    <h2 class="slide-title">วิธีแจ้งปัญหา</h2>
+                    <p class="slide-subtitle">กรอกข้อมูลให้ครบถ้วนเพื่อให้ทีม IT เข้าใจปัญหาได้ถูกต้อง</p>
+
+                    <div class="steps-flow">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>กรอก E-mail ของคุณ</h3>
+                                <p>ใส่ชื่อ email และเลือก domain เช่น gfca.com, asiatic.co.th</p>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>ใส่เบอร์ติดต่อ / 3CX</h3>
+                                <p>หมายเลขโทรศัพท์หรือเบอร์ 3CX เพื่อให้ติดต่อกลับได้</p>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>กรอกรหัสพนักงาน</h3>
+                                <p>รหัสพนักงานของคุณ (ไม่เกิน 10 ตัวอักษร)</p>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3>เลือกประเภทปัญหา & อธิบาย</h3>
+                                <p>เลือกประเภทปัญหาและอธิบายรายละเอียดให้ชัดเจน</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column-visual">
+                    <div class="mock-screen">
+                        <div class="mock-header">
+                            <div class="mock-dot red"></div>
+                            <div class="mock-dot yellow"></div>
+                            <div class="mock-dot green"></div>
+                        </div>
+                        <div class="mock-content">
+                            <div class="form-preview">
+                                <div class="form-field">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>john.doe@gfca.com</span>
+                                </div>
+                                <div class="form-field">
+                                    <i class="bi bi-telephone"></i>
+                                    <span>1234</span>
+                                </div>
+                                <div class="form-field">
+                                    <i class="bi bi-person-badge"></i>
+                                    <span>EMP001234</span>
+                                </div>
+                                <div class="form-field">
+                                    <i class="bi bi-tags"></i>
+                                    <span>Network (ระบบเครือข่าย)</span>
+                                </div>
+                                <div class="form-field" style="min-height: 60px; align-items: flex-start;">
+                                    <i class="bi bi-chat-text"></i>
+                                    <span>ไม่สามารถเชื่อมต่ออินเทอร์เน็ตได้...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Problem Types -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <span class="slide-number">ประเภทปัญหา</span>
+                <h2 class="slide-title">ปัญหาที่สามารถแจ้งได้</h2>
+                <p class="slide-subtitle">เลือกประเภทที่ตรงกับปัญหาของคุณมากที่สุด</p>
+
+                <div class="cards-grid">
+                    <div class="feature-card">
+                        <div class="card-icon icon-green">
+                            <i class="bi bi-pc-display"></i>
+                        </div>
+                        <h3 class="card-title">Hardware</h3>
+                        <p class="card-desc">อุปกรณ์คอมพิวเตอร์ เช่น จอภาพ, คีย์บอร์ด, เมาส์</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="card-icon icon-blue">
+                            <i class="bi bi-window"></i>
+                        </div>
+                        <h3 class="card-title">Software</h3>
+                        <p class="card-desc">โปรแกรม เช่น Microsoft Office, โปรแกรมทำงาน</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="card-icon icon-purple">
+                            <i class="bi bi-wifi"></i>
+                        </div>
+                        <h3 class="card-title">Network</h3>
+                        <p class="card-desc">ระบบเครือข่าย, อินเทอร์เน็ต, การเชื่อมต่อ</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="card-icon icon-gold">
+                            <i class="bi bi-printer"></i>
+                        </div>
+                        <h3 class="card-title">Printer</h3>
+                        <p class="card-desc">เครื่องพิมพ์ทุกชนิด รวมถึงการติดตั้ง</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="card-icon icon-green">
+                            <i class="bi bi-envelope-paper"></i>
+                        </div>
+                        <h3 class="card-title">Outlook</h3>
+                        <p class="card-desc">อีเมล Outlook, ปฏิทิน, การตั้งค่าบัญชี</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="card-icon icon-blue">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <h3 class="card-title">VPN / สิทธิ์โฟลเดอร์</h3>
+                        <p class="card-desc">การเชื่อมต่อ VPN, การเปิดสิทธิ์เข้าโฟลเดอร์</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: After Submission -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <span class="slide-number">หลังแจ้งปัญหา</span>
+                <h2 class="slide-title">จะเกิดอะไรขึ้นต่อ?</h2>
+                <p class="slide-subtitle">ขั้นตอนหลังจากคุณส่งแบบฟอร์มแจ้งปัญหาสำเร็จ</p>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="bi bi-check-lg" style="color: var(--primary);"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>ระบบบันทึกเคส</h4>
+                            <p>ข้อมูลของคุณถูกบันทึกลงระบบ พร้อมรหัสเคส (CASE-XXXX)</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="bi bi-microsoft-teams" style="color: var(--secondary);"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>แจ้งเตือนทีม IT</h4>
+                            <p>ระบบส่งการแจ้งเตือนไปยัง Microsoft Teams ให้ทีม IT ทราบทันที</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="bi bi-tools" style="color: var(--accent);"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>ทีม IT ดำเนินการแก้ไข</h4>
+                            <p>เจ้าหน้าที่จะติดต่อกลับมาเพื่อดำเนินการแก้ไขปัญหาของคุณ</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="bi bi-envelope-check" style="color: var(--gold);"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>ปิดเคส & ส่ง Email ประเมิน</h4>
+                            <p>เมื่อแก้ไขเสร็จ Admin จะปิดเคส และคุณจะได้รับ Email ให้ประเมินบริการ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Evaluation -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <span class="slide-number">ขั้นตอนที่ 2</span>
+                <h2 class="slide-title">การประเมินความพึงพอใจ</h2>
+                <p class="slide-subtitle">ให้คะแนนเพื่อช่วยพัฒนาบริการให้ดียิ่งขึ้น</p>
+
+                <div class="eval-grid">
+                    <div class="eval-card">
+                        <div class="eval-letter">Q</div>
+                        <h3>Quality</h3>
+                        <p>แก้ไขปัญหาได้ถูกต้อง และใช้งานได้เป็นปกติ</p>
+                        <div class="rating-demo">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                    </div>
+
+                    <div class="eval-card">
+                        <div class="eval-letter">D</div>
+                        <h3>Delivery</h3>
+                        <p>ความรวดเร็วในการเข้าดำเนินการแก้ไข</p>
+                        <div class="rating-demo">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                    </div>
+
+                    <div class="eval-card">
+                        <div class="eval-letter">C</div>
+                        <h3>Cost</h3>
+                        <p>ขั้นตอนการแจ้งซ่อมและการติดต่อขอความช่วยเหลือ</p>
+                        <div class="rating-demo">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <div
+                        style="display: inline-flex; gap: 2rem; background: var(--card-bg); padding: 1rem 2rem; border-radius: 100px; border: 1px solid var(--border);">
+                        <span><i class="bi bi-star-fill" style="color: var(--gold);"></i> 5 = ดีมาก</span>
+                        <span><i class="bi bi-star" style="color: var(--text-secondary);"></i> 1 = ต้องปรับปรุง</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Follow-up -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content two-columns">
+                <div class="column-text">
+                    <span class="slide-number">Email ติดตามผล</span>
+                    <h2 class="slide-title">การสอบถามหลังแก้ไข</h2>
+                    <p class="slide-subtitle">ระบบจะส่ง Email สอบถามผลลัพธ์หลังปิดเคส 24 ชั่วโมง</p>
+
+                    <div class="steps-flow">
+                        <div class="step-item">
+                            <div class="step-number"><i class="bi bi-envelope"></i></div>
+                            <div class="step-content">
+                                <h3>ได้รับ Email สอบถาม</h3>
+                                <p>ระบบส่ง Email อัตโนมัติถามว่าปัญหาหายแล้วหรือยัง</p>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number"><i class="bi bi-hand-index"></i></div>
+                            <div class="step-content">
+                                <h3>คลิกลิงก์แจ้งผลลัพธ์</h3>
+                                <p>เลือกว่า "ดีขึ้นแล้ว" หรือ "ยังมีปัญหา"</p>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number"><i class="bi bi-chat-dots"></i></div>
+                            <div class="step-content">
+                                <h3>แจ้งรายละเอียดเพิ่มเติม</h3>
+                                <p>หากยังมีปัญหา สามารถอธิบายรายละเอียดเพิ่มเติมได้</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column-visual">
+                    <div class="mock-screen">
+                        <div class="mock-header">
+                            <div class="mock-dot red"></div>
+                            <div class="mock-dot yellow"></div>
+                            <div class="mock-dot green"></div>
+                        </div>
+                        <div class="mock-content" style="text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📧</div>
+                            <h4 style="margin-bottom: 1rem; color: var(--primary);">Email สอบถามหลังแก้ไข</h4>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">เคส CASE-0001
+                                ได้รับการแก้ไขแล้ว<br>ปัญหาของคุณหายแล้วหรือยัง?</p>
+
+                            <div style="display: flex; gap: 1rem; justify-content: center;">
+                                <div
+                                    style="background: rgba(34, 197, 94, 0.2); color: var(--primary); padding: 0.75rem 1.5rem; border-radius: 100px; font-weight: 600;">
+                                    <i class="bi bi-check-circle"></i> ดีขึ้นแล้ว
+                                </div>
+                                <div
+                                    style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 0.75rem 1.5rem; border-radius: 100px; font-weight: 600;">
+                                    <i class="bi bi-x-circle"></i> ยังมีปัญหา
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Summary -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <span class="slide-number">สรุป</span>
+                <h2 class="slide-title">กระบวนการทำงานโดยรวม</h2>
+
+                <div class="timeline" style="margin-top: 3rem;">
+                    <div class="timeline-item">
+                        <div class="timeline-icon" style="border-color: #06c755;">
+                            <i class="bi bi-1-circle-fill" style="color: #06c755; font-size: 1.25rem;"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>ติดต่อ IT ผ่าน LINE OA</h4>
+                            <p>แจ้งปัญหาเบื้องต้นผ่าน LINE OA → ทาง IT จะส่งลิงก์ Ticket ให้</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon" style="border-color: var(--primary);">
+                            <i class="bi bi-2-circle-fill" style="color: var(--primary); font-size: 1.25rem;"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>ผู้ใช้กรอกแบบฟอร์ม</h4>
+                            <p>กรอกรายละเอียดปัญหาในแบบฟอร์มที่ IT ส่งให้</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon" style="border-color: var(--secondary);">
+                            <i class="bi bi-3-circle-fill" style="color: var(--secondary); font-size: 1.25rem;"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>ระบบบันทึก & แจ้งเตือน</h4>
+                            <p>บันทึกข้อมูลและส่งแจ้งเตือนไปยัง Microsoft Teams</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon" style="border-color: var(--accent);">
+                            <i class="bi bi-4-circle-fill" style="color: var(--accent); font-size: 1.25rem;"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>ทีม IT ดำเนินการ</h4>
+                            <p>เจ้าหน้าที่ติดต่อกลับและดำเนินการแก้ไขปัญหา</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon" style="border-color: var(--gold);">
+                            <i class="bi bi-5-circle-fill" style="color: var(--gold); font-size: 1.25rem;"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>ปิดเคส & ประเมิน</h4>
+                            <p>Admin ปิดเคส → ผู้ใช้ได้รับ Email ให้ประเมินความพึงพอใจ (Q/D/C)</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon" style="border-color: var(--primary);">
+                            <i class="bi bi-6-circle-fill" style="color: var(--primary); font-size: 1.25rem;"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>ติดตามผล</h4>
+                            <p>หลัง 24 ชม. ระบบส่ง Email สอบถามว่าปัญหาหายแล้วหรือยัง</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Thank You -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content center-content">
+                <div class="thank-you-icon">
+                    <i class="bi bi-heart-fill"></i>
+                </div>
+                <h1 class="slide-title">ขอบคุณครับ</h1>
+                <p class="slide-subtitle">หากมีปัญหาด้าน IT สามารถแจ้งผ่านระบบได้ตลอดเวลา</p>
+
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="bi bi-globe"></i>
+                        <span>IT Helpdesk System</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="bi bi-telephone"></i>
+                        <span>ติดต่อทีม IT</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="bi bi-microsoft-teams"></i>
+                        <span>Microsoft Teams</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Navigation Controls -->
+    <div class="nav-controls">
+        <button class="nav-btn" id="prevBtn" disabled>
+            <i class="bi bi-chevron-left"></i>
+        </button>
+
+        <div class="slide-indicators" id="slideIndicators"></div>
+
+        <button class="nav-btn" id="nextBtn">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const indicators = document.getElementById('slideIndicators');
+            const progressBar = document.getElementById('progressBar');
+
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            // Create slide indicators
+            slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('indicator');
+                if (index === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => goToSlide(index));
+                indicators.appendChild(dot);
+            });
+
+            const updateProgress = () => {
+                const progress = ((currentSlide + 1) / totalSlides) * 100;
+                progressBar.style.width = `${progress}%`;
+            };
+
+            const updateIndicators = () => {
+                document.querySelectorAll('.indicator').forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentSlide);
+                });
+            };
+
+            const updateButtons = () => {
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+            };
+
+            const goToSlide = (index) => {
+                if (index < 0 || index >= totalSlides) return;
+
+                // Mark current slide as exiting
+                slides[currentSlide].classList.remove('active');
+                slides[currentSlide].classList.add('exit');
+
+                // Update current slide
+                currentSlide = index;
+
+                // Remove exit class from all and add active to current
+                setTimeout(() => {
+                    slides.forEach((slide, i) => {
+                        slide.classList.remove('exit');
+                        slide.classList.toggle('active', i === currentSlide);
+                    });
+                }, 100);
+
+                updateProgress();
+                updateIndicators();
+                updateButtons();
+            };
+
+            const nextSlide = () => goToSlide(currentSlide + 1);
+            const prevSlide = () => goToSlide(currentSlide - 1);
+
+            // Event listeners
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    prevSlide();
+                }
+            });
+
+            // Touch/swipe support
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+
+            document.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                const diff = touchStartX - touchEndX;
+
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) {
+                        nextSlide();
+                    } else {
+                        prevSlide();
+                    }
+                }
+            });
+
+            // Initialize
+            updateProgress();
+        });
+    </script>
+</body>
+
+</html>

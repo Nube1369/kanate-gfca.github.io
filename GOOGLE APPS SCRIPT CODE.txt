@@ -1,0 +1,991 @@
+// ----- GOOGLE APPS SCRIPT CODE (REAL-TIME & PERFORMANCE UPDATE) -----
+
+const ticketSheetName = "Sheet1";
+const userSheetName = "Users";
+const userProperties = PropertiesService.getUserProperties();
+
+function getThaiDateTime(date) {
+  const optionsDate = { year: 'numeric', month: 'numeric', day: 'numeric', timeZone: 'Asia/Bangkok' };
+  const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' };
+  return {
+    date: date.toLocaleDateString('th-TH', optionsDate),
+    time: date.toLocaleTimeString('th-TH', optionsTime)
+  };
+}
+
+function isAuthorized(token) {
+    if (!token) return false;
+    const storedToken = userProperties.getProperty(token);
+    return storedToken !== null;
+}
+
+// ***** CHANGE: ปรับปรุง doGet ทั้งหมดเพื่อรองรับการแสดงหน้าประเมิน *****
+function doGet(e) {
+  try {
+    // Check if requesting evaluation page (legacy support)
+    if (e.parameter.page === 'evaluate') {
+        const caseId = e.parameter.caseId || '';
+        const html = getEvaluateHtml(caseId);
+        return HtmlService.createHtmlOutput(html)
+            .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+            .setTitle('IT Helpdesk - แบบประเมินความพึงพอใจ');
+    }
+
+    // Check evaluation status API endpoint
+    if (e.parameter.action === 'checkEvaluation') {
+        const caseId = e.parameter.caseId || '';
+        if (!caseId) {
+            return ContentService.createTextOutput(JSON.stringify({ 
+                success: false, 
+                message: "Missing caseId parameter" 
+            })).setMimeType(ContentService.MimeType.JSON);
+        }
+        
+        const ticketSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ticketSheetName);
+        const data = ticketSheet.getDataRange().getValues();
+        const headers = data[0];
+        const caseIdIndex = headers.findIndex(h => h.toString().toLowerCase().includes('caseid'));
+        const scoreQIndex = 17; // Column R: ScoreQ (1-indexed = 18, 0-indexed = 17)
+        
+        const ticketRow = data.find((row, index) => index > 0 && row[caseIdIndex] === caseId);
+        
+        if (!ticketRow) {
+            return ContentService.createTextOutput(JSON.stringify({ 
+                success: false, 
+                message: "ไม่พบเคสในระบบ" 
+            })).setMimeType(ContentService.MimeType.JSON);
+        }
+        
+        const scoreQ = ticketRow[scoreQIndex];
+        const alreadyEvaluated = scoreQ && scoreQ.toString().trim() !== '';
+        
+        return ContentService.createTextOutput(JSON.stringify({ 
+            success: true, 
+            alreadyEvaluated: alreadyEvaluated 
+        })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Check problem follow-up status API endpoint
+    if (e.parameter.action === 'checkProblemFollowup') {
+        const caseId = e.parameter.caseId || '';
+        if (!caseId) {
+            return ContentService.createTextOutput(JSON.stringify({ 
+                success: false, 
+                message: "Missing caseId parameter" 
+            })).setMimeType(ContentService.MimeType.JSON);
+        }
+        
+        const ticketSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ticketSheetName);
+        const data = ticketSheet.getDataRange().getValues();
+        const headers = data[0];
+        const caseIdIndex = headers.findIndex(h => h.toString().toLowerCase().includes('caseid'));
+        const commentProblemIndex = 25; // Column Z: CommentProblem (1-indexed = 26, 0-indexed = 25)
+        
+        const ticketRow = data.find((row, index) => index > 0 && row[caseIdIndex] === caseId);
+        
+        if (!ticketRow) {
+            return ContentService.createTextOutput(JSON.stringify({ 
+                success: false, 
+                message: "ไม่พบเคสในระบบ" 
+            })).setMimeType(ContentService.MimeType.JSON);
+        }
+        
+        const commentProblem = ticketRow[commentProblemIndex];
+        const alreadySubmitted = commentProblem && commentProblem.toString().trim() !== '';
+        
+        return ContentService.createTextOutput(JSON.stringify({ 
+            success: true, 
+            alreadySubmitted: alreadySubmitted 
+        })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const lastCheckedParam = e.parameter.lastChecked;
+    const ticketSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ticketSheetName);
+    
+    if (ticketSheet.getLastRow() <= 1) {
+      return ContentService.createTextOutput(JSON.stringify({ success: true, data: { tickets: [], users: [] } })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const ticketDataRange = ticketSheet.getDataRange();
+    // ***** FIX: เปลี่ยนมาใช้ getDisplayValues() เพื่อให้ได้ค่าวันที่/เวลาเป็นข้อความที่ถูกต้อง *****
+    const ticketDisplayValues = ticketDataRange.getDisplayValues(); 
+    
+    const ticketHeaders = ticketDisplayValues.shift() || [];
+    const lastUpdatedHeaderIndex = ticketHeaders.findIndex(h => h.replace(/\s+/g, '') === 'LastUpdated');
+
+    let filteredTicketValues = ticketDisplayValues;
+
+    if (lastCheckedParam && lastUpdatedHeaderIndex !== -1) {
+      const lastChecked = parseInt(lastCheckedParam, 10);
+      if (!isNaN(lastChecked)) {
+        filteredTicketValues = ticketDisplayValues.filter(row => {
+          // แปลงค่า timestamp ที่เป็นข้อความกลับเป็นตัวเลขเพื่อเปรียบเทียบ
+          const currentTimestamp = parseInt(row[lastUpdatedHeaderIndex], 10);
+          return !isNaN(currentTimestamp) && currentTimestamp > lastChecked;
+        });
+      }
+    }
+
+    const tickets = filteredTicketValues.map((row) => {
+      let ticket = {};
+      ticketHeaders.forEach((header, i) => {
+        const key = header.replace(/\s+/g, '');
+        // ตอนนี้ทุกค่าเป็นข้อความ (string) แล้ว จึงไม่ต้องเช็คประเภทข้อมูลอีก
+        ticket[key] = row[i];
+      });
+      return ticket;
+    });
+
+    let users = [];
+    if (!lastCheckedParam) {
+        const userSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(userSheetName);
+        if (userSheet.getLastRow() > 1) {
+            const userData = userSheet.getDataRange().getValues();
+            userData.shift();
+            users = userData.map((row, index) => ({
+                rowIndex: index + 2,
+                username: row[0],
+                password: "" 
+            }));
+        }
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: true, data: { tickets: tickets, users: users } }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    Logger.log(error); // Log error for debugging
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: error.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+
+function doPost(e) {
+  let requestData;
+  try {
+    requestData = JSON.parse(e.postData.contents);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Invalid request data." })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  const action = requestData.action;
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000); 
+
+  try {
+    if (action === 'login') {
+      return handleLogin(requestData);
+    }
+    if (action === 'submitTicket') {
+      const ticketSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ticketSheetName);
+      
+      const rowId = handleSubmitTicket(ticketSheet, requestData);
+
+      if (requestData.teamsWebhookUrl) {
+          sendToTeams(requestData, requestData.teamsWebhookUrl, rowId);
+      }
+      
+      return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Ticket submitted." })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Moved check inside to skip auth for evaluation submission if desired, 
+    // but assuming evaluation uses doPost via fetch from external context we might not have token.
+    // However, the evaluation page is now on GAS.
+    
+    if (action === 'submitEvaluation') {
+        const ticketSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ticketSheetName);
+        return handleSubmitEvaluation(ticketSheet, requestData);
+    }
+    
+    // Handle problem follow-up submission (no auth required)
+    if (action === 'submitProblemFollowup') {
+        const ticketSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ticketSheetName);
+        return handleSubmitProblemFollowup(ticketSheet, requestData);
+    }
+
+    if (!isAuthorized(requestData.token)) {
+      return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Unauthorized." })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const ticketSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ticketSheetName);
+    const userSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(userSheetName);
+    
+    let result;
+    switch (action) {
+      case 'logout':
+        result = handleLogout(requestData);
+        break;
+      case 'closeTicket':
+        result = handleCloseTicket(ticketSheet, requestData);
+        break;
+      case 'resendEvaluationEmail':
+        result = handleResendEvaluationEmail(ticketSheet, requestData);
+        break;
+      case 'addUser':
+        result = handleAddUser(userSheet, requestData);
+        break;
+      case 'editUser':
+        result = handleEditUser(userSheet, requestData);
+        break;
+      case 'deleteUser':
+        result = handleDeleteUser(userSheet, requestData);
+        break;
+      case 'sendProblemFollowupEmail':
+        result = handleSendProblemFollowupEmail(ticketSheet, requestData);
+        break;
+      default:
+        result = ContentService.createTextOutput(JSON.stringify({ success: false, message: "Invalid action." })).setMimeType(ContentService.MimeType.JSON);
+    }
+    return result;
+
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: error.toString() })).setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function sendToTeams(data, webhookUrl, rowId) {
+  const dashboardUrl = `https://nube1369.github.io/HelpMedek03d/dashboard.html?ticketId=${rowId}`;
+  
+  const payload = {
+      "@type": "MessageCard",
+      "@context": "http://schema.org/extensions",
+      "summary": "IT Helpdesk - แจ้งปัญหาใหม่",
+      "themeColor": "0072C6",
+      "title": "มีปัญหาใหม่ถูกแจ้งเข้ามา",
+      "sections": [
+          {
+              "activityTitle": "แบบฟอร์มแจ้งปัญหา",
+              "activitySubtitle": "มีการส่งคำร้องขอความช่วยเหลือใหม่เข้ามา",
+              "facts": [
+                  { "name": "ชื่อผู้แจ้ง", "value": data.submitterName },
+                  { "name": "เบอร์ติดต่อกลับ / 3CX", "value": data.contactNumber },
+                  { "name": "รหัสพนักงาน", "value": data.department },
+                  { "name": "ประเภทปัญหา", "value": data.problemType }
+              ],
+              "text": `**รายละเอียดปัญหา:**\n${data.problemDetails}\n\n[คลิกเพื่อจัดการงานนี้](${dashboardUrl})`
+          }
+      ]
+  };
+
+  const options = {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload)
+  };
+
+  try {
+      UrlFetchApp.fetch(webhookUrl, options);
+  } catch(e) {
+      Logger.log(e);
+  }
+}
+
+function sendClosedToTeams(ticketInfo, webhookUrl) {
+  const dashboardUrl = `https://nube1369.github.io/HelpMedek03d/dashboard.html?ticketId=${ticketInfo.rowIndex}`;
+  
+  const payload = {
+      "@type": "MessageCard",
+      "@context": "http://schema.org/extensions",
+      "summary": "IT Helpdesk - ปิดเคสแล้ว",
+      "themeColor": "22C55E",
+      "title": "✅ เคสถูกปิดเรียบร้อยแล้ว",
+      "sections": [
+          {
+              "activityTitle": "แจ้งปิดเคส IT Helpdesk",
+              "activitySubtitle": `เคส ${ticketInfo.caseId} ได้รับการแก้ไขและปิดเรียบร้อยแล้ว`,
+              "facts": [
+                  { "name": "หมายเลขเคส", "value": ticketInfo.caseId },
+                  { "name": "ผู้แจ้ง", "value": ticketInfo.submitterName },
+                  { "name": "ประเภทปัญหา", "value": ticketInfo.problemType },
+                  { "name": "วันที่ปิดเคส", "value": `${ticketInfo.closedDate} ${ticketInfo.closedTime}` }
+              ],
+              "text": `**สรุปการแก้ไข:**\n${ticketInfo.resolutionComment || 'ไม่มีหมายเหตุ'}\n\n[คลิกเพื่อดูรายละเอียด](${dashboardUrl})`
+          }
+      ]
+  };
+
+  const options = {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload)
+  };
+
+  try {
+      UrlFetchApp.fetch(webhookUrl, options);
+  } catch(e) {
+      Logger.log(e);
+  }
+}
+
+function sendEvaluationEmail(email, caseId, ticketInfo) {
+    if (!email || !caseId) {
+        return { success: false, error: "Email or CaseID missing" };
+    }
+    // Use GitHub Pages hosted evaluation page
+    const evaluationPageUrl = "https://nube1369.github.io/gfca-it-by-kanate-h/evaluate.html";
+    const evaluationUrl = `${evaluationPageUrl}?caseId=${caseId}`;
+    const subject = `แจ้งปิดเคสงาน IT Helpdesk (${caseId}) และขอรับการประเมิน`;
+    
+    // Extract ticket info with defaults
+    const submitterName = ticketInfo?.submitterName || email;
+    const problemDetails = ticketInfo?.problemDetails || '-';
+    const submissionDate = ticketInfo?.submissionDate || '-';
+    const submissionTime = ticketInfo?.submissionTime || '';
+    
+    const htmlBody = `
+    <div style="font-family: 'Sarabun', 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f3f4f6;">
+        <div style="background: #f1f5f9; color: #000000; padding: 30px; border-radius: 12px 12px 0 0; text-align: center; border-bottom: 3px solid #f59e0b;">
+            <h2 style="margin: 0 0 10px 0; color: #000000; font-size: 24px;">🔧 IT Hardware</h2>
+            <p style="margin: 0; color: #000000; font-size: 16px;">แจ้งปิดเคสและขอรับการประเมิน</p>
+        </div>
+        <div style="background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <p style="color: #000000; font-size: 16px; margin-bottom: 15px;">เรียน ผู้ใช้งาน,</p>
+            <p style="color: #000000; font-size: 15px; line-height: 1.6;">
+                <span style="color: #22c55e; font-size: 1.2em;">✅</span> ปัญหาของคุณได้รับการแก้ไขและปิดเคสเรียบร้อยแล้ว
+            </p>
+            
+            <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0; border: 1px solid #e2e8f0;">
+                <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                    <tr><td style="color: #4b5563; padding: 8px 0; width: 120px;">หมายเลขเคส:</td><td style="color: #f59e0b; font-weight: bold;">${caseId}</td></tr>
+                    <tr><td style="color: #4b5563; padding: 8px 0;">ผู้แจ้ง:</td><td style="color: #000000; font-weight: 500;">${submitterName}</td></tr>
+                    <tr><td style="color: #4b5563; padding: 8px 0;">วันที่แจ้ง:</td><td style="color: #000000; font-weight: 500;">${submissionDate} ${submissionTime}</td></tr>
+                    <tr><td style="color: #4b5563; padding: 8px 0;">รายละเอียด:</td><td style="color: #000000; font-weight: 500;">${problemDetails}</td></tr>
+                </table>
+            </div>
+            
+            <p style="color: #000000; font-size: 15px; line-height: 1.6; text-align: center;">
+                เพื่อพัฒนาคุณภาพการบริการ เราขอรบกวนเวลาเพียง <strong>1 นาที</strong><br>
+                ประเมินความพึงพอใจของท่านต่อการให้บริการครั้งนี้
+            </p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${evaluationUrl}" style="display: inline-block; background-color: #f59e0b; color: #ffffff !important; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-weight: bold; font-size: 16px; border: 2px solid #f59e0b; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.4);">
+                    ⭐ ประเมินความพึงพอใจ
+                </a>
+            </div>
+            
+            <p style="color: #4b5563; font-size: 14px; text-align: center; margin-top: 20px;">ขอขอบคุณที่ใช้บริการ</p>
+        </div>
+        <p style="text-align: center; color: #6b7280; font-size: 12px; margin-top: 20px;">
+            © IT Hardware Team
+        </p>
+    </div>
+    `;
+
+    try {
+        MailApp.sendEmail({
+            to: email,
+            subject: subject,
+            htmlBody: htmlBody
+        });
+        Logger.log("Email sent to: " + email);
+        return { success: true };
+    } catch (e) {
+        Logger.log("Failed to send email to " + email + ": " + e.toString());
+        return { success: false, error: e.toString() };
+    }
+}
+
+// ... (Other functions handleSubmitEvaluation, handleLogin, etc. are below and unchanged except new getEvaluateHtml)
+
+function getEvaluateHtml(caseId) {
+  return `<!DOCTYPE html>
+<html lang="th" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Helpdesk - แบบประเมินความพึงพอใจ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bs-body-font-family: 'Inter', 'Sarabun', sans-serif; --bs-primary: #22c55e; --bs-body-bg: #0f172a; --bs-body-color: #d1d5db; --bs-border-color: rgba(107, 114, 128, 0.2); --bs-card-bg: #1f2937; --gold: #fbbf24; }
+        body { background-color: var(--bs-body-bg); color: var(--bs-body-color); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .main-container { width: 100%; max-width: 600px; padding: 1rem; }
+        .card { background: var(--bs-card-bg); border: 1px solid var(--bs-border-color); border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .rating-section { margin-bottom: 1.5rem; text-align: left; }
+        .rating-label { font-size: 1.1rem; font-weight: 500; margin-bottom: 0.5rem; color: #f3f4f6; }
+        .stars { display: inline-flex; flex-direction: row-reverse; gap: 0.25rem; }
+        .stars input[type="radio"] { display: none; }
+        .stars label { font-size: 2rem; color: #4b5563; cursor: pointer; transition: all 0.2s; }
+        .stars label:hover, .stars label:hover ~ label, .stars input[type="radio"]:checked ~ label { color: var(--gold); transform: scale(1.1); }
+        .custom-btn { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; width: 100%; transition: all 0.3s; }
+        .custom-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .custom-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner-border { width: 3rem; height: 3rem; color: var(--bs-primary); }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay"><div class="spinner-border mb-3" role="status"></div><div class="text-white">กำลังบันทึกข้อมูล...</div></div>
+    <div class="main-container">
+        <div class="text-center mb-4">
+             <img src="https://res.cloudinary.com/dqveqz8cy/image/upload/v1753430042/IT_Logo_ptq112.png" alt="Logo" style="height: 60px; margin-bottom: 1rem;">
+             <h2 class="fw-bold text-white">แบบประเมินความพึงพอใจ</h2>
+             <p class="text-muted">เคส: <span id="caseIdDisplay" class="text-primary fw-bold">Loading...</span></p>
+             <div class="d-flex justify-content-center gap-2 mb-3">
+                <span class="badge rounded-pill bg-success bg-opacity-25 text-success border border-success"><i class="bi bi-star-fill me-1"></i>5 = ดีมาก</span>
+                <span class="badge rounded-pill bg-danger bg-opacity-25 text-danger border border-danger"><i class="bi bi-star me-1"></i>1 = ปรับปรุง</span>
+             </div>
+        </div>
+        <div class="card p-4" id="evaluation-card">
+            <form id="evaluationForm">
+                <div class="rating-section"><div class="rating-label">1. แก้ไขปัญหาได้ถูกต้อง และใช้งานได้เป็นปกติ (Quality)</div><div class="stars"><input type="radio" id="q5" name="scoreQ" value="5" required><label for="q5"><i class="bi bi-star-fill"></i></label><input type="radio" id="q4" name="scoreQ" value="4"><label for="q4"><i class="bi bi-star-fill"></i></label><input type="radio" id="q3" name="scoreQ" value="3"><label for="q3"><i class="bi bi-star-fill"></i></label><input type="radio" id="q2" name="scoreQ" value="2"><label for="q2"><i class="bi bi-star-fill"></i></label><input type="radio" id="q1" name="scoreQ" value="1"><label for="q1"><i class="bi bi-star-fill"></i></label></div></div>
+                <div class="rating-section"><div class="rating-label">2. ความรวดเร็วในการเข้าดำเนินการแก้ไข (Delivery)</div><div class="stars"><input type="radio" id="d5" name="scoreD" value="5" required><label for="d5"><i class="bi bi-star-fill"></i></label><input type="radio" id="d4" name="scoreD" value="4"><label for="d4"><i class="bi bi-star-fill"></i></label><input type="radio" id="d3" name="scoreD" value="3"><label for="d3"><i class="bi bi-star-fill"></i></label><input type="radio" id="d2" name="scoreD" value="2"><label for="d2"><i class="bi bi-star-fill"></i></label><input type="radio" id="d1" name="scoreD" value="1"><label for="d1"><i class="bi bi-star-fill"></i></label></div></div>
+                <div class="rating-section"><div class="rating-label">3. ขั้นตอนการแจ้งซ่อมและการติดต่อขอความช่วยเหลือ (Cost)</div><div class="stars"><input type="radio" id="c5" name="scoreC" value="5" required><label for="c5"><i class="bi bi-star-fill"></i></label><input type="radio" id="c4" name="scoreC" value="4"><label for="c4"><i class="bi bi-star-fill"></i></label><input type="radio" id="c3" name="scoreC" value="3"><label for="c3"><i class="bi bi-star-fill"></i></label><input type="radio" id="c2" name="scoreC" value="2"><label for="c2"><i class="bi bi-star-fill"></i></label><input type="radio" id="c1" name="scoreC" value="1"><label for="c1"><i class="bi bi-star-fill"></i></label></div></div>
+                <div class="mb-4"><label for="comment" class="form-label text-white fw-bold">ข้อเสนอแนะเพิ่มเติม</label><textarea class="form-control" id="comment" rows="3" placeholder="ความคิดเห็นของคุณ..."></textarea></div>
+                <div class="d-grid gap-2"><button type="submit" class="custom-btn">ส่งแบบประเมิน</button></div>
+            </form>
+        </div>
+        <div id="success-message" class="card p-5 text-center hidden"><div class="mb-3 text-success" style="font-size: 4rem;"><i class="bi bi-check-circle-fill"></i></div><h3 class="text-white fw-bold">ขอบคุณสำหรับการประเมิน</h3><p class="text-muted">ข้อมูลของคุณถูกบันทึกเรียบร้อยแล้ว</p></div>
+        <div id="error-message" class="card p-5 text-center hidden"><div class="mb-3 text-danger" style="font-size: 4rem;"><i class="bi bi-x-circle-fill"></i></div><h3 class="text-white fw-bold">เกิดข้อผิดพลาด</h3><p class="text-muted" id="error-text"></p></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyl7ot3u6zwdSr3n5dm52wZJHG08lmKhhIaPuuZiZ7Ogerv1rd1l4GmFCVDaABSAPXY/exec"; 
+            
+            // **** INJECTED FROM SERVER ****
+            const caseId = "${caseId}"; 
+            
+            const caseIdDisplay = document.getElementById('caseIdDisplay');
+            const form = document.getElementById('evaluationForm');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const successMsg = document.getElementById('success-message');
+            const errorMsg = document.getElementById('error-message');
+            const evaluationCard = document.getElementById('evaluation-card');
+
+            if (caseId && caseId.trim() !== "") {
+               caseIdDisplay.textContent = caseId;
+            } else { 
+               caseIdDisplay.textContent = 'ไม่พบรหัสเคส'; 
+               form.innerHTML = '<div class="alert alert-danger">ไม่พบรหัสเคสในลิงก์</div>'; 
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!caseId) return;
+                const formData = new FormData(form);
+                const data = { action: 'submitEvaluation', caseId: caseId, scoreQ: formData.get('scoreQ'), scoreD: formData.get('scoreD'), scoreC: formData.get('scoreC'), comment: document.getElementById('comment').value };
+                loadingOverlay.style.display = 'flex';
+                try {
+                    const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
+                    const result = await response.json();
+                    loadingOverlay.style.display = 'none';
+                    if (result.success) { evaluationCard.classList.add('hidden'); successMsg.classList.remove('hidden'); }
+                    else { document.getElementById('error-text').textContent = result.message || 'Unknown error'; errorMsg.classList.remove('hidden'); evaluationCard.classList.add('hidden'); }
+                } catch (error) {
+                    loadingOverlay.style.display = 'none'; document.getElementById('error-text').textContent = 'Error: ' + error.message; errorMsg.classList.remove('hidden'); evaluationCard.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>`;
+}
+
+function handleLogin(data) {
+  const userSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(userSheetName);
+  const users = userSheet.getDataRange().getValues();
+  const foundUser = users.find(u => u[0] === data.username && u[1] === data.password);
+
+  if (foundUser) {
+    const token = Utilities.getUuid();
+    userProperties.setProperty(token, data.username);
+    return ContentService.createTextOutput(JSON.stringify({ success: true, token: token })).setMimeType(ContentService.MimeType.JSON);
+  } else {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Invalid credentials." })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function handleLogout(data) {
+    if (data.token) {
+        userProperties.deleteProperty(data.token);
+    }
+    return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Logged out." })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleSubmitTicket(sheet, data) {
+  const newRowIndex = sheet.getLastRow() + 1;
+  const caseId = "CASE-" + new Date().getTime();
+  const now = new Date();
+  const submission = getThaiDateTime(now);
+  const timestamp = now.getTime();
+
+  // Corrected appendRow to ensure 21 columns (A-U).
+  // Column 6 (F) is Status "Open".
+  // Columns 17-21 (Q-U) should be empty for unrelated/evaluation data.
+  // Last element "Open" was incorrectly placed in index 19 (Column T). 
+  // We need to ensure array length matches our sheet structure.
+  
+  sheet.appendRow([ 
+      caseId,               // A: CaseID
+      data.submitterName,   // B: SubmitterName
+      data.department,      // C: Department
+      data.problemType,     // D: ProblemType
+      data.problemDetails,  // E: ProblemDetails
+      "Open",               // F: Status
+      newRowIndex,          // G: RowIndex
+      submission.date,      // H: SubmissionDate
+      submission.time,      // I: SubmissionTime
+      "",                   // J: ClosedDate
+      "",                   // K: ClosedTime
+      "",                   // L: ResolutionComment
+      data.contactNumber,   // M: ContactNumber
+      timestamp,            // N: LastUpdated
+      "",                   // O: ClosedBy
+      "",                   // P: (Reserved/Unused)
+      "",                   // Q: Email Status
+      "",                   // R: Score Q
+      "",                   // S: Score D
+      "",                   // T: Score C
+      ""                    // U: Comment
+  ]);
+  return newRowIndex;
+}
+
+function handleCloseTicket(sheet, data) {
+  if (!data.rowIndex || isNaN(Number(data.rowIndex))) { return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Invalid row index." })).setMimeType(ContentService.MimeType.JSON); }
+  const now = new Date();
+  const closing = getThaiDateTime(now);
+  const timestamp = now.getTime();
+  
+  const rowIndex = Number(data.rowIndex);
+  const submitterName = sheet.getRange(rowIndex, 2).getValue(); 
+  const userEmail = submitterName; 
+
+  sheet.getRange(rowIndex, 6).setValue("Closed");
+  sheet.getRange(rowIndex, 10).setValue(closing.date);
+  sheet.getRange(rowIndex, 11).setValue(closing.time);
+  sheet.getRange(rowIndex, 12).setValue(data.resolutionComment || ""); 
+  sheet.getRange(rowIndex, 14).setValue(timestamp);
+
+  // Send Email
+  const caseId = sheet.getRange(rowIndex, 1).getValue();
+  const problemDetails = sheet.getRange(rowIndex, 5).getValue(); // Column E: ProblemDetails
+  const submissionDate = sheet.getRange(rowIndex, 8).getDisplayValue(); // Column H: SubmissionDate
+  const submissionTime = sheet.getRange(rowIndex, 9).getDisplayValue(); // Column I: SubmissionTime
+  
+  const ticketInfo = {
+    submitterName: submitterName,
+    problemDetails: problemDetails,
+    submissionDate: submissionDate,
+    submissionTime: submissionTime
+  };
+  
+  // Validate Email
+  if (!userEmail || !userEmail.includes("@")) {
+      sheet.getRange(rowIndex, 17).setValue("Failed: Invalid Email (" + userEmail + ")");
+      return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Ticket closed, but Email FAILED: Invalid Address." })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const emailResult = sendEvaluationEmail(userEmail, caseId, ticketInfo);
+  let message = "Ticket closed.";
+  
+  if (emailResult.success) {
+      sheet.getRange(rowIndex, 17).setValue("Sent"); 
+      // Set LastEmailSentDate, LastEmailSentTime, EmailSendCount
+      sheet.getRange(rowIndex, 22).setValue(closing.date);  // Column V: LastEmailSentDate
+      sheet.getRange(rowIndex, 23).setValue(closing.time);  // Column W: LastEmailSentTime
+      sheet.getRange(rowIndex, 24).setValue(1);             // Column X: EmailSendCount = 1
+      message += " Email sent to " + userEmail;
+  } else {
+      sheet.getRange(rowIndex, 17).setValue("Failed: " + emailResult.error);
+      message += " Failed to send: " + emailResult.error;
+  }
+
+  // Send Teams notification when closing ticket
+  if (data.teamsWebhookUrl) {
+      Logger.log("Teams webhook URL received: " + data.teamsWebhookUrl);
+      const problemType = sheet.getRange(rowIndex, 4).getValue(); // Column D: ProblemType
+      const closedTicketInfo = {
+          caseId: caseId,
+          submitterName: submitterName,
+          problemType: problemType,
+          closedDate: closing.date,
+          closedTime: closing.time,
+          resolutionComment: data.resolutionComment || '',
+          rowIndex: rowIndex
+      };
+      Logger.log("Sending Teams notification for case: " + caseId);
+      sendClosedToTeams(closedTicketInfo, data.teamsWebhookUrl);
+  } else {
+      Logger.log("No teamsWebhookUrl in data - Teams notification skipped");
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({ success: true, message: message })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleResendEvaluationEmail(sheet, data) {
+  if (!data.rowIndex || isNaN(Number(data.rowIndex))) { 
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Invalid row index." })).setMimeType(ContentService.MimeType.JSON); 
+  }
+  
+  const rowIndex = Number(data.rowIndex);
+  const status = sheet.getRange(rowIndex, 6).getValue();
+  if (status !== "Closed") {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Ticket is not closed." })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // Check if 24 hours have passed since LAST EMAIL SENT (not closing time)
+  const lastEmailDateStr = sheet.getRange(rowIndex, 22).getDisplayValue(); // Column V: LastEmailSentDate
+  const lastEmailTimeStr = sheet.getRange(rowIndex, 23).getDisplayValue(); // Column W: LastEmailSentTime
+  
+  // If no LastEmailSentDate, fall back to ClosedDate for backward compatibility
+  const dateToCheck = lastEmailDateStr || sheet.getRange(rowIndex, 10).getDisplayValue();
+  const timeToCheck = lastEmailTimeStr || sheet.getRange(rowIndex, 11).getDisplayValue();
+  
+  if (!dateToCheck || !timeToCheck) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Missing date/time data." })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // Parse Thai date (DD/MM/YYYY BE format)
+  const dateParts = dateToCheck.split('/');
+  const timeParts = timeToCheck.split(':');
+  if (dateParts.length !== 3 || timeParts.length < 2) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Invalid date/time format." })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  const day = parseInt(dateParts[0], 10);
+  const month = parseInt(dateParts[1], 10) - 1;
+  const yearBE = parseInt(dateParts[2], 10);
+  const yearAD = yearBE - 543;
+  const hours = parseInt(timeParts[0], 10);
+  const minutes = parseInt(timeParts[1], 10);
+  const seconds = parseInt(timeParts[2] || '0', 10);
+  
+  const lastEmailDate = new Date(yearAD, month, day, hours, minutes, seconds);
+  const now = new Date();
+  const hoursSinceLastEmail = (now - lastEmailDate) / (1000 * 60 * 60);
+  
+  if (hoursSinceLastEmail < 24) {
+    return ContentService.createTextOutput(JSON.stringify({ 
+      success: false, 
+      message: `ต้องรออีก ${Math.ceil(24 - hoursSinceLastEmail)} ชั่วโมงก่อนส่งอีเมลซ้ำ` 
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // Check if already evaluated
+  const scoreQ = sheet.getRange(rowIndex, 18).getValue();
+  if (scoreQ && scoreQ.toString().trim() !== '') {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Already evaluated." })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // Get email, case ID, and ticket info
+  const userEmail = sheet.getRange(rowIndex, 2).getValue();
+  const caseId = sheet.getRange(rowIndex, 1).getValue();
+  const problemDetails = sheet.getRange(rowIndex, 5).getValue(); // Column E: ProblemDetails
+  const submissionDate = sheet.getRange(rowIndex, 8).getDisplayValue(); // Column H: SubmissionDate
+  const submissionTime = sheet.getRange(rowIndex, 9).getDisplayValue(); // Column I: SubmissionTime
+  
+  const ticketInfo = {
+    submitterName: userEmail,
+    problemDetails: problemDetails,
+    submissionDate: submissionDate,
+    submissionTime: submissionTime
+  };
+  
+  if (!userEmail || !userEmail.includes("@")) {
+    sheet.getRange(rowIndex, 17).setValue("Resend Failed: Invalid Email");
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Invalid email address." })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // Send the email
+  const emailResult = sendEvaluationEmail(userEmail, caseId, ticketInfo);
+  const nowForUpdate = new Date();
+  const timestamp = nowForUpdate.getTime();
+  const emailDateTime = getThaiDateTime(nowForUpdate);
+  sheet.getRange(rowIndex, 14).setValue(timestamp); // Update LastUpdated
+  
+  if (emailResult.success) {
+    sheet.getRange(rowIndex, 17).setValue("Resent");
+    // Update LastEmailSentDate, LastEmailSentTime, and increment EmailSendCount
+    sheet.getRange(rowIndex, 22).setValue(emailDateTime.date);  // Column V: LastEmailSentDate
+    sheet.getRange(rowIndex, 23).setValue(emailDateTime.time);  // Column W: LastEmailSentTime
+    const currentCount = sheet.getRange(rowIndex, 24).getValue() || 0;
+    sheet.getRange(rowIndex, 24).setValue(Number(currentCount) + 1); // Column X: EmailSendCount++
+    return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Evaluation email resent successfully." })).setMimeType(ContentService.MimeType.JSON);
+  } else {
+    sheet.getRange(rowIndex, 17).setValue("Resend Failed: " + emailResult.error);
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Failed to resend: " + emailResult.error })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function handleSubmitEvaluation(sheet, data) {
+    const caseId = data.caseId;
+    if (!caseId) return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Case ID is required." })).setMimeType(ContentService.MimeType.JSON);
+
+    const ticketData = sheet.getDataRange().getValues();
+    // Assuming Case ID is in Column A (Index 0)
+    // Note: getValues() returns 0-indexed array, so Row 1 is index 0.
+    // Row Index stored in column G (index 6) matches the actual row number in sheet.
+    
+    // Find row by Case ID
+    let rowIndex = -1;
+    for (let i = 1; i < ticketData.length; i++) { // Start from 1 to skip header
+        if (ticketData[i][0] == caseId) {
+            rowIndex = i + 1; // Convert to 1-based row index for sheet operations
+            break;
+        }
+    }
+
+    if (rowIndex === -1) {
+        return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Case ID not found." })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Column R (18) = Score Q
+    // Column S (19) = Score D
+    // Column T (20) = Score C
+    // Column U (21) = Comment
+    
+    sheet.getRange(rowIndex, 18).setValue(data.scoreQ);
+    sheet.getRange(rowIndex, 19).setValue(data.scoreD);
+    sheet.getRange(rowIndex, 20).setValue(data.scoreC);
+    sheet.getRange(rowIndex, 21).setValue(data.comment);
+
+    return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Evaluation submitted." })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleAddUser(sheet, data) {
+  if (sheet.getLastRow() -1 >= 5) { return ContentService.createTextOutput(JSON.stringify({ success: false, message: "User limit of 5 reached." })).setMimeType(ContentService.MimeType.JSON); }
+  if (!data.username || !data.password) { return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Username and password are required." })).setMimeType(ContentService.MimeType.JSON); }
+  sheet.appendRow([data.username, data.password]);
+  return ContentService.createTextOutput(JSON.stringify({ success: true, message: "User added." })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleEditUser(sheet, data) {
+  if (!data.rowIndex || isNaN(Number(data.rowIndex))) { return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Invalid row index." })).setMimeType(ContentService.MimeType.JSON); }
+  sheet.getRange(data.rowIndex, 1).setValue(data.username);
+  sheet.getRange(data.rowIndex, 2).setValue(data.password);
+  return ContentService.createTextOutput(JSON.stringify({ success: true, message: "User updated." })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleDeleteUser(sheet, data) {
+  sheet.deleteRow(data.rowIndex);
+  return ContentService.createTextOutput(JSON.stringify({ success: true, message: "User deleted." })).setMimeType(ContentService.MimeType.JSON);
+}
+
+// ***** MANUAL AUTH TRIGGER *****
+// Run this function once in the editor to authorize email sending!
+function checkAuth() {
+  Logger.log("Checking permissions...");
+  // This line triggers the authorization prompt for sending emails
+  const quota = MailApp.getRemainingDailyQuota(); 
+  Logger.log("Email Quota Remaining: " + quota);
+  Logger.log("Authorization Successful!");
+}
+
+// ***** PROBLEM FOLLOW-UP EMAIL FUNCTIONS *****
+
+// Handle problem follow-up submission from the web page
+function handleSubmitProblemFollowup(sheet, data) {
+    const caseId = data.caseId;
+    const problemStatus = data.problemStatus;
+    const comment = data.comment || '';
+    
+    if (!caseId) {
+        return ContentService.createTextOutput(JSON.stringify({ 
+            success: false, 
+            message: "Missing caseId" 
+        })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const dataRange = sheet.getDataRange().getValues();
+    const headers = dataRange[0];
+    const caseIdIndex = headers.findIndex(h => h.toString().toLowerCase().includes('caseid'));
+    const commentProblemIndex = 25; // Column Z: CommentProblem (0-indexed = 25)
+    
+    // Find the row with matching caseId
+    let rowIndex = -1;
+    for (let i = 1; i < dataRange.length; i++) {
+        if (dataRange[i][caseIdIndex] === caseId) {
+            rowIndex = i + 1;
+            break;
+        }
+    }
+    
+    if (rowIndex === -1) {
+        return ContentService.createTextOutput(JSON.stringify({ 
+            success: false, 
+            message: "ไม่พบเคสในระบบ" 
+        })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Create comment text with status
+    const now = new Date();
+    const thaiDateTime = getThaiDateTime(now);
+    const statusText = problemStatus === 'ok' ? 'ใช้งานได้ปกติแล้ว' : 'ยังมีปัญหาอยู่';
+    const fullComment = `[${thaiDateTime.date} ${thaiDateTime.time}] ${statusText}${comment ? ': ' + comment : ''}`;
+    
+    // Save to column Z (CommentProblem)
+    sheet.getRange(rowIndex, 26).setValue(fullComment);
+    
+    return ContentService.createTextOutput(JSON.stringify({ 
+        success: true, 
+        message: "Problem follow-up submitted." 
+    })).setMimeType(ContentService.MimeType.JSON);
+}
+
+// Send problem follow-up email to user
+function sendProblemFollowupEmail(email, caseId, ticketInfo) {
+    if (!email || !caseId) {
+        return { success: false, error: "Email or CaseID missing" };
+    }
+    
+    const followupPageUrl = "https://nube1369.github.io/gfca-it-by-kanate-h/problem-followup.html";
+    const followupUrl = `${followupPageUrl}?caseId=${caseId}`;
+    const subject = `สอบถามหลังการแก้ไข - งาน IT Helpdesk (${caseId})`;
+    
+    // Extract ticket info with defaults
+    const problem = ticketInfo.problem || 'N/A';
+    const closedDate = ticketInfo.closedDate || 'N/A';
+    
+    const body = `
+เรียน ผู้ใช้งาน,
+
+ทีม IT Hardware ได้ดำเนินการแก้ไขปัญหาตามที่คุณแจ้งมาเรียบร้อยแล้ว
+
+รายละเอียดเคส:
+- หมายเลขเคส: ${caseId}
+- ปัญหา: ${problem}
+- วันที่ปิดเคส: ${closedDate}
+
+เราอยากทราบว่าปัญหาของคุณได้รับการแก้ไขเรียบร้อยหรือไม่?
+กรุณาคลิกลิงก์ด้านล่างเพื่อแจ้งผลลัพธ์:
+
+${followupUrl}
+
+หากมีปัญหาเพิ่มเติม ทีม IT ยินดีให้บริการครับ
+
+ขอบคุณครับ,
+IT Hardware Team
+    `;
+    
+    const htmlBody = `
+    <div style="font-family: 'Sarabun', 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f3f4f6;">
+        <div style="background: #f1f5f9; color: #000000; padding: 30px; border-radius: 12px 12px 0 0; text-align: center; border-bottom: 3px solid #0284c7;">
+            <h2 style="margin: 0 0 10px 0; color: #000000; font-size: 24px;">🔧 IT Hardware</h2>
+            <p style="margin: 0; color: #000000; font-size: 16px;">สอบถามหลังการแก้ไข</p>
+        </div>
+        <div style="background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <p style="color: #000000; font-size: 16px; margin-bottom: 15px;">เรียน ผู้ใช้งาน,</p>
+            <p style="color: #000000; font-size: 15px; line-height: 1.6;">ทีม IT Hardware ได้ดำเนินการแก้ไขปัญหาตามที่คุณแจ้งมาเรียบร้อยแล้ว เราอยากทราบว่าปัญหาของคุณได้รับการแก้ไขเรียบร้อยหรือไม่?</p>
+            
+            <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0; border: 1px solid #e2e8f0;">
+                <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                    <tr><td style="color: #4b5563; padding: 8px 0; width: 120px;">หมายเลขเคส:</td><td style="color: #0284c7; font-weight: bold;">${caseId}</td></tr>
+                    <tr><td style="color: #4b5563; padding: 8px 0;">ปัญหา:</td><td style="color: #000000; font-weight: 500;">${problem}</td></tr>
+                    <tr><td style="color: #4b5563; padding: 8px 0;">วันที่ปิดเคส:</td><td style="color: #000000; font-weight: 500;">${closedDate}</td></tr>
+                </table>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${followupUrl}" style="display: inline-block; background-color: #60a5fa; color: #ffffff !important; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-weight: bold; font-size: 16px; border: 2px solid #60a5fa; box-shadow: 0 4px 6px rgba(96, 165, 250, 0.4);">
+                    ✅ แจ้งผลลัพธ์
+                </a>
+            </div>
+            
+            <p style="color: #4b5563; font-size: 14px; text-align: center; margin-top: 20px;">หากมีปัญหาเพิ่มเติม ทีม IT ยินดีให้บริการครับ</p>
+        </div>
+        <p style="text-align: center; color: #6b7280; font-size: 12px; margin-top: 20px;">
+            © IT Hardware Team
+        </p>
+    </div>
+    `;
+    
+    try {
+        MailApp.sendEmail({
+            to: email,
+            subject: subject,
+            body: body,
+            htmlBody: htmlBody
+        });
+        return { success: true };
+    } catch (error) {
+        Logger.log("Error sending problem follow-up email: " + error);
+        return { success: false, error: error.toString() };
+    }
+}
+
+// Handle manual send problem follow-up email from dashboard
+function handleSendProblemFollowupEmail(sheet, data) {
+    const caseId = data.caseId;
+    
+    if (!caseId) {
+        return ContentService.createTextOutput(JSON.stringify({ 
+            success: false, 
+            message: "CaseID is required" 
+        })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const dataRange = sheet.getDataRange().getValues();
+    const headers = dataRange[0];
+    const caseIdIndex = headers.findIndex(h => h.toString().toLowerCase().includes('caseid'));
+    const emailIndex = 1; // Column B: SubmitterName (contains email addresses)
+    const problemIndex = headers.findIndex(h => h.toString().toLowerCase().includes('problem') && !h.toString().toLowerCase().includes('type'));
+    const closeDateIndex = headers.findIndex(h => h.toString().toLowerCase().includes('closedate') || h.toString().toLowerCase().includes('closeddate'));
+    const emailProblemIndex = 24; // Column Y: EmailProblem (0-indexed = 24)
+    
+    // Find the row
+    let rowIndex = -1;
+    let ticketRow = null;
+    for (let i = 1; i < dataRange.length; i++) {
+        if (dataRange[i][caseIdIndex] === caseId) {
+            rowIndex = i + 1;
+            ticketRow = dataRange[i];
+            break;
+        }
+    }
+    
+    if (rowIndex === -1) {
+        return ContentService.createTextOutput(JSON.stringify({ 
+            success: false, 
+            message: "Case not found" 
+        })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Check if already sent
+    const alreadySent = ticketRow[emailProblemIndex] && ticketRow[emailProblemIndex].toString().trim() !== '';
+    if (alreadySent) {
+        return ContentService.createTextOutput(JSON.stringify({ 
+            success: false, 
+            message: "Email already sent for this case" 
+        })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const email = ticketRow[emailIndex];
+    if (!email) {
+        return ContentService.createTextOutput(JSON.stringify({ 
+            success: false, 
+            message: "No email found for this ticket" 
+        })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const ticketInfo = {
+        problem: ticketRow[problemIndex] || 'N/A',
+        closedDate: ticketRow[closeDateIndex] || 'N/A'
+    };
+    
+    const result = sendProblemFollowupEmail(email, caseId, ticketInfo);
+    
+    if (result.success) {
+        // Mark as sent in column Y with timestamp
+        const now = new Date();
+        const thaiDateTime = getThaiDateTime(now);
+        sheet.getRange(rowIndex, 25).setValue(`SENT: ${thaiDateTime.date} ${thaiDateTime.time}`);
+        
+        return ContentService.createTextOutput(JSON.stringify({ 
+            success: true, 
+            message: "Problem follow-up email sent successfully" 
+        })).setMimeType(ContentService.MimeType.JSON);
+    } else {
+        return ContentService.createTextOutput(JSON.stringify({ 
+            success: false, 
+            message: result.error || "Failed to send email" 
+        })).setMimeType(ContentService.MimeType.JSON);
+    }
+}

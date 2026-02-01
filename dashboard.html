@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Helpdesk - Admin Dashboard</title>
+
+    <!-- Local Libraries -->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/tippy.css" />
+
+    <style>
+        :root {
+            --bs-body-font-family: 'Inter', 'Sarabun', sans-serif;
+            --bs-primary: #22c55e;
+            --bs-primary-dark: #16a34a;
+            --bs-body-bg: #0f172a;
+            --bs-body-color: #d1d5db;
+            --bs-border-color: rgba(107, 114, 128, 0.2);
+            --bs-card-bg: #1f2937;
+            --bs-input-bg: #374151;
+            --gradient-primary: linear-gradient(135deg, #22c55e 0%, #059669 100%);
+            --gradient-secondary: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            --shadow-primary: 0 10px 25px -5px rgba(34, 197, 94, 0.1), 0 8px 10px -6px rgba(34, 197, 94, 0.1);
+            --shadow-card: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-image: none;
+            background-color: #030712;
+            color: var(--bs-body-color);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes move-stars {
+            from {
+                transform: translateY(0px);
+            }
+
+            to {
+                transform: translateY(-2000px);
+            }
+        }
+
+        .stars-container {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 300%;
+            background-image:
+                radial-gradient(1px 1px at 20px 30px, #eee, transparent),
+                radial-gradient(1px 1px at 40px 70px, #fff, transparent),
+                radial-gradient(1px 1px at 50px 160px, #ddd, transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, #fff, transparent),
+                radial-gradient(1px 1px at 160px 120px, #ddd, transparent),
+                radial-gradient(2px 2px at 20% 20%, #fff, transparent),
+                radial-gradient(2px 2px at 40% 30%, #fff, transparent),
+                radial-gradient(2px 2px at 60% 80%, #fff, transparent),
+                radial-gradient(2px 2px at 80% 50%, #fff, transparent),
+                radial-gradient(2px 2px at 95% 90%, #fff, transparent),
+                radial-gradient(3px 3px at 5% 95%, #fff, transparent),
+                radial-gradient(3px 3px at 90% 10%, #fff, transparent);
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: move-stars 200s linear infinite;
+            z-index: -1;
+        }
+
+        #login-logo-container {
+            display: none;
+            position: fixed;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1056;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #login-logo-container img {
+            width: 100px;
+            height: auto;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.4));
+        }
+
+        body.login-active-bg #login-logo-container {
+            display: flex;
+        }
+
+        body.login-active-bg .navbar {
+            display: none;
+        }
+
+        .navbar {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--bs-border-color);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: var(--gradient-secondary);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-card);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-primary);
+        }
+
+        .card-header {
+            background: rgba(34, 197, 94, 0.1);
+            color: #f0fdf4;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+            padding: 1.25rem 1.5rem;
+        }
+
+        .dashboard-card {
+            background: var(--bs-card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            border: 1px solid var(--bs-border-color);
+            cursor: help;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-primary);
+        }
+
+        .dashboard-card .icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+
+        .dashboard-card .icon-circle.bg-warning-soft {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .dashboard-card .icon-circle.bg-primary-soft {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--bs-primary);
+        }
+
+        .dashboard-card .icon-circle.bg-info-soft {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .dashboard-card .icon-circle.bg-danger-soft {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .dashboard-card .card-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            transition: font-size 0.3s ease;
+        }
+
+        .dashboard-card .card-label {
+            font-size: 1rem;
+            color: #94a3b8;
+        }
+
+        #open-cases-card {
+            background: #39342b;
+            border-color: transparent;
+        }
+
+        #closed-cases-card {
+            background: #223c32;
+            border-color: transparent;
+        }
+
+        #total-cases-card {
+            background: #25344d;
+            border-color: transparent;
+        }
+
+        #avg-close-time-card-wrapper {
+            background: transparent;
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0px 8px 28px -9px rgba(0, 0, 0, 0.45);
+            border: 1px solid transparent;
+            cursor: help;
+            transition: all 0.3s ease;
+        }
+
+        #avg-close-time-card-wrapper:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-primary);
+        }
+
+        .dashboard-card-inner-content {
+            position: relative;
+            z-index: 2;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            height: 100%;
+        }
+
+        #avg-close-time-card-wrapper .card-value {
+            color: #f87171;
+        }
+
+        #avg-close-time-card-wrapper .icon-circle {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+        }
+
+        .chart-container {
+            height: 300px;
+        }
+
+        .stats-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        .stats-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.85rem 0.25rem;
+            border-bottom: 1px solid var(--bs-border-color);
+            font-size: 0.95rem;
+            cursor: help;
+        }
+
+        .stats-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .stats-list-item .value {
+            font-weight: 600;
+            color: var(--bs-primary);
+        }
+
+        .admin-nav {
+            background: var(--gradient-secondary);
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--bs-border-color);
+        }
+
+        .admin-nav .nav-link {
+            color: #cbd5e1;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.25rem;
+        }
+
+        .admin-nav .nav-link.active {
+            color: #ffffff;
+            background: var(--gradient-primary);
+            box-shadow: var(--shadow-primary);
+        }
+
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1060;
+            transition: top 0.3s ease;
+            width: 220px;
+            height: 220px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body.login-active-bg .loading-spinner {
+            top: 80%;
+        }
+
+        .planets {
+            position: relative;
+            height: 100px;
+            width: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #planetTrail1,
+        #planetTrail2,
+        #planetTrail3 {
+            outline: solid rgb(101, 101, 101) 1px;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        #planetTrail1::after,
+        #planetTrail2::after,
+        #planetTrail3::after {
+            content: "";
+            width: 10px;
+            height: 10px;
+            position: absolute;
+            border-radius: 50%;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #planetTrail1::after {
+            background-color: rgb(213, 213, 120);
+        }
+
+        #planetTrail2::after {
+            background-color: rgb(115, 174, 231);
+        }
+
+        #planetTrail3::after {
+            background-color: rgb(180, 73, 49);
+        }
+
+        #planetTrail1 {
+            width: 120px;
+            height: 120px;
+            animation: trails1 4s infinite;
+        }
+
+        #planetTrail2 {
+            width: 170px;
+            height: 170px;
+            animation: trails2 4s infinite;
+        }
+
+        #planetTrail3 {
+            width: 220px;
+            height: 220px;
+            animation: trails3 4s infinite;
+        }
+
+        @keyframes trails1 {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            40% {
+                transform: rotate(360deg);
+                width: 120px;
+                height: 120px;
+            }
+
+            50% {
+                width: 0px;
+                height: 0px;
+            }
+
+            90% {
+                width: 0px;
+                height: 0px;
+            }
+
+            100% {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        @keyframes trails2 {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            40% {
+                transform: rotate(250deg);
+                width: 170px;
+                height: 170px;
+            }
+
+            50% {
+                width: 0px;
+                height: 0px;
+            }
+
+            90% {
+                width: 0px;
+                height: 0px;
+            }
+
+            100% {
+                width: 170px;
+                height: 170px;
+            }
+        }
+
+        @keyframes trails3 {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            40% {
+                transform: rotate(170deg);
+                width: 220px;
+                height: 220px;
+            }
+
+            50% {
+                width: 0px;
+                height: 0px;
+            }
+
+            90% {
+                width: 0px;
+                height: 0px;
+            }
+
+            100% {
+                width: 220px;
+                height: 220px;
+            }
+        }
+
+        #star {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: rgb(255, 170, 0);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: bouncingStar 4s infinite;
+        }
+
+        #starShadow {
+            position: absolute;
+            width: 50px;
+            height: 20px;
+            background-color: rgb(255, 170, 0);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, 100%);
+            filter: blur(5px);
+            opacity: 0.3;
+            animation: shadowAnimation 4s infinite;
+        }
+
+        @keyframes bouncingStar {
+            0% {
+                transform: translate(-50%, -50%);
+            }
+
+            10% {
+                transform: translate(-50%, -30%);
+            }
+
+            20% {
+                transform: translate(-50%, -50%);
+            }
+
+            30% {
+                transform: translate(-50%, -30%);
+            }
+
+            40% {
+                transform: translate(-50%, -50%);
+                width: 50px;
+                height: 50px;
+            }
+
+            50% {
+                width: 0px;
+                height: 0px;
+            }
+
+            90% {
+                width: 0px;
+                height: 0px;
+            }
+
+            100% {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @keyframes shadowAnimation {
+            0% {
+                opacity: 0.1;
+            }
+
+            10% {
+                opacity: 0.4;
+            }
+
+            20% {
+                opacity: 0.1;
+            }
+
+            30% {
+                opacity: 0.4;
+            }
+
+            40% {
+                opacity: 0.1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+
+            90% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 0.1;
+            }
+        }
+
+        #blackHole {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: transparent;
+            outline: orange solid 5px;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: bouncingBlackHole 4s infinite;
+        }
+
+        @keyframes bouncingBlackHole {
+            0% {
+                height: 0px;
+                width: 0px;
+            }
+
+            40% {
+                width: 0px;
+                height: 0px;
+            }
+
+            50% {
+                width: 50px;
+                height: 50px;
+            }
+
+            90% {
+                width: 50px;
+                height: 50px;
+            }
+
+            100% {
+                width: 0px;
+                height: 0px;
+            }
+        }
+
+        #blackHoleDisk1 {
+            position: absolute;
+            width: 68px;
+            height: 68px;
+            clip-path: inset(50% 0 0 0);
+            border: transparent 10px solid;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotateX(70deg);
+            animation: diskAn 4s infinite;
+        }
+
+        #blackHoleDisk2 {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            clip-path: inset(0 0 50% 0);
+            border: rgb(245, 174, 8) 10px solid;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotateX(55deg);
+            animation: diskAn 4s infinite;
+        }
+
+        @keyframes diskAn {
+            0% {
+                height: 0px;
+                width: 0px;
+                border: orange 0px solid;
+            }
+
+            40% {
+                width: 0px;
+                height: 0px;
+                border: orange 0px solid;
+            }
+
+            50% {
+                width: 88px;
+                height: 88px;
+                border: orange 18px solid;
+            }
+
+            90% {
+                width: 88px;
+                height: 88px;
+                border: orange 18px solid;
+            }
+
+            100% {
+                width: 0px;
+                height: 0px;
+                border: orange 0px solid;
+            }
+        }
+
+        #planet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: rgb(255, 255, 255);
+            border-radius: 50%;
+            animation: planetAn 4s infinite;
+        }
+
+        @keyframes planetAn {
+            0% {
+                opacity: 0;
+                transform: translate(0px, 0px);
+                z-index: 1;
+            }
+
+            50% {
+                opacity: 0;
+                transform: translate(0px, 0px);
+                z-index: 1;
+            }
+
+            58% {
+                opacity: 1;
+            }
+
+            70% {
+                opacity: 1;
+                transform: translate(100px, 40px);
+                z-index: 1;
+            }
+
+            71% {
+                z-index: 0;
+            }
+
+            90% {
+                z-index: 0;
+                opacity: 1;
+                transform: translate(-10px, 70px);
+            }
+
+            100% {
+                transform: translate(-10px, 70px);
+                opacity: 0;
+            }
+        }
+
+        .modal-content {
+            background: var(--bs-card-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 1rem;
+        }
+
+        #loginModal .modal-dialog {
+            max-width: 350px;
+        }
+
+        #loginModal .modal-content {
+            background: transparent;
+            border: none;
+        }
+
+        #loginModal .form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-left: 2em;
+            padding-right: 2em;
+            padding-bottom: 0.4em;
+            background-color: #171717;
+            border-radius: 20px;
+        }
+
+        #loginModal #heading {
+            text-align: center;
+            margin: 2em;
+            color: rgb(0, 255, 200);
+            font-size: 1.2em;
+        }
+
+        #loginModal .field {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5em;
+            border-radius: 25px;
+            padding: 0.6em;
+            border: none;
+            outline: none;
+            color: white;
+            background-color: #171717;
+            box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
+        }
+
+        #loginModal .input-icon {
+            height: 1.3em;
+            width: 1.3em;
+            fill: rgb(0, 255, 200);
+        }
+
+        #loginModal .input-field {
+            background: none;
+            border: none;
+            outline: none;
+            width: 100%;
+            color: rgb(0, 255, 200);
+        }
+
+        #loginModal .form .btn {
+            display: flex;
+            justify-content: center;
+            flex-direction: row;
+            margin-top: 2.5em;
+        }
+
+        #loginModal .button1 {
+            padding: 0.5em;
+            padding-left: 1.1em;
+            padding-right: 1.1em;
+            border-radius: 5px;
+            margin-right: 0.5em;
+            border: none;
+            outline: none;
+            transition: .4s ease-in-out;
+            background-image: linear-gradient(163deg, #00ff75 0%, #3700ff 100%);
+            color: rgb(0, 0, 0);
+        }
+
+        #loginModal .button1:hover {
+            background-image: linear-gradient(163deg, #00642f 0%, #13034b 100%);
+            color: rgb(0, 255, 200);
+        }
+
+        #loginModal .login-card {
+            background-image: linear-gradient(163deg, #00ff75 0%, #3700ff 100%);
+            border-radius: 22px;
+            transition: all .3s;
+        }
+
+        #loginModal .login-card2 {
+            border-radius: 0;
+            transition: all .2s;
+        }
+
+        #loginModal .login-card2:hover {
+            transform: scale(0.98);
+            border-radius: 20px;
+        }
+
+        #loginModal .login-card:hover {
+            box-shadow: 0px 0px 30px 1px rgba(0, 255, 117, 0.30);
+        }
+
+        #login-error {
+            color: #ef4444;
+            text-align: center;
+            margin-top: 1em;
+        }
+
+        .tippy-box[data-theme~='custom-dark'] {
+            background-color: var(--bs-card-bg);
+            color: var(--bs-body-color);
+            border: 1px solid var(--bs-border-color);
+            font-family: 'Inter', 'Sarabun', sans-serif;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .tippy-box[data-theme~='custom-dark'][data-placement^='top']>.tippy-arrow::before {
+            border-top-color: var(--bs-card-bg);
+        }
+
+        .tippy-box[data-theme~='custom-dark'][data-placement^='bottom']>.tippy-arrow::before {
+            border-bottom-color: var(--bs-card-bg);
+        }
+
+        .tippy-content {
+            padding: 0.5rem 0.75rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card,
+        .dashboard-card,
+        #avg-close-time-card-wrapper {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        .shake-error {
+            animation: shake 0.6s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        .wave {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            opacity: 0.6;
+            left: -50%;
+            top: -50%;
+            z-index: 1;
+            background: linear-gradient(744deg, #af40ff, #5b42f3 60%, #00ddeb);
+            border-radius: 40%;
+            animation: wave 55s infinite linear;
+        }
+
+        #avg-close-time-card-wrapper.playing .wave:nth-child(2) {
+            animation-duration: 50s;
+        }
+
+        #avg-close-time-card-wrapper.playing .wave:nth-child(3) {
+            animation-duration: 45s;
+        }
+
+        @keyframes wave {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #logout-btn {
+            padding: 20px 60px;
+            background-color: #000;
+            border: none;
+            font-size: 18px;
+            position: relative;
+            transition: 500ms;
+            margin-top: 5px;
+            margin-right: 5px;
+        }
+
+        #logout-btn span {
+            color: gray;
+            position: relative;
+            transition: 500ms;
+            transition-delay: 500ms;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        #logout-btn:before {
+            content: '';
+            position: absolute;
+            width: 0%;
+            height: 0%;
+            left: 50%;
+            right: 50%;
+            top: 50%;
+            bottom: 50%;
+            transition: 500ms;
+            transition-delay: 500ms;
+            background-color: red;
+            box-shadow: 0 0 10px red,
+                0 0 30px red,
+                0 0 50px red;
+        }
+
+        #logout-btn div {
+            transition: 500ms;
+            position: absolute;
+            background-color: red;
+            box-shadow: 0 0 15px red, 0 0 30px red, 0 0 50px red;
+        }
+
+        #logout-btn .top {
+            width: 15px;
+            height: 2px;
+            top: 0;
+            left: 0;
+        }
+
+        #logout-btn .bottom {
+            width: 15px;
+            height: 2px;
+            bottom: 0;
+            right: 0;
+        }
+
+        #logout-btn .left {
+            width: 2px;
+            height: 15px;
+            top: 0;
+            left: 0;
+        }
+
+        #logout-btn .right {
+            width: 2px;
+            height: 15px;
+            bottom: 0;
+            right: 0;
+        }
+
+        #logout-btn:hover {
+            color: #000;
+        }
+
+        #logout-btn:hover span {
+            color: #000;
+        }
+
+        #logout-btn:hover:before {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        #logout-btn:hover .top,
+        #logout-btn:hover .bottom {
+            width: 100%;
+        }
+
+        #logout-btn:hover .left,
+        #logout-btn:hover .right {
+            height: 100%;
+        }
+
+        /* Countdown Timer Styles */
+        .countdown-container {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-top: 1rem;
+        }
+
+        .countdown-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .countdown-timer {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #3b82f6;
+            font-family: 'Inter', monospace;
+        }
+
+        .countdown-sending {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .countdown-sending .countdown-label {
+            color: #22c55e;
+        }
+
+        .countdown-sending .countdown-timer {
+            color: #22c55e;
+        }
+
+        .countdown-resent {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .countdown-resent .countdown-label {
+            color: #8b5cf6;
+        }
+
+        /* Problem Followup Countdown Styles */
+        .problem-countdown-container {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-top: 1rem;
+        }
+
+        .problem-countdown-container .countdown-label {
+            font-size: 0.85rem;
+            color: #f59e0b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .problem-countdown-container .countdown-timer {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #f59e0b;
+            font-family: 'Inter', monospace;
+        }
+
+        .problem-countdown-sending {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .problem-countdown-sending .countdown-label,
+        .problem-countdown-sending .countdown-timer {
+            color: #22c55e;
+        }
+
+        .problem-countdown-sent {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .problem-countdown-sent .countdown-label,
+        .problem-countdown-sent .countdown-timer {
+            color: #22c55e;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stars-container"></div>
+
+    <div id="login-logo-container">
+        <img src="https://res.cloudinary.com/dqveqz8cy/image/upload/v1753430042/IT_Logo_ptq112.png"
+            alt="IT Helpdesk Logo">
+    </div>
+
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid">
+            <div class="navbar-brand fw-bold d-flex align-items-center">
+                <img src="https://res.cloudinary.com/dqveqz8cy/image/upload/v1753430042/IT_Logo_ptq112.png"
+                    alt="IT Helpdesk Logo" style="height: 40px; margin-right: 12px;">
+            </div>
+            <div class="ms-auto">
+                <button id="logout-btn" style="display: none;">
+                    <span>Logout</span>
+                    <div class="top"></div>
+                    <div class="left"></div>
+                    <div class="bottom"></div>
+                    <div class="right"></div>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        <div id="admin-dashboard" style="display: none;">
+            <ul class="nav nav-pills admin-nav">
+                <li class="nav-item"><a class="nav-link active" id="nav-dashboard" href="#"><i
+                            class="bi bi-grid-1x2-fill me-1"></i> ภาพรวม</a></li>
+                <li class="nav-item"><a class="nav-link" id="nav-tickets" href="#"><i class="bi bi-list-task me-1"></i>
+                        รายการปัญหา</a></li>
+                <li class="nav-item"><a class="nav-link" id="nav-users" href="#"><i class="bi bi-people me-1"></i>
+                        จัดการผู้ใช้</a></li>
+            </ul>
+            <div id="admin-content">
+                <div id="admin-view-dashboard">
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-3 col-md-6">
+                            <div id="open-cases-card" class="dashboard-card h-100"
+                                data-tippy-content="จำนวนเคสทั้งหมดที่ยังคงอยู่ในสถานะ 'Open' และรอการแก้ไข">
+                                <div class="icon-circle bg-warning-soft"><i class="bi bi-folder2-open"></i></div>
+                                <div>
+                                    <div id="open-cases-count" class="card-value">0</div>
+                                    <div class="card-label">เคสที่เปิดอยู่</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div id="closed-cases-card" class="dashboard-card h-100"
+                                data-tippy-content="จำนวนเคสทั้งหมดที่ได้รับการแก้ไขเรียบร้อยแล้ว (สถานะ 'Closed')">
+                                <div class="icon-circle bg-primary-soft"><i class="bi bi-patch-check-fill"></i></div>
+                                <div>
+                                    <div id="closed-cases-count" class="card-value">0</div>
+                                    <div class="card-label">เคสที่ปิดแล้ว</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div id="total-cases-card" class="dashboard-card h-100"
+                                data-tippy-content="จำนวนเคสทั้งหมดที่เคยแจ้งเข้ามาในระบบ">
+                                <div class="icon-circle bg-info-soft"><i class="bi bi-journal-text"></i></div>
+                                <div>
+                                    <div id="total-cases-count" class="card-value">0</div>
+                                    <div class="card-label">เคสทั้งหมด</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div id="avg-close-time-card-wrapper" class="h-100 playing"
+                                data-tippy-content="ค่าเฉลี่ยของเวลาที่ใช้ในการปิดเคสทั้งหมด นับตั้งแต่เวลาแจ้งจนถึงเวลาปิด">
+                                <div class="wave"></div>
+                                <div class="wave"></div>
+                                <div class="wave"></div>
+                                <div class="dashboard-card-inner-content">
+                                    <div class="icon-circle"><i class="bi bi-clock-history"></i></div>
+                                    <div>
+                                        <div id="avg-close-time" class="card-value">N/A</div>
+                                        <div class="card-label">เวลาเฉลี่ยในการปิดเคส</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-7">
+                            <div class="card h-100"
+                                data-tippy-content="กราฟเส้นแสดงจำนวนเคสที่ถูกแจ้งเข้ามาในแต่ละวัน ย้อนหลัง 7 วัน">
+                                <div class="card-header"><i class="bi bi-graph-up me-2"></i>แนวโน้มเคสรายวัน (7
+                                    วันล่าสุด)</div>
+                                <div class="card-body">
+                                    <div class="chart-container"><canvas id="dailyTrendChart"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="card h-100"
+                                data-tippy-content="แผนภูมิวงกลมแสดงสัดส่วนของปัญหาแต่ละประเภทจากเคสทั้งหมด">
+                                <div class="card-header"><i class="bi bi-pie-chart-fill me-2"></i>สัดส่วนประเภทปัญหา
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container"><canvas id="problemTypeChart"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4"
+                        data-tippy-content="กราฟแท่งเปรียบเทียบจำนวนเคสที่แจ้งเข้ามาในแต่ละเดือนของปีปัจจุบัน">
+                        <div class="card-header"><i class="bi bi-bar-chart-line-fill me-2"></i>ภาพรวมเคสรายเดือน</div>
+                        <div class="card-body">
+                            <div class="chart-container"><canvas id="monthlyTrendChart"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header"
+                                    data-tippy-content="สรุปภาพรวมของเคสที่เกิดขึ้นในสัปดาห์ปัจจุบัน (นับวันจันทร์เป็นวันเริ่มต้น)">
+                                    <i class="bi bi-calendar-week me-2"></i>สถิติสัปดาห์นี้
+                                </div>
+                                <div class="card-body">
+                                    <ul class="stats-list" id="weekly-stats-list"></ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header"
+                                    data-tippy-content="วิเคราะห์ประสิทธิภาพในการแก้ไขปัญหา โดยวัดระยะเวลาตั้งแต่แจ้งจนปิดเคส">
+                                    <i class="bi bi-hourglass-split me-2"></i>สถิติเวลาในการแก้ไข
+                                </div>
+                                <div class="card-body">
+                                    <ul class="stats-list" id="resolution-time-stats-list"></ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-12">
+                            <div class="card h-100">
+                                <div class="card-header"
+                                    data-tippy-content="แสดงรายชื่อ 5 อันดับแรกของผู้ใช้ที่แจ้งปัญหาเข้ามาบ่อยที่สุด"><i
+                                        class="bi bi-person-check-fill me-2"></i>5 ผู้ที่แจ้งปัญหาบ่อยสุด</div>
+                                <div class="card-body">
+                                    <ul class="stats-list" id="top-submitters-list"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="admin-view-tickets" style="display: none;">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center"><span><i
+                                    class="bi bi-list-task me-2"></i>รายการแจ้งปัญหาทั้งหมด</span><button
+                                id="refresh-btn" class="btn btn-sm btn-outline-secondary"><i
+                                    class="bi bi-arrow-clockwise me-1"></i>รีเฟรช</button></div>
+                        <div class="card-body">
+                            <div id="ticket-list" class="row"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="admin-view-users" style="display: none;">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-people me-2"></i>จัดการผู้ใช้ระบบ</div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <form id="add-user-form" class="row g-3 align-items-end">
+                                    <div class="col-sm-4"><label for="newUsername"
+                                            class="form-label">Username</label><input type="text" class="form-control"
+                                            id="newUsername" required></div>
+                                    <div class="col-sm-4"><label for="newPassword"
+                                            class="form-label">Password</label><input type="password"
+                                            class="form-control" id="newPassword" required></div>
+                                    <div class="col-sm-4"><button type="submit" class="btn btn-primary w-100"><i
+                                                class="bi bi-plus-circle me-1"></i>เพิ่มผู้ใช้</button></div>
+                                </form><small id="user-limit-msg" class="form-text text-muted mt-2"></small>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Username</th>
+                                            <th>Password</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="user-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals and Spinner -->
+    <div class="loading-spinner">
+        <div id="planetTrail1"></div>
+        <div id="planetTrail2"></div>
+        <div id="planetTrail3"></div>
+        <div class="planets">
+            <div id="planet"></div>
+            <div id="star"></div>
+            <div id="starShadow"></div>
+            <div id="blackHoleDisk2"></div>
+            <div id="blackHole"></div>
+            <div id="blackHoleDisk1"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alertModalLabel"></h5><button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="alertModalBody"></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        id="alertModalCloseBtn">ปิด</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="loginModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="login-card">
+                    <div class="login-card2">
+                        <form class="form" id="login-form">
+                            <p id="heading">Login</p>
+                            <div class="field">
+                                <svg viewBox="0 0 16 16" fill="currentColor" height="16" width="16"
+                                    xmlns="http://www.w3.org/2000/svg" class="input-icon">
+                                    <path
+                                        d="M13.106 7.222c0-2.967-2.249-5.032-5.482-5.032-3.35 0-5.646 2.318-5.646 5.702 0 3.493 2.235 5.708 5.762 5.708.862 0 1.689-.123 2.304-.335v-.862c-.43.199-1.354.328-2.29.328-2.926 0-4.813-1.88-4.813-4.798 0-2.844 1.921-4.881 4.594-4.881 2.735 0 4.608 1.688 4.608 4.156 0 1.682-.554 2.769-1.416 2.769-.492 0-.772-.28-.772-.76V5.206H8.923v.834h-.11c-.266-.595-.881-.964-1.6-.964-1.4 0-2.378 1.162-2.378 2.823 0 1.737.957 2.906 2.379 2.906.8 0 1.415-.39 1.709-1.087h.11c.081.67.703 1.148 1.503 1.148 1.572 0 2.57-1.415 2.57-3.643zm-7.177.704c0-1.197.54-1.907 1.456-1.907.93 0 1.524.738 1.524 1.907S8.308 9.84 7.371 9.84c-.895 0-1.442-.725-1.442-1.914z">
+                                    </path>
+                                </svg>
+                                <input type="text" class="input-field" placeholder="Username" autocomplete="off"
+                                    id="adminUsernameInput" required>
+                            </div>
+                            <div class="field">
+                                <svg viewBox="0 0 16 16" fill="currentColor" height="16" width="16"
+                                    xmlns="http://www.w3.org/2000/svg" class="input-icon">
+                                    <path
+                                        d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z">
+                                    </path>
+                                </svg>
+                                <input type="password" class="input-field" placeholder="Password"
+                                    id="adminPasswordInput" required>
+                            </div>
+                            <div id="login-error" style="display: none;"></div>
+                            <div class="btn">
+                                <button class="button1"
+                                    type="submit">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Login&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="resolutionModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>บันทึกการแก้ไข (ปิดเคส)</h5><button
+                        type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="resolution-form"><input type="hidden" id="resolutionRowIndex">
+                        <div class="mb-3"><label for="resolutionComment" class="form-label">หมายเหตุการแก้ไข (Resolution
+                                Comment)</label><textarea class="form-control" id="resolutionComment" rows="4"
+                                placeholder="ระบุวิธีการแก้ไขปัญหาโดยสรุป..."></textarea></div>
+                        <div class="modal-footer"><button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">ยกเลิก</button><button type="submit"
+                                class="btn btn-primary">ยืนยันการปิดเคส</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i>ยืนยันการดำเนินการ</h5><button
+                        type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="confirmModalBody"></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">ยกเลิก</button><button type="button" class="btn btn-primary"
+                        id="confirmModalBtn">ยืนยัน</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editUserModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>แก้ไขข้อมูลผู้ใช้</h5><button
+                        type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-user-form"><input type="hidden" id="editUserRowIndex">
+                        <div class="mb-3"><label class="form-label">Username</label><input type="text"
+                                class="form-control" id="editUsername" required></div>
+                        <div class="mb-3"><label class="form-label">Password (ตั้งรหัสใหม่)</label><input
+                                type="password" class="form-control" id="editPassword" required></div><button
+                            type="submit" class="btn btn-primary w-100">บันทึก</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/tippy.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase Client -->
+    <script src="js/supabase-config.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ใช้ Supabase client จาก js/supabase-config.js แทน Google Apps Script
+            const TEAMS_WEBHOOK_URL = SUPABASE_CONFIG.TEAMS_WEBHOOK_URL;
+            let allTickets = [], adminUsers = [], problemTypeChart, dailyTrendChart, monthlyTrendChart;
+            let confirmCallback = null;
+            let pollingIntervalId = null;
+            let lastCheckedTimestamp = 0;
+            let needsRefresh = false;
+            let alertCountdownInterval = null;
+
+            const DOMElements = {
+                adminDashboard: document.getElementById('admin-dashboard'),
+                ticketList: document.getElementById('ticket-list'),
+                loadingSpinner: document.querySelector('.loading-spinner'),
+                logoutBtn: document.getElementById('logout-btn'),
+                userTableBody: document.getElementById('user-table-body'),
+                addUserForm: document.getElementById('add-user-form'),
+                editUserForm: document.getElementById('edit-user-form'),
+                resolutionForm: document.getElementById('resolution-form'),
+                userLimitMsg: document.getElementById('user-limit-msg'),
+                openCasesCount: document.getElementById('open-cases-count'),
+                closedCasesCount: document.getElementById('closed-cases-count'),
+                totalCasesCount: document.getElementById('total-cases-count'),
+                avgCloseTime: document.getElementById('avg-close-time'),
+                problemTypeChartCanvas: document.getElementById('problemTypeChart'),
+                dailyTrendChartCanvas: document.getElementById('dailyTrendChart'),
+                monthlyTrendChartCanvas: document.getElementById('monthlyTrendChart'),
+                weeklyStatsList: document.getElementById('weekly-stats-list'),
+                resolutionTimeStatsList: document.getElementById('resolution-time-stats-list'),
+                topSubmittersList: document.getElementById('top-submitters-list'),
+                loginForm: document.getElementById('login-form'),
+                loginError: document.getElementById('login-error'),
+                adminContent: document.getElementById('admin-content'),
+                refreshBtn: document.getElementById('refresh-btn'),
+                confirmModalBtn: document.getElementById('confirmModalBtn'),
+                newUsernameInput: document.getElementById('newUsername'),
+                newPasswordInput: document.getElementById('newPassword'),
+                editUsernameInput: document.getElementById('editUsername'),
+                editPasswordInput: document.getElementById('editPassword')
+            };
+            const Modals = {
+                alert: new bootstrap.Modal(document.getElementById('alertModal')),
+                login: new bootstrap.Modal(document.getElementById('loginModal')),
+                confirm: new bootstrap.Modal(document.getElementById('confirmModal')),
+                resolution: new bootstrap.Modal(document.getElementById('resolutionModal')),
+                editUser: new bootstrap.Modal(document.getElementById('editUserModal')),
+            };
+
+            const showAlert = (message, isSuccess = true) => {
+                document.getElementById('alertModalLabel').textContent = isSuccess ? 'สำเร็จ!' : 'เกิดข้อผิดพลาด';
+                document.getElementById('alertModalBody').innerHTML = message;
+
+                if (alertCountdownInterval) clearInterval(alertCountdownInterval);
+
+                if (isSuccess) {
+                    let countdown = 3;
+                    const closeBtn = document.getElementById('alertModalCloseBtn');
+                    closeBtn.textContent = `ปิด (${countdown})`;
+
+                    alertCountdownInterval = setInterval(() => {
+                        countdown--;
+                        if (countdown > 0) {
+                            closeBtn.textContent = `ปิด (${countdown})`;
+                        } else {
+                            clearInterval(alertCountdownInterval);
+                            Modals.alert.hide();
+                        }
+                    }, 1000);
+                }
+
+                Modals.alert.show();
+            };
+
+            const showConfirm = (message, callback) => {
+                document.getElementById('confirmModalBody').textContent = message;
+                confirmCallback = callback;
+                Modals.confirm.show();
+            };
+
+            const showLoading = (show) => { DOMElements.loadingSpinner.style.display = show ? 'flex' : 'none'; };
+
+            const switchAdminView = (targetId) => {
+                document.querySelectorAll('#admin-content > div').forEach(p => p.style.display = 'none');
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.style.display = 'block';
+                }
+                document.querySelectorAll('.admin-nav .nav-link').forEach(l => l.classList.remove('active'));
+                const activeLink = document.querySelector(`.admin-nav .nav-link[id="nav-${targetId.split('-')[2]}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+                if (targetId === 'admin-view-dashboard') renderDashboard(allTickets);
+                if (targetId === 'admin-view-tickets') renderTickets(allTickets);
+            };
+
+            const postToAction = async (action, data) => {
+                showLoading(true);
+                let alertMsg = null;
+                let alertSuccess = false;
+                let unauthorized = false;
+
+                needsRefresh = false;
+
+                const token = sessionStorage.getItem('authToken');
+                if (!token && action !== 'login') {
+                    alertMsg = 'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง';
+                    alertSuccess = false;
+                    unauthorized = true;
+                } else {
+                    try {
+                        let result = { success: false, message: 'Unknown action' };
+
+                        // เรียกใช้ Supabase API ตาม action
+                        switch (action) {
+                            case 'closeTicket':
+                                // หา ticket จาก RowIndex (ใช้เป็น case_id หรือ id)
+                                const ticketToClose = allTickets.find(t => t.RowIndex === data.rowIndex);
+                                if (ticketToClose) {
+                                    result = await supabase.closeTicket(
+                                        ticketToClose.CaseID,
+                                        data.resolutionComment,
+                                        supabase.getCurrentUser()
+                                    );
+                                    // ส่ง Teams notification
+                                    const updatedTicket = await supabase.getTicketByCaseId(ticketToClose.CaseID);
+                                    if (updatedTicket) {
+                                        await supabase.sendTeamsNotification(updatedTicket, 'closed');
+                                        // ส่ง evaluation email
+                                        await supabase.sendEvaluationEmail(updatedTicket);
+                                    }
+                                    result = { success: true };
+                                }
+                                break;
+
+                            case 'addUser':
+                                result = await supabase.addUser(data.username, data.password);
+                                break;
+
+                            case 'editUser':
+                                result = await supabase.updateUser(data.rowIndex, data.username, data.password);
+                                break;
+
+                            case 'deleteUser':
+                                result = await supabase.deleteUser(data.rowIndex);
+                                break;
+
+                            case 'sendProblemFollowupEmail':
+                                const ticket = await supabase.getTicketByCaseId(data.caseId);
+                                if (ticket) {
+                                    result = await supabase.sendProblemFollowupEmail(ticket);
+                                }
+                                break;
+
+                            default:
+                                result = { success: false, message: 'Unknown action: ' + action };
+                        }
+
+                        if (result.success) {
+                            alertMsg = 'ดำเนินการสำเร็จ';
+                            alertSuccess = true;
+                            needsRefresh = true;
+                            if (action.includes('User')) DOMElements.addUserForm.reset();
+                            if (action === 'closeTicket') DOMElements.resolutionForm.reset();
+                        } else {
+                            alertMsg = 'เกิดข้อผิดพลาด: ' + (result.message || 'Unknown error');
+                            alertSuccess = false;
+                        }
+                    } catch (error) {
+                        alertMsg = 'เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + error.message;
+                        alertSuccess = false;
+                    }
+                }
+
+                showLoading(false);
+
+                setTimeout(() => {
+                    if (alertMsg) {
+                        showAlert(alertMsg, alertSuccess);
+                    }
+                    if (unauthorized) {
+                        handleLogout();
+                    }
+                }, 100);
+            };
+
+            const parseThaiDateTime = (dateStr, timeStr) => {
+                if (!dateStr || !timeStr || dateStr.trim() === '' || timeStr.trim() === '') return null;
+                const dateParts = dateStr.trim().split('/');
+                if (dateParts.length !== 3) return null;
+                const timeParts = timeStr.trim().split(':');
+                if (timeParts.length < 2) return null;
+                const day = parseInt(dateParts[0], 10);
+                const month = parseInt(dateParts[1], 10) - 1;
+                const yearBE = parseInt(dateParts[2], 10);
+                if (isNaN(day) || isNaN(month) || isNaN(yearBE)) return null;
+                const yearAD = yearBE - 543;
+                const hours = parseInt(timeParts[0], 10) || 0;
+                const minutes = parseInt(timeParts[1], 10) || 0;
+                const seconds = parseInt(timeParts[2], 10) || 0;
+                if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) return null;
+                return new Date(yearAD, month, day, hours, minutes, seconds);
+            };
+            const initializeTooltips = () => tippy('[data-tippy-content]', { theme: 'custom-dark', animation: 'fade' });
+            const sanitizeHTML = (str) => {
+                if (!str) return '';
+                const temp = document.createElement('div');
+                temp.textContent = str;
+                return temp.innerHTML;
+            };
+            const formatDuration = (totalMinutes) => {
+                if (isNaN(totalMinutes) || totalMinutes < 0) return 'N/A';
+                if (totalMinutes < 1) return `${(totalMinutes * 60).toFixed(0)} วินาที`;
+                if (totalMinutes < 60) return `${totalMinutes.toFixed(0)} นาที`;
+
+                const days = Math.floor(totalMinutes / 1440);
+                const hours = Math.floor((totalMinutes % 1440) / 60);
+                const minutes = Math.round(totalMinutes % 60);
+
+                let result = '';
+                if (days > 0) result += `${days} วัน `;
+                if (hours > 0) result += `${hours} ชม. `;
+                if (minutes > 0 && days === 0) result += `${minutes} นาที`;
+
+                return result.trim() || '0 นาที';
+            };
+
+            const renderDashboard = (tickets) => {
+                if (!tickets) return;
+                DOMElements.openCasesCount.textContent = tickets.filter(t => t.Status === 'Open').length;
+                DOMElements.closedCasesCount.textContent = tickets.filter(t => t.Status === 'Closed').length;
+                DOMElements.totalCasesCount.textContent = tickets.length;
+
+                const durationsInMinutes = tickets.filter(t => t.Status === 'Closed')
+                    .map(t => {
+                        const start = parseThaiDateTime(t.SubmissionDate, t.SubmissionTime);
+                        const end = parseThaiDateTime(t.ClosedDate, t.ClosedTime);
+                        return (start && end) ? (end - start) / 60000 : null;
+                    }).filter(d => d !== null && d >= 0);
+
+                const avgMinutes = durationsInMinutes.length > 0 ? durationsInMinutes.reduce((a, b) => a + b, 0) / durationsInMinutes.length : 0;
+
+                const formattedTime = formatDuration(avgMinutes);
+                DOMElements.avgCloseTime.textContent = formattedTime;
+
+                if (formattedTime.length > 8) {
+                    DOMElements.avgCloseTime.style.fontSize = '1.75rem';
+                } else {
+                    DOMElements.avgCloseTime.style.fontSize = '2.25rem';
+                }
+
+                renderProblemTypeChart(tickets);
+                renderDailyTrendChart(tickets);
+                renderMonthlyTrendChart(tickets);
+                renderWeeklyStats(tickets);
+                renderResolutionTimeStats(tickets);
+                renderTopSubmitters(tickets);
+                initializeTooltips();
+            };
+
+            const renderProblemTypeChart = (tickets) => {
+                const typeCounts = tickets.reduce((acc, { ProblemType }) => { if (ProblemType) acc[ProblemType] = (acc[ProblemType] || 0) + 1; return acc; }, {});
+                if (problemTypeChart) problemTypeChart.destroy();
+                problemTypeChart = new Chart(DOMElements.problemTypeChartCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(typeCounts),
+                        datasets: [{
+                            data: Object.values(typeCounts),
+                            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
+                            borderColor: '#1f2937',
+                            borderWidth: 4,
+                            hoverOffset: 12
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#e2e8f0', padding: 15, font: { size: 14 } } },
+                            tooltip: { backgroundColor: '#334155', titleColor: '#fff', bodyColor: '#e2e8f0', cornerRadius: 8, padding: 12 }
+                        }
+                    }
+                });
+            };
+
+            const renderDailyTrendChart = (tickets) => {
+                const dailyData = Array(7).fill(0);
+                const today = new Date();
+                const labels = [];
+                const thaiDays = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(today.getDate() - i);
+                    labels.push(thaiDays[date.getDay()]);
+                    dailyData[6 - i] = tickets.filter(t => {
+                        const subDate = parseThaiDateTime(t.SubmissionDate, t.SubmissionTime);
+                        return subDate && subDate.toDateString() === date.toDateString();
+                    }).length;
+                }
+
+                if (dailyTrendChart) dailyTrendChart.destroy();
+                const ctx = DOMElements.dailyTrendChartCanvas.getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(34, 197, 94, 0.5)');
+                gradient.addColorStop(1, 'rgba(34, 197, 94, 0)');
+
+                dailyTrendChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Cases',
+                            data: dailyData,
+                            borderColor: '#22c55e',
+                            backgroundColor: gradient,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#22c55e',
+                            pointHoverRadius: 8,
+                            pointHoverBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.15)' } },
+                            x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { backgroundColor: '#334155', titleColor: '#fff', bodyColor: '#e2e8f0', cornerRadius: 8, padding: 12 }
+                        }
+                    }
+                });
+            };
+
+            const renderMonthlyTrendChart = (tickets) => {
+                const labels = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+                const monthlyData = Array(12).fill(0);
+                const today = new Date();
+                tickets.forEach(t => { const d = parseThaiDateTime(t.SubmissionDate, t.SubmissionTime); if (d && d.getFullYear() === today.getFullYear()) monthlyData[d.getMonth()]++; });
+
+                if (monthlyTrendChart) monthlyTrendChart.destroy();
+                const ctx = DOMElements.monthlyTrendChartCanvas.getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
+                gradient.addColorStop(1, 'rgba(59, 130, 246, 0.4)');
+
+                monthlyTrendChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Cases',
+                            data: monthlyData,
+                            backgroundColor: gradient,
+                            borderColor: '#3b82f6',
+                            borderWidth: 1,
+                            borderRadius: 6,
+                            hoverBackgroundColor: '#3b82f6'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.15)' } },
+                            x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { backgroundColor: '#334155', titleColor: '#fff', bodyColor: '#e2e8f0', cornerRadius: 8, padding: 12 }
+                        }
+                    }
+                });
+            };
+
+            const renderWeeklyStats = (tickets) => {
+                const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0);
+                const firstDayOfWeek = new Date(todayMidnight);
+                firstDayOfWeek.setDate(todayMidnight.getDate() - todayMidnight.getDay() + (todayMidnight.getDay() === 0 ? -6 : 1));
+                const newThisWeek = tickets.filter(t => parseThaiDateTime(t.SubmissionDate, t.SubmissionTime) >= firstDayOfWeek).length;
+                const closedThisWeek = tickets.filter(t => t.Status === 'Closed' && parseThaiDateTime(t.ClosedDate, t.ClosedTime) >= firstDayOfWeek).length;
+                const overdue = tickets.filter(t => t.Status === 'Open' && parseThaiDateTime(t.SubmissionDate, t.SubmissionTime) < firstDayOfWeek).length;
+
+                const closedTickets = tickets.filter(t => t.Status === 'Closed');
+                let avgClosedPerDay = 0;
+                if (tickets.length > 0) {
+                    const firstTicketDate = tickets.map(t => parseThaiDateTime(t.SubmissionDate, t.SubmissionTime)).filter(d => d).sort((a, b) => a - b)[0];
+                    if (firstTicketDate) {
+                        const calculateWorkingDays = (start, end) => {
+                            let count = 0;
+                            const current = new Date(start);
+                            while (current <= end) {
+                                const day = current.getDay();
+                                if (day !== 0 && day !== 6) { count++; }
+                                current.setDate(current.getDate() + 1);
+                            }
+                            return count;
+                        };
+                        const workingDays = calculateWorkingDays(firstTicketDate, new Date());
+                        if (workingDays > 0) {
+                            avgClosedPerDay = closedTickets.length / workingDays;
+                        } else {
+                            avgClosedPerDay = closedTickets.length;
+                        }
+                    }
+                }
+
+                DOMElements.weeklyStatsList.innerHTML = `<li class="stats-list-item" data-tippy-content="เคสใหม่ที่แจ้งเข้ามาตั้งแต่วันจันทร์ของสัปดาห์นี้"><span class="label">เคสใหม่ (สัปดาห์นี้)</span> <span class="value">${newThisWeek} เคส</span></li><li class="stats-list-item" data-tippy-content="เคสที่ปิดไปแล้วตั้งแต่วันจันทร์ของสัปดาห์นี้"><span class="label">เคสปิด (สัปดาห์นี้)</span> <span class="value">${closedThisWeek} เคส</span></li><li class="stats-list-item" data-tippy-content="ค่าเฉลี่ยเคสที่ปิดได้ต่อวันทำการ (จ-ศ)"><span class="label">เฉลี่ยปิด/วันทำการ</span> <span class="value">${avgClosedPerDay.toFixed(1)} เคส</span></li><li class="stats-list-item" data-tippy-content="เคสที่เปิดค้างมาจากสัปดาห์ก่อนๆ"><span class="label">เคสค้าง</span> <span class="value">${overdue} เคส</span></li>`;
+            };
+            const renderResolutionTimeStats = (tickets) => {
+                const resTimes = tickets.filter(t => t.Status === 'Closed').map(t => (parseThaiDateTime(t.ClosedDate, t.ClosedTime) - parseThaiDateTime(t.SubmissionDate, t.SubmissionTime)) / 60000).filter(d => d >= 0);
+                if (resTimes.length === 0) {
+                    DOMElements.resolutionTimeStatsList.innerHTML = `<li class="stats-list-item" data-tippy-content="ไม่มีข้อมูลเคสที่ปิดแล้ว"><span class="label">เร็วสุด (Min)</span> <span class="value">N/A</span></li><li class="stats-list-item" data-tippy-content="ไม่มีข้อมูลเคสที่ปิดแล้ว"><span class="label">เฉลี่ย (Avg)</span> <span class="value">N/A</span></li><li class="stats-list-item" data-tippy-content="ไม่มีข้อมูลเคสที่ปิดแล้ว"><span class="label">ช้าสุด (Max)</span> <span class="value">N/A</span></li>`;
+                    return;
+                }
+                DOMElements.resolutionTimeStatsList.innerHTML = `<li class="stats-list-item" data-tippy-content="เวลาที่น้อยที่สุดที่ใช้ในการแก้ปัญหา"><span class="label">เร็วสุด (Min)</span> <span class="value">${formatDuration(Math.min(...resTimes))}</span></li><li class="stats-list-item" data-tippy-content="เวลาเฉลี่ยที่ใช้ในการแก้ปัญหาทั้งหมด"><span class="label">เฉลี่ย (Avg)</span> <span class="value">${formatDuration(resTimes.reduce((a, b) => a + b, 0) / resTimes.length)}</span></li><li class="stats-list-item" data-tippy-content="เวลาที่นานที่สุดที่ใช้ในการแก้ปัญหา"><span class="label">ช้าสุด (Max)</span> <span class="value">${formatDuration(Math.max(...resTimes))}</span></li>`;
+            };
+            const renderTopSubmitters = (tickets) => {
+                const counts = tickets.reduce((acc, { SubmitterName }) => {
+                    if (SubmitterName) {
+                        const normalizedName = SubmitterName.trim().toLowerCase();
+                        if (acc[normalizedName]) {
+                            acc[normalizedName].count++;
+                        } else {
+                            acc[normalizedName] = {
+                                name: SubmitterName.trim(),
+                                count: 1
+                            };
+                        }
+                    }
+                    return acc;
+                }, {});
+                const sorted = Object.values(counts).sort((a, b) => b.count - a.count).slice(0, 5);
+                DOMElements.topSubmittersList.innerHTML = sorted.length ? sorted.map(({ name, count }) => `<li class="stats-list-item"><span class="label">${sanitizeHTML(name)}</span><span class="value">${count} เคส</span></li>`).join('') : `<li class="stats-list-item">ไม่มีข้อมูล</li>`;
+            };
+
+            const renderTickets = (tickets) => {
+                const ticketListEl = DOMElements.ticketList;
+                ticketListEl.innerHTML = '';
+                if (!tickets || tickets.length === 0) {
+                    ticketListEl.innerHTML = '<p class="text-center text-muted p-5">ไม่พบรายการปัญหา</p>';
+                    return;
+                }
+
+                tickets.sort((a, b) => {
+                    if (a.Status === 'Open' && b.Status !== 'Open') {
+                        return -1;
+                    }
+                    if (a.Status !== 'Open' && b.Status === 'Open') {
+                        return 1;
+                    }
+                    const dateA = parseThaiDateTime(a.SubmissionDate, a.SubmissionTime);
+                    const dateB = parseThaiDateTime(b.SubmissionDate, b.SubmissionTime);
+
+                    if (!dateA && !dateB) return 0;
+                    if (!dateA) return 1;
+                    if (!dateB) return -1;
+
+                    return dateB - dateA;
+                }).forEach(ticket => {
+                    const cardHtml = `
+                <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                    <div class="card w-100 d-flex flex-column">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="ticket-id">${sanitizeHTML(ticket.CaseID)}</span>
+                                <div class="d-flex flex-column gap-1 align-items-end">
+                                    <span class="badge rounded-pill status-badge ${ticket.Status === 'Open' ? 'bg-warning' : 'bg-success'}">${sanitizeHTML(ticket.Status)}</span>
+                                    ${(() => {
+                            if (ticket.Status !== 'Closed') return '';
+                            const isEvaluated = ticket.ScoreQ && ticket.ScoreQ.toString().trim() !== '';
+                            return isEvaluated
+                                ? `<span class="badge rounded-pill bg-success bg-opacity-75" style="font-size: 0.75rem;"><i class="bi bi-star-fill me-1"></i>ประเมินแล้ว</span>`
+                                : `<span class="badge rounded-pill bg-secondary bg-opacity-50 text-light" style="font-size: 0.75rem;"><i class="bi bi-hourglass-split me-1"></i>รอประเมิน</span>`;
+                        })()}
+                                    ${(() => {
+                            if (ticket.Status !== 'Closed') return '';
+                            const emailStatus = ticket.EmailStatus ? ticket.EmailStatus.toString().trim() : '';
+                            if (emailStatus === 'Sent' || emailStatus === 'Resent') {
+                                return `<span class="badge rounded-pill bg-info bg-opacity-75" style="font-size: 0.75rem;"><i class="bi bi-envelope-check-fill me-1"></i>${emailStatus === 'Resent' ? 'ส่งซ้ำแล้ว' : 'ส่งเมลแล้ว'}</span>`;
+                            } else if (emailStatus.includes('Failed')) {
+                                return `<span class="badge rounded-pill bg-danger bg-opacity-75" style="font-size: 0.75rem;"><i class="bi bi-envelope-x-fill me-1"></i>ส่งไม่ผ่าน</span>`;
+                            }
+                            return '';
+                        })()}
+                                </div>
+                            </div>
+                            <div class="ticket-details mt-2">
+                                <p class="mb-1"><strong>ผู้แจ้ง:</strong> ${sanitizeHTML(ticket.SubmitterName)}</p>
+                                <p class="mb-1"><strong>เบอร์ติดต่อ:</strong> ${sanitizeHTML(ticket.ContactNumber)}</p>
+                                <p class="mb-1"><strong>รหัสพนักงาน:</strong> ${sanitizeHTML(ticket.Department)}</p>
+                                <p class="mb-1"><strong>ประเภท:</strong> ${sanitizeHTML(ticket.ProblemType)}</p>
+                                <p class="mb-1"><strong>รายละเอียด:</strong></p>
+                                <p class="text-white-50" style="white-space: pre-wrap;">${sanitizeHTML(ticket.ProblemDetails)}</p>
+                            </div>
+                            <!-- ***** CHANGE: Rearrange date display ***** -->
+                            <div class="ticket-footer small text-muted mt-3 pt-3 border-top border-secondary-subtle">
+                                <div>แจ้งเมื่อ: ${sanitizeHTML(ticket.SubmissionDate) || 'N/A'} ${sanitizeHTML(ticket.SubmissionTime) || 'N/A'}</div>
+                                ${ticket.Status === 'Closed' ? `<div>ปิดเมื่อ: ${sanitizeHTML(ticket.ClosedDate) || 'N/A'} ${sanitizeHTML(ticket.ClosedTime) || 'N/A'}</div>` : ''}
+                            </div>
+                            ${ticket.Status === 'Closed' && ticket.ResolutionComment ? `
+                            <div class="mt-3 pt-3 border-top border-secondary-subtle">
+                                <p class="mb-1"><strong><i class="bi bi-chat-square-text-fill me-2"></i>หมายเหตุการแก้ไข:</strong></p>
+                                <p class="text-white-50 mb-0" style="white-space: pre-wrap;">${sanitizeHTML(ticket.ResolutionComment)}</p>
+                            </div>` : ''}
+                            ${(() => {
+                            if (ticket.Status !== 'Closed') return '';
+                            const isEvaluated = ticket.ScoreQ && ticket.ScoreQ.toString().trim() !== '';
+                            if (isEvaluated) return '';
+                            const emailStatus = ticket.EmailStatus ? ticket.EmailStatus.toString().trim() : '';
+                            if (emailStatus.includes('Failed')) return '';
+                            const emailSendCount = ticket.EmailSendCount ? parseInt(ticket.EmailSendCount) : 1;
+                            const lastEmailDate = ticket.LastEmailSentDate || ticket.ClosedDate;
+                            const lastEmailTime = ticket.LastEmailSentTime || ticket.ClosedTime;
+                            return `<div class="countdown-container" data-case-id="${sanitizeHTML(ticket.CaseID)}" data-row-index="${ticket.RowIndex}" data-last-email-date="${sanitizeHTML(lastEmailDate)}" data-last-email-time="${sanitizeHTML(lastEmailTime)}" data-email-status="${sanitizeHTML(emailStatus)}" data-send-count="${emailSendCount}">
+                                    <div class="countdown-label"><i class="bi bi-envelope-at"></i> <span class="countdown-status-text">ส่งอีเมลขอประเมินอีกครั้งใน</span><span class="send-count-badge" style="margin-left: 0.5rem; background: rgba(139, 92, 246, 0.2); padding: 0.1rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; color: #a78bfa;">ครั้งที่ ${emailSendCount}</span></div>
+                                    <div class="countdown-timer">กำลังคำนวณ...</div>
+                                </div>`;
+                        })()}
+                            ${(() => {
+                            // Problem Followup Countdown - Show only for closed tickets without EmailProblem
+                            if (ticket.Status !== 'Closed') return '';
+                            if (ticket.EmailProblem && ticket.EmailProblem.toString().trim() !== '') return '';
+
+                            return `<div class="problem-countdown-container" data-case-id="${sanitizeHTML(ticket.CaseID)}" data-closed-date="${sanitizeHTML(ticket.ClosedDate)}" data-closed-time="${sanitizeHTML(ticket.ClosedTime)}">
+                                    <div class="countdown-label"><i class="bi bi-envelope-exclamation"></i> <span class="problem-countdown-status-text">ส่งเมลสอบถามปัญหาอัตโนมัติใน</span></div>
+                                    <div class="countdown-timer problem-countdown-timer">กำลังคำนวณ...</div>
+                                </div>`;
+                        })()}
+                            <div class="mt-auto text-end pt-3">
+                            ${ticket.Status === 'Open' ? `<button class="btn btn-success btn-sm close-ticket-btn" data-row-index="${ticket.RowIndex}"><i class="bi bi-check-circle"></i> ปิดเคส</button>` : ''}
+                            ${ticket.Status === 'Closed' && (!ticket.EmailProblem || ticket.EmailProblem.toString().trim() === '') ? `<button class="btn btn-outline-warning btn-sm send-problem-followup-btn" data-case-id="${sanitizeHTML(ticket.CaseID)}" data-tippy-content="ส่งเมลสอบถามปัญหาหลังแก้ไข"><i class="bi bi-envelope-exclamation"></i> สอบถามปัญหา</button>` : ''}
+                            ${ticket.Status === 'Closed' && ticket.EmailProblem && ticket.EmailProblem.toString().trim() !== '' ? `<span class="badge bg-info bg-opacity-25 text-info border border-info" data-tippy-content="${sanitizeHTML(ticket.EmailProblem)}"><i class="bi bi-envelope-check me-1"></i>ส่งเมลสอบถามแล้ว</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                    ticketListEl.insertAdjacentHTML('beforeend', cardHtml);
+                });
+            };
+            const renderUsers = (users) => {
+                const userTableBodyEl = DOMElements.userTableBody;
+                userTableBodyEl.innerHTML = '';
+                if (!users || users.length === 0) return;
+                users.forEach(user => {
+                    userTableBodyEl.insertAdjacentHTML('beforeend', `
+                    <tr><td>${sanitizeHTML(user.username)}</td><td>******</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-warning me-2 edit-user-btn" data-row-index="${user.rowIndex}" data-username="${sanitizeHTML(user.username)}"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger delete-user-btn" data-row-index="${user.rowIndex}"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>`);
+                });
+                const userCount = users.length;
+                DOMElements.userLimitMsg.textContent = `จำนวนผู้ใช้: ${userCount}/5`;
+                DOMElements.addUserForm.querySelector('button').disabled = userCount >= 5;
+            };
+
+            // ===== COUNTDOWN TIMER & AUTO RESEND EVALUATION EMAIL =====
+            let countdownIntervalId = null;
+            const RESEND_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+            const pendingResends = new Set(); // Track cases that are currently being resent
+
+            const startCountdownTimers = () => {
+                if (countdownIntervalId) clearInterval(countdownIntervalId);
+
+                countdownIntervalId = setInterval(() => {
+                    const containers = document.querySelectorAll('.countdown-container');
+                    containers.forEach(container => {
+                        const caseId = container.dataset.caseId;
+                        const rowIndex = container.dataset.rowIndex;
+                        const lastEmailDate = container.dataset.lastEmailDate;
+                        const lastEmailTime = container.dataset.lastEmailTime;
+                        const emailStatus = container.dataset.emailStatus;
+
+                        const lastEmailDateTime = parseThaiDateTime(lastEmailDate, lastEmailTime);
+                        if (!lastEmailDateTime) {
+                            container.querySelector('.countdown-timer').textContent = 'ไม่พบวันที่ส่งอีเมล';
+                            return;
+                        }
+
+                        const now = new Date();
+                        const resendTime = new Date(lastEmailDateTime.getTime() + RESEND_COOLDOWN_MS);
+                        const timeLeft = resendTime - now;
+
+                        if (timeLeft <= 0) {
+                            // Time's up - trigger auto resend
+                            // Allow resending regardless of emailStatus (Sent, Resent)
+                            if (!pendingResends.has(caseId)) {
+                                triggerAutoResend(caseId, rowIndex, container);
+                            }
+                        } else {
+                            // Display countdown
+                            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                            container.querySelector('.countdown-timer').textContent =
+                                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        }
+                    });
+                }, 1000);
+            };
+
+            const triggerAutoResend = async (caseId, rowIndex, container) => {
+                pendingResends.add(caseId);
+
+                // Update UI to show sending state
+                container.classList.add('countdown-sending');
+                container.querySelector('.countdown-status-text').innerHTML = '<i class="bi bi-send me-1"></i>กำลังส่งอีเมลขอประเมินซ้ำ...';
+                container.querySelector('.countdown-timer').textContent = 'โปรดรอสักครู่';
+
+                try {
+                    // ใช้ Supabase client แทน Google Apps Script
+                    const ticket = await supabase.getTicketByCaseId(caseId);
+                    if (!ticket) {
+                        throw new Error('ไม่พบเคส');
+                    }
+
+                    const result = await supabase.sendEvaluationEmail(ticket);
+
+                    if (result.success) {
+                        container.classList.remove('countdown-sending');
+                        container.classList.add('countdown-resent');
+                        container.querySelector('.countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>ส่งอีเมลซ้ำสำเร็จ!';
+                        container.querySelector('.countdown-timer').textContent = '✓';
+                        container.dataset.emailStatus = 'Resent';
+
+                        // Increment the send count in the UI
+                        const currentCount = parseInt(container.dataset.sendCount) || 1;
+                        const newCount = currentCount + 1;
+                        container.dataset.sendCount = newCount;
+                        const countBadge = container.querySelector('.send-count-badge');
+                        if (countBadge) {
+                            countBadge.textContent = `ครั้งที่ ${newCount}`;
+                        }
+
+                        // Refresh data after a short delay to get updated LastEmailSentDate/Time
+                        setTimeout(() => initializeApp(true), 2000);
+                    } else {
+                        container.querySelector('.countdown-status-text').textContent = 'ส่งไม่สำเร็จ: ' + (result.message || 'Unknown error');
+                        container.querySelector('.countdown-timer').textContent = '✗';
+                        container.classList.remove('countdown-sending');
+                    }
+                } catch (error) {
+                    container.querySelector('.countdown-status-text').textContent = 'เกิดข้อผิดพลาด';
+                    container.querySelector('.countdown-timer').textContent = error.message;
+                    container.classList.remove('countdown-sending');
+                } finally {
+                    pendingResends.delete(caseId);
+                }
+            };
+
+            const stopCountdownTimers = () => {
+                if (countdownIntervalId) {
+                    clearInterval(countdownIntervalId);
+                    countdownIntervalId = null;
+                }
+            };
+
+            // ===== PROBLEM FOLLOWUP COUNTDOWN TIMER & AUTO SEND EMAIL =====
+            let problemCountdownIntervalId = null;
+            const PROBLEM_FOLLOWUP_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+            const pendingProblemFollowups = new Set(); // Track cases being sent
+
+            const startProblemFollowupCountdownTimers = () => {
+                if (problemCountdownIntervalId) clearInterval(problemCountdownIntervalId);
+
+                problemCountdownIntervalId = setInterval(() => {
+                    const containers = document.querySelectorAll('.problem-countdown-container');
+                    containers.forEach(container => {
+                        const caseId = container.dataset.caseId;
+                        const closedDate = container.dataset.closedDate;
+                        const closedTime = container.dataset.closedTime;
+
+                        const closedDateTime = parseThaiDateTime(closedDate, closedTime);
+                        if (!closedDateTime) {
+                            container.querySelector('.problem-countdown-timer').textContent = 'ไม่พบวันที่ปิดเคส';
+                            return;
+                        }
+
+                        const now = new Date();
+                        const sendTime = new Date(closedDateTime.getTime() + PROBLEM_FOLLOWUP_COOLDOWN_MS);
+                        const timeLeft = sendTime - now;
+
+                        if (timeLeft <= 0) {
+                            // Time's up - trigger auto send
+                            if (!pendingProblemFollowups.has(caseId)) {
+                                triggerAutoProblemFollowup(caseId, container);
+                            }
+                        } else {
+                            // Display countdown
+                            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                            container.querySelector('.problem-countdown-timer').textContent =
+                                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        }
+                    });
+                }, 1000);
+            };
+
+            const triggerAutoProblemFollowup = async (caseId, container) => {
+                pendingProblemFollowups.add(caseId);
+
+                // Update UI to show sending state
+                container.classList.add('problem-countdown-sending');
+                container.querySelector('.problem-countdown-status-text').innerHTML = '<i class="bi bi-send me-1"></i>กำลังส่งเมลสอบถามปัญหา...';
+                container.querySelector('.problem-countdown-timer').textContent = 'โปรดรอสักครู่';
+
+                try {
+                    // ใช้ Supabase client แทน Google Apps Script
+                    const ticket = await supabase.getTicketByCaseId(caseId);
+                    if (!ticket) {
+                        throw new Error('ไม่พบเคส');
+                    }
+
+                    const result = await supabase.sendProblemFollowupEmail(ticket);
+
+                    if (result.success) {
+                        container.classList.remove('problem-countdown-sending');
+                        container.classList.add('problem-countdown-sent');
+                        container.querySelector('.problem-countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>ส่งเมลสอบถามปัญหาสำเร็จ!';
+                        container.querySelector('.problem-countdown-timer').textContent = '✓';
+
+                        // Refresh data after a short delay
+                        setTimeout(() => initializeApp(true), 2000);
+                    } else {
+                        container.querySelector('.problem-countdown-status-text').textContent = 'ส่งไม่สำเร็จ: ' + (result.message || 'Unknown error');
+                        container.querySelector('.problem-countdown-timer').textContent = '✗';
+                        container.classList.remove('problem-countdown-sending');
+                    }
+                } catch (error) {
+                    container.querySelector('.problem-countdown-status-text').textContent = 'เกิดข้อผิดพลาด';
+                    container.querySelector('.problem-countdown-timer').textContent = error.message;
+                    container.classList.remove('problem-countdown-sending');
+                } finally {
+                    pendingProblemFollowups.delete(caseId);
+                }
+            };
+
+            const stopProblemFollowupCountdownTimers = () => {
+                if (problemCountdownIntervalId) {
+                    clearInterval(problemCountdownIntervalId);
+                    problemCountdownIntervalId = null;
+                }
+            };
+
+            async function initializeApp(isSilent = false) {
+                const token = sessionStorage.getItem('authToken');
+                if (!token) {
+                    if (!isSilent) Modals.login.show();
+                    return;
+                }
+
+                if (!isSilent) showLoading(true);
+                try {
+                    // ดึงข้อมูลจาก Supabase แทน Google Apps Script
+                    const ticketsData = await supabase.getTickets();
+                    const usersData = await supabase.getUsers();
+
+                    // แปลง column names จาก snake_case เป็น PascalCase เพื่อให้ compatible กับ rendering functions
+                    allTickets = (ticketsData || []).filter(t => t.case_id && t.case_id.trim() !== '').map(t => ({
+                        CaseID: t.case_id,
+                        SubmitterName: t.submitter_name,
+                        ContactNumber: t.contact_number,
+                        Department: t.department,
+                        ProblemType: t.problem_type,
+                        ProblemDetails: t.problem_details,
+                        Status: t.status,
+                        SubmissionDate: t.submission_date,
+                        SubmissionTime: t.submission_time,
+                        ClosedDate: t.closed_date,
+                        ClosedTime: t.closed_time,
+                        ResolutionComment: t.resolution_comment,
+                        EmailStatus: t.email_status,
+                        ScoreQ: t.score_q,
+                        ScoreD: t.score_d,
+                        ScoreC: t.score_c,
+                        LastEmailSentDate: t.last_email_sent_date,
+                        LastEmailSentTime: t.last_email_sent_time,
+                        EmailSendCount: t.email_send_count,
+                        EmailProblem: t.email_problem_status,
+                        RowIndex: t.id // ใช้ UUID เป็น RowIndex
+                    }));
+
+                    adminUsers = (usersData || []).map(u => ({
+                        rowIndex: u.id,
+                        username: u.username
+                    }));
+
+                    lastCheckedTimestamp = new Date().getTime();
+
+                    showDashboard();
+                } catch (error) {
+                    if (!isSilent) showAlert('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + error.toString(), false);
+                } finally {
+                    if (!isSilent) showLoading(false);
+                }
+            }
+
+            async function fetchUpdates() {
+                try {
+                    // ดึงข้อมูลที่มีการอัปเดตจาก Supabase
+                    const ticketsData = await supabase.getTickets(lastCheckedTimestamp);
+                    const requestFinishedTime = new Date().getTime();
+
+                    if (ticketsData && ticketsData.length > 0) {
+                        let hasChanges = false;
+
+                        ticketsData.forEach(t => {
+                            // แปลง snake_case เป็น PascalCase
+                            const updatedTicket = {
+                                CaseID: t.case_id,
+                                SubmitterName: t.submitter_name,
+                                ContactNumber: t.contact_number,
+                                Department: t.department,
+                                ProblemType: t.problem_type,
+                                ProblemDetails: t.problem_details,
+                                Status: t.status,
+                                SubmissionDate: t.submission_date,
+                                SubmissionTime: t.submission_time,
+                                ClosedDate: t.closed_date,
+                                ClosedTime: t.closed_time,
+                                ResolutionComment: t.resolution_comment,
+                                EmailStatus: t.email_status,
+                                ScoreQ: t.score_q,
+                                ScoreD: t.score_d,
+                                ScoreC: t.score_c,
+                                LastEmailSentDate: t.last_email_sent_date,
+                                LastEmailSentTime: t.last_email_sent_time,
+                                EmailSendCount: t.email_send_count,
+                                EmailProblem: t.email_problem_status,
+                                RowIndex: t.id
+                            };
+
+                            const existingTicketIndex = allTickets.findIndex(ticket => ticket.RowIndex === updatedTicket.RowIndex);
+
+                            if (existingTicketIndex > -1) {
+                                allTickets[existingTicketIndex] = updatedTicket;
+                            } else {
+                                allTickets.push(updatedTicket);
+                            }
+                            hasChanges = true;
+                        });
+
+                        if (hasChanges) {
+                            renderDashboard(allTickets);
+
+                            if (document.getElementById('admin-view-tickets').style.display === 'block') {
+                                renderTickets(allTickets);
+                            }
+                        }
+                    }
+                    lastCheckedTimestamp = requestFinishedTime;
+
+                } catch (error) {
+                    console.error("Polling for updates failed:", error);
+                }
+            }
+
+            function showDashboard() {
+                DOMElements.adminDashboard.style.display = 'block';
+                DOMElements.logoutBtn.style.display = 'inline-flex';
+                renderDashboard(allTickets);
+                renderTickets(allTickets);
+                renderUsers(adminUsers);
+                startPolling();
+                startCountdownTimers();
+                startProblemFollowupCountdownTimers();
+            }
+
+            function startPolling() {
+                if (pollingIntervalId) clearInterval(pollingIntervalId);
+                pollingIntervalId = setInterval(fetchUpdates, 15000);
+            }
+
+            function handleLogout() {
+                // ใช้ Supabase client logout แทน Google Apps Script
+                supabase.logout();
+                DOMElements.adminDashboard.style.display = 'none';
+                DOMElements.logoutBtn.style.display = 'none';
+                if (pollingIntervalId) clearInterval(pollingIntervalId);
+                stopCountdownTimers();
+                stopProblemFollowupCountdownTimers();
+                Modals.login.show();
+            }
+
+            DOMElements.logoutBtn.addEventListener('click', handleLogout);
+
+            DOMElements.loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                showLoading(true);
+                const username = document.getElementById('adminUsernameInput').value;
+                const password = document.getElementById('adminPasswordInput').value;
+
+                try {
+                    // ใช้ Supabase login แทน Google Apps Script
+                    const result = await supabase.login(username, password);
+
+                    if (result.success && result.token) {
+                        sessionStorage.setItem('authToken', result.token);
+                        Modals.login.hide();
+                        DOMElements.loginError.style.display = 'none';
+                        initializeApp();
+                    } else {
+                        DOMElements.loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
+                        DOMElements.loginError.style.display = 'block';
+                        const modalContent = document.querySelector('#loginModal .login-card');
+                        modalContent.classList.add('shake-error');
+                        setTimeout(() => modalContent.classList.remove('shake-error'), 600);
+                    }
+                } catch (error) {
+                    DOMElements.loginError.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+                    DOMElements.loginError.style.display = 'block';
+                } finally {
+                    showLoading(false);
+                }
+            });
+
+            document.querySelectorAll('.admin-nav .nav-link').forEach(l => l.addEventListener('click', (e) => { e.preventDefault(); switchAdminView(`admin-view-${e.target.id.split('-')[1]}`); }));
+
+            if (DOMElements.refreshBtn) {
+                DOMElements.refreshBtn.addEventListener('click', () => initializeApp(false));
+            }
+
+            DOMElements.adminContent.addEventListener('click', (e) => {
+                const closeBtn = e.target.closest('.close-ticket-btn');
+                const editBtn = e.target.closest('.edit-user-btn');
+                const deleteBtn = e.target.closest('.delete-user-btn');
+                const sendProblemFollowupBtn = e.target.closest('.send-problem-followup-btn');
+
+                if (closeBtn) {
+                    document.getElementById('resolutionRowIndex').value = closeBtn.dataset.rowIndex;
+                    Modals.resolution.show();
+                }
+
+                if (editBtn) {
+                    document.getElementById('editUserRowIndex').value = editBtn.dataset.rowIndex;
+                    document.getElementById('editUsername').value = editBtn.dataset.username;
+                    document.getElementById('editPassword').value = '';
+                    Modals.editUser.show();
+                }
+                if (deleteBtn) {
+                    if (adminUsers.length <= 1) return showAlert('ไม่สามารถลบผู้ใช้คนสุดท้ายได้', false);
+                    showConfirm('คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้นี้?', () => postToAction('deleteUser', { rowIndex: deleteBtn.dataset.rowIndex }));
+                }
+
+                // Send problem follow-up email button handler
+                if (sendProblemFollowupBtn) {
+                    const caseId = sendProblemFollowupBtn.dataset.caseId;
+                    showConfirm('ต้องการส่งเมลสอบถามปัญหาหลังแก้ไขไปยังผู้ใช้หรือไม่?', () => postToAction('sendProblemFollowupEmail', { caseId: caseId }));
+                }
+            });
+
+            if (DOMElements.confirmModalBtn) {
+                DOMElements.confirmModalBtn.addEventListener('click', () => {
+                    if (confirmCallback) confirmCallback();
+                    Modals.confirm.hide();
+                });
+            }
+
+            DOMElements.resolutionForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const rowIndex = document.getElementById('resolutionRowIndex').value;
+                const resolutionComment = document.getElementById('resolutionComment').value;
+                postToAction('closeTicket', { rowIndex, resolutionComment, teamsWebhookUrl: TEAMS_WEBHOOK_URL });
+                Modals.resolution.hide();
+            });
+
+            DOMElements.addUserForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                postToAction('addUser', {
+                    username: DOMElements.newUsernameInput.value,
+                    password: DOMElements.newPasswordInput.value
+                });
+            });
+            DOMElements.editUserForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                postToAction('editUser', {
+                    rowIndex: document.getElementById('editUserRowIndex').value,
+                    username: DOMElements.editUsernameInput.value,
+                    password: DOMElements.editPasswordInput.value
+                }).then(() => Modals.editUser.hide());
+            });
+
+            const loginModalEl = document.getElementById('loginModal');
+            loginModalEl.addEventListener('show.bs.modal', () => {
+                document.body.classList.add('login-active-bg');
+            });
+            loginModalEl.addEventListener('hide.bs.modal', () => {
+                document.body.classList.remove('login-active-bg');
+            });
+
+            document.getElementById('alertModal').addEventListener('hidden.bs.modal', () => {
+                if (alertCountdownInterval) {
+                    clearInterval(alertCountdownInterval);
+                    alertCountdownInterval = null;
+                }
+                document.getElementById('alertModalCloseBtn').textContent = 'ปิด';
+
+                if (needsRefresh) {
+                    needsRefresh = false;
+                    initializeApp(false);
+                }
+            });
+
+            const sanitizeInput = (e) => {
+                const input = e.target;
+                let sanitized = input.value.replace(/[^\x00-\x7F]/g, '');
+                if (input.value !== sanitized) {
+                    input.value = sanitized;
+                }
+            };
+
+            DOMElements.newUsernameInput.addEventListener('input', sanitizeInput);
+            DOMElements.newPasswordInput.addEventListener('input', sanitizeInput);
+            DOMElements.editUsernameInput.addEventListener('input', sanitizeInput);
+            DOMElements.editPasswordInput.addEventListener('input', sanitizeInput);
+
+
+            initializeApp();
+        });
+    </script>
+</body>
+
+</html>

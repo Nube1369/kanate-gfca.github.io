@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Helpdesk System - Flowchart</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 40px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1e3a5f;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: #2563eb;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .mermaid {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #e5e7eb;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 20px;
+            }
+
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+
+            .mermaid {
+                page-break-inside: avoid;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔧 IT Helpdesk System</h1>
+        <p class="subtitle">Flowchart การทำงานของระบบ</p>
+
+        <h2>1. ภาพรวมระบบ (System Overview)</h2>
+        <div class="mermaid">
+            flowchart TB
+            subgraph Users["👤 ผู้ใช้งาน"]
+            A["🌐 Index.html<br />แบบฟอร์มแจ้งปัญหา"]
+            E["📝 evaluate.html<br />แบบประเมิน"]
+            F["❓ problem-followup.html<br />สอบถามหลังแก้ไข"]
+            end
+
+            subgraph Admin["👨‍💼 Admin Dashboard"]
+            B["📊 dashboard.html"]
+            end
+
+            subgraph Backend["⚙️ Google Apps Script"]
+            C["📡 API Endpoints"]
+            D["📋 Google Sheets"]
+            end
+
+            A -->|submitTicket| C
+            C -->|บันทึกเคส| D
+            C -->|แจ้งเตือน| T["📢 Teams"]
+
+            B -->|closeTicket| C
+            C -->|ส่ง Email| M["📧 Email"]
+            M --> E
+            E -->|submitEvaluation| C
+
+            C -->|24 ชม.| PF["⏱️ Auto Send"]
+            PF --> M2["📧 Email สอบถาม"]
+            M2 --> F
+            F -->|submitProblemFollowup| C
+        </div>
+
+        <h2>2. การแจ้งปัญหา (Ticket Submission)</h2>
+        <div class="mermaid">
+            flowchart LR
+            A["ผู้ใช้เปิด<br />Index.html"] --> B["กรอกแบบฟอร์ม"]
+            B --> C["Submit"]
+            C --> D["Google Apps Script"]
+            D --> E["บันทึก<br />Google Sheets"]
+            E --> F["แจ้ง Teams"]
+            F --> G["สำเร็จ ✅"]
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>3. Admin Dashboard</h2>
+        <div class="mermaid">
+            flowchart TB
+            A["Admin Login"] --> B["Dashboard"]
+
+            B --> C["📊 ภาพรวม"]
+            C --> C1["สถิติเคส"]
+            C --> C2["กราฟแนวโน้ม"]
+
+            B --> D["📋 รายการปัญหา"]
+            D --> D1["ดูรายละเอียด"]
+            D --> D2["ปิดเคส"]
+            D --> D3["ส่ง Email"]
+
+            B --> E["👥 จัดการผู้ใช้"]
+            E --> E1["CRUD Admin"]
+        </div>
+
+        <h2>4. ระบบ Countdown & Auto Email</h2>
+        <div class="mermaid">
+            flowchart TB
+            A["ปิดเคส"] --> B["บันทึก ClosedDate/Time"]
+            B --> C["ส่ง Email ขอประเมิน"]
+
+            C --> D{"Countdown 24 ชม."}
+
+            D -->|ยังไม่ถึง| E["แสดง Countdown"]
+            E --> D
+
+            D -->|หมดเวลา| F["Auto Send<br />Problem Followup Email"]
+            F --> G["ผู้ใช้ได้รับ Email"]
+
+            C --> H["ผู้ใช้คลิกลิงก์"]
+            H --> I["ให้คะแนน Q/D/C"]
+            I --> J["บันทึก Score"]
+
+            G --> K["ผู้ใช้แจ้งผลลัพธ์"]
+            K --> L["บันทึก Comment"]
+        </div>
+
+        <h2>5. การสอบถามหลังแก้ไข (Problem Followup Flow)</h2>
+        <div class="mermaid">
+            flowchart TB
+            A["ผู้ใช้ได้รับ Email<br />สอบถามหลังแก้ไข 📧"] --> B["คลิกลิงก์<br />แจ้งผลลัพธ์"]
+            B --> C["เปิด<br />problem-followup.html"]
+            C --> D{"เลือกสถานะ"}
+
+            D -->|"✅ ดีขึ้นแล้ว"| E["ไม่มีปัญหา"]
+            D -->|"⚠️ ยังมีปัญหา"| F["กรอกรายละเอียด<br />ปัญหาที่พบ"]
+
+            E --> G["กดส่ง"]
+            F --> G
+
+            G --> H["Google Apps Script<br />handleSubmitProblemFollowup"]
+            H --> I["บันทึกลง<br />CommentProblem<br />Column Z"]
+            I --> J["แสดงข้อความ<br />ขอบคุณ ✅"]
+
+            J --> K{"มีปัญหาเพิ่ม?"}
+            K -->|ใช่| L["Admin ติดต่อ<br />ผู้ใช้กลับ"]
+            K -->|ไม่| M["ปิดเคส<br />สมบูรณ์"]
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>6. Google Sheets Structure</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Column</th>
+                    <th>Field</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>A</td>
+                    <td>CaseID</td>
+                    <td>รหัสเคส (CASE-xxxx)</td>
+                </tr>
+                <tr>
+                    <td>B</td>
+                    <td>SubmitterName</td>
+                    <td>ชื่อ/อีเมลผู้แจ้ง</td>
+                </tr>
+                <tr>
+                    <td>C</td>
+                    <td>Department</td>
+                    <td>รหัสพนักงาน</td>
+                </tr>
+                <tr>
+                    <td>D</td>
+                    <td>ProblemType</td>
+                    <td>ประเภทปัญหา</td>
+                </tr>
+                <tr>
+                    <td>E</td>
+                    <td>ProblemDetails</td>
+                    <td>รายละเอียด</td>
+                </tr>
+                <tr>
+                    <td>F</td>
+                    <td>Status</td>
+                    <td>Open/Closed</td>
+                </tr>
+                <tr>
+                    <td>H-I</td>
+                    <td>SubmissionDate/Time</td>
+                    <td>วันเวลาแจ้ง</td>
+                </tr>
+                <tr>
+                    <td>J-K</td>
+                    <td>ClosedDate/Time</td>
+                    <td>วันเวลาปิด</td>
+                </tr>
+                <tr>
+                    <td>L</td>
+                    <td>ResolutionComment</td>
+                    <td>หมายเหตุการแก้ไข</td>
+                </tr>
+                <tr>
+                    <td>Q</td>
+                    <td>EmailStatus</td>
+                    <td>สถานะส่ง Email</td>
+                </tr>
+                <tr>
+                    <td>R-T</td>
+                    <td>ScoreQ/D/C</td>
+                    <td>คะแนนประเมิน</td>
+                </tr>
+                <tr>
+                    <td>V-W</td>
+                    <td>LastEmailSent</td>
+                    <td>วันเวลาส่ง Email ล่าสุด</td>
+                </tr>
+                <tr>
+                    <td>Y</td>
+                    <td>EmailProblem</td>
+                    <td>สถานะส่ง Email สอบถาม</td>
+                </tr>
+                <tr>
+                    <td>Z</td>
+                    <td>CommentProblem</td>
+                    <td>ความเห็นปัญหา</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>7. ไฟล์ในระบบ</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Index.html</td>
+                    <td>หน้าแจ้งปัญหาสำหรับผู้ใช้</td>
+                </tr>
+                <tr>
+                    <td>dashboard.html</td>
+                    <td>Admin Dashboard</td>
+                </tr>
+                <tr>
+                    <td>evaluate.html</td>
+                    <td>แบบประเมินความพึงพอใจ</td>
+                </tr>
+                <tr>
+                    <td>problem-followup.html</td>
+                    <td>แบบสอบถามหลังแก้ไข</td>
+                </tr>
+                <tr>
+                    <td>GOOGLE APPS SCRIPT CODE.txt</td>
+                    <td>Backend API Code</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="footer">
+            <p>IT Helpdesk System Documentation</p>
+            <p>Generated: January 28, 2026</p>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+    </script>
+</body>
+
+</html>

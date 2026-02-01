@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Helpdesk - แบบประเมินความพึงพอใจ</title>
+
+    <!-- Local Libraries -->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap-icons.min.css">
+
+    <style>
+        :root {
+            --bs-body-font-family: 'Inter', 'Sarabun', sans-serif;
+            --bs-primary: #22c55e;
+            --bs-body-bg: #0f172a;
+            --bs-body-color: #e2e8f0;
+            --bs-border-color: rgba(148, 163, 184, 0.25);
+            --bs-card-bg: rgba(30, 41, 59, 0.75);
+            --bs-input-bg: rgba(51, 65, 85, 0.5);
+            --gradient-primary: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            --shadow-primary: 0 10px 25px -5px rgba(34, 197, 94, 0.2);
+            --gold: #fbbf24;
+        }
+
+        body {
+            background-color: var(--bs-body-bg);
+            background-image: radial-gradient(at 20% 20%, hsla(212, 95%, 60%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 80% 20%, hsla(160, 95%, 50%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 80%, hsla(280, 95%, 60%, 0.15) 0px, transparent 50%);
+            color: var(--bs-body-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 600px;
+            background: var(--bs-card-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 1.5rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header {
+            background: transparent;
+            color: #f0fdf4;
+            font-weight: 600;
+            border-bottom: 1px solid var(--bs-border-color);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .card-header img {
+            height: 60px;
+            margin-bottom: 1rem;
+        }
+
+        .form-control,
+        .form-select {
+            background: var(--bs-input-bg);
+            color: var(--bs-body-color);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 0.75rem;
+            padding: 0.875rem 1rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.25);
+        }
+
+        .rating-section {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .rating-label {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #f3f4f6;
+        }
+
+        .stars-rating {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            gap: 0.25rem;
+        }
+
+        .stars-rating input[type="radio"] {
+            display: none;
+        }
+
+        .stars-rating label {
+            font-size: 2rem;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .stars-rating label:hover,
+        .stars-rating label:hover~label,
+        .stars-rating input[type="radio"]:checked~label {
+            color: var(--gold);
+            transform: scale(1.1);
+        }
+
+        .custom-btn {
+            outline: none;
+            cursor: pointer;
+            border: none;
+            padding: 0.9rem 2rem;
+            margin: 0;
+            font-family: inherit;
+            font-size: inherit;
+            position: relative;
+            display: inline-block;
+            letter-spacing: 0.05rem;
+            font-weight: 700;
+            font-size: 17px;
+            border-radius: 500px;
+            overflow: hidden;
+            background: #66ff66;
+            color: ghostwhite;
+            width: 100%;
+        }
+
+        .custom-btn span {
+            position: relative;
+            z-index: 10;
+            transition: color 0.4s;
+        }
+
+        .custom-btn:hover span {
+            color: black;
+        }
+
+        .custom-btn::before,
+        .custom-btn::after {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .custom-btn::before {
+            content: "";
+            background: #000;
+            width: 120%;
+            left: -10%;
+            transform: skew(30deg);
+            transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+        }
+
+        .custom-btn:hover::before {
+            transform: translate3d(100%, 0, 0);
+        }
+
+        .custom-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Loading Overlay */
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            z-index: 1050;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: var(--bs-primary);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Success/Error Cards */
+        .result-card {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .result-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-icon.success {
+            color: var(--bs-primary);
+        }
+
+        .result-icon.error {
+            color: #ef4444;
+        }
+
+        .result-icon.warning {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stars-container" id="starsContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loader-container" id="loading-overlay">
+        <div class="spinner-border mb-3" role="status"></div>
+        <div class="text-white">กำลังโหลดข้อมูล...</div>
+    </div>
+
+    <div class="main-container">
+        <div class="form-card" id="main-card">
+            <div class="card-header">
+                <img src="assets/images/IT_Logo.png" alt="IT Helpdesk Logo">
+                <h2 class="fw-bold text-white mb-2">แบบประเมินความพึงพอใจ</h2>
+                <p class="text-muted mb-2">เคส: <span id="caseIdDisplay" class="text-primary fw-bold">Loading...</span>
+                </p>
+                <div class="d-flex justify-content-center gap-2">
+                    <span class="badge rounded-pill bg-success bg-opacity-25 text-success border border-success"><i
+                            class="bi bi-star-fill me-1"></i>5 = ดีมาก</span>
+                    <span class="badge rounded-pill bg-danger bg-opacity-25 text-danger border border-danger"><i
+                            class="bi bi-star me-1"></i>1 = ปรับปรุง</span>
+                </div>
+            </div>
+
+            <!-- Evaluation Form -->
+            <div class="card-body p-4" id="evaluation-form-container">
+                <form id="evaluationForm">
+                    <div class="rating-section">
+                        <div class="rating-label">1. แก้ไขปัญหาได้ถูกต้อง และใช้งานได้เป็นปกติ (Quality)</div>
+                        <div class="stars-rating">
+                            <input type="radio" id="q5" name="scoreQ" value="5" required>
+                            <label for="q5"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="q4" name="scoreQ" value="4">
+                            <label for="q4"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="q3" name="scoreQ" value="3">
+                            <label for="q3"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="q2" name="scoreQ" value="2">
+                            <label for="q2"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="q1" name="scoreQ" value="1">
+                            <label for="q1"><i class="bi bi-star-fill"></i></label>
+                        </div>
+                    </div>
+                    <div class="rating-section">
+                        <div class="rating-label">2. ความรวดเร็วในการเข้าดำเนินการแก้ไข (Delivery)</div>
+                        <div class="stars-rating">
+                            <input type="radio" id="d5" name="scoreD" value="5" required>
+                            <label for="d5"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="d4" name="scoreD" value="4">
+                            <label for="d4"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="d3" name="scoreD" value="3">
+                            <label for="d3"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="d2" name="scoreD" value="2">
+                            <label for="d2"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="d1" name="scoreD" value="1">
+                            <label for="d1"><i class="bi bi-star-fill"></i></label>
+                        </div>
+                    </div>
+                    <div class="rating-section">
+                        <div class="rating-label">3. ขั้นตอนการแจ้งซ่อมและการติดต่อขอความช่วยเหลือ (Cost)</div>
+                        <div class="stars-rating">
+                            <input type="radio" id="c5" name="scoreC" value="5" required>
+                            <label for="c5"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="c4" name="scoreC" value="4">
+                            <label for="c4"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="c3" name="scoreC" value="3">
+                            <label for="c3"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="c2" name="scoreC" value="2">
+                            <label for="c2"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="c1" name="scoreC" value="1">
+                            <label for="c1"><i class="bi bi-star-fill"></i></label>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="comment" class="form-label text-white fw-bold">ข้อเสนอแนะเพิ่มเติม</label>
+                        <textarea class="form-control" id="comment" rows="3"
+                            placeholder="ความคิดเห็นของคุณ..."></textarea>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="custom-btn"><span>ส่งแบบประเมิน</span></button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Success Message -->
+            <div class="result-card hidden" id="success-message">
+                <div class="result-icon success"><i class="bi bi-check-circle-fill"></i></div>
+                <h3 class="text-white fw-bold">ขอบคุณสำหรับการประเมิน</h3>
+                <p class="text-muted">ข้อมูลของคุณถูกบันทึกเรียบร้อยแล้ว</p>
+            </div>
+
+            <!-- Already Evaluated Message -->
+            <div class="result-card hidden" id="already-evaluated-message">
+                <div class="result-icon warning"><i class="bi bi-exclamation-circle-fill"></i></div>
+                <h3 class="text-white fw-bold">คุณได้ประเมินเคสนี้แล้ว</h3>
+                <p class="text-muted">ขอบคุณที่สละเวลาให้คะแนน</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="result-card hidden" id="error-message">
+                <div class="result-icon error"><i class="bi bi-x-circle-fill"></i></div>
+                <h3 class="text-white fw-bold">เกิดข้อผิดพลาด</h3>
+                <p class="text-muted" id="error-text"></p>
+            </div>
+
+            <!-- No Case ID Message -->
+            <div class="result-card hidden" id="no-caseid-message">
+                <div class="result-icon error"><i class="bi bi-link-45deg"></i></div>
+                <h3 class="text-white fw-bold">ลิงก์ไม่ถูกต้อง</h3>
+                <p class="text-muted">ไม่พบรหัสเคสในลิงก์ กรุณาตรวจสอบลิงก์อีกครั้ง</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <!-- Supabase Config -->
+    <script src="js/supabase-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create stars background
+            const starsContainer = document.getElementById('starsContainer');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 2 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+
+            // Get caseId from URL query parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const caseId = urlParams.get('caseId');
+
+            const caseIdDisplay = document.getElementById('caseIdDisplay');
+            const form = document.getElementById('evaluationForm');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const successMsg = document.getElementById('success-message');
+            const errorMsg = document.getElementById('error-message');
+            const alreadyEvaluatedMsg = document.getElementById('already-evaluated-message');
+            const noCaseIdMsg = document.getElementById('no-caseid-message');
+            const formContainer = document.getElementById('evaluation-form-container');
+
+            const showLoading = (show, text = 'กำลังโหลดข้อมูล...') => {
+                loadingOverlay.querySelector('.text-white').textContent = text;
+                loadingOverlay.style.display = show ? 'flex' : 'none';
+            };
+
+            const hideAllContent = () => {
+                formContainer.classList.add('hidden');
+                successMsg.classList.add('hidden');
+                errorMsg.classList.add('hidden');
+                alreadyEvaluatedMsg.classList.add('hidden');
+                noCaseIdMsg.classList.add('hidden');
+            };
+
+            if (!caseId || caseId.trim() === "") {
+                caseIdDisplay.textContent = 'ไม่พบรหัสเคส';
+                hideAllContent();
+                noCaseIdMsg.classList.remove('hidden');
+                return;
+            }
+
+            caseIdDisplay.textContent = caseId;
+
+            // Check if already evaluated using Supabase
+            const checkEvaluationStatus = async () => {
+                showLoading(true, 'กำลังตรวจสอบสถานะ...');
+                try {
+                    const ticket = await supabase.getTicketByCaseId(caseId);
+                    showLoading(false);
+
+                    if (!ticket) {
+                        hideAllContent();
+                        document.getElementById('error-text').textContent = 'ไม่พบเคสในระบบ';
+                        errorMsg.classList.remove('hidden');
+                        return;
+                    }
+
+                    if (ticket.score_q && ticket.score_q.toString().trim() !== '') {
+                        hideAllContent();
+                        alreadyEvaluatedMsg.classList.remove('hidden');
+                    } else {
+                        formContainer.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    showLoading(false);
+                    hideAllContent();
+                    document.getElementById('error-text').textContent = 'ไม่สามารถเชื่อมต่อกับระบบได้: ' + error.message;
+                    errorMsg.classList.remove('hidden');
+                }
+            };
+
+            // Initial check
+            checkEvaluationStatus();
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!caseId) return;
+
+                const formData = new FormData(form);
+                const scoreQ = formData.get('scoreQ');
+                const scoreD = formData.get('scoreD');
+                const scoreC = formData.get('scoreC');
+                const comment = document.getElementById('comment').value;
+
+                showLoading(true, 'กำลังบันทึกข้อมูล...');
+
+                try {
+                    const result = await supabase.submitEvaluation(caseId, scoreQ, scoreD, scoreC, comment);
+                    showLoading(false);
+
+                    if (result && !result.error) {
+                        hideAllContent();
+                        successMsg.classList.remove('hidden');
+                    } else {
+                        document.getElementById('error-text').textContent = result.message || 'เกิดข้อผิดพลาดในการบันทึก';
+                        hideAllContent();
+                        errorMsg.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    showLoading(false);
+                    document.getElementById('error-text').textContent = 'Error: ' + error.message;
+                    hideAllContent();
+                    errorMsg.classList.remove('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

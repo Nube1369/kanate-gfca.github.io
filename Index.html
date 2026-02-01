@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Helpdesk - แจ้งปัญหา</title>
+
+    <!-- Local Libraries -->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap-icons.min.css">
+
+    <!-- Tippy.js for Tooltips -->
+    <link rel="stylesheet" href="assets/css/tippy.css" />
+
+    <style>
+        :root {
+            --bs-body-font-family: 'Inter', 'Sarabun', sans-serif;
+            --bs-primary: #22c55e;
+            --bs-body-bg: #0f172a;
+            --bs-body-color: #e2e8f0;
+            --bs-border-color: rgba(148, 163, 184, 0.25);
+            --bs-card-bg: rgba(30, 41, 59, 0.75);
+            --bs-input-bg: rgba(51, 65, 85, 0.5);
+            --gradient-primary: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            --shadow-primary: 0 10px 25px -5px rgba(34, 197, 94, 0.2);
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        body {
+            background-color: var(--bs-body-bg);
+            background-image: radial-gradient(at 20% 20%, hsla(212, 95%, 60%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 80% 20%, hsla(160, 95%, 50%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 80%, hsla(280, 95%, 60%, 0.15) 0px, transparent 50%);
+            color: var(--bs-body-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: transparent;
+            border-bottom: 1px solid var(--bs-border-color);
+        }
+
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 600px;
+            background: var(--bs-card-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 1.5rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header {
+            background: transparent;
+            color: #f0fdf4;
+            font-weight: 600;
+            border-bottom: 1px solid var(--bs-border-color);
+            padding: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-control,
+        .form-select {
+            background: var(--bs-input-bg);
+            color: var(--bs-body-color);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 0.75rem;
+            padding: 0.875rem 1rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.25);
+        }
+
+        .modal-content {
+            background: var(--bs-card-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 1rem;
+        }
+
+        /* Custom Tippy.js Theme */
+        .tippy-box[data-theme~='custom-dark'] {
+            background-color: var(--bs-card-bg);
+            color: var(--bs-body-color);
+            border: 1px solid var(--bs-border-color);
+            font-family: 'Inter', 'Sarabun', sans-serif;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .tippy-box[data-theme~='custom-dark'][data-placement^='top']>.tippy-arrow::before {
+            border-top-color: var(--bs-card-bg);
+        }
+
+        .tippy-box[data-theme~='custom-dark'][data-placement^='bottom']>.tippy-arrow::before {
+            border-bottom-color: var(--bs-card-bg);
+        }
+
+        .tippy-content {
+            padding: 0.5rem 0.75rem;
+        }
+
+        #alertModal .modal-title,
+        #alertModal .modal-body {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #alertModal .modal-dialog {
+            max-width: 560px;
+        }
+
+        .custom-btn {
+            outline: none;
+            cursor: pointer;
+            border: none;
+            padding: 0.9rem 2rem;
+            margin: 0;
+            font-family: inherit;
+            font-size: inherit;
+            position: relative;
+            display: inline-block;
+            letter-spacing: 0.05rem;
+            font-weight: 700;
+            font-size: 17px;
+            border-radius: 500px;
+            overflow: hidden;
+            background: #66ff66;
+            color: ghostwhite;
+        }
+
+        .custom-btn span {
+            position: relative;
+            z-index: 10;
+            transition: color 0.4s;
+        }
+
+        .custom-btn:hover span {
+            color: black;
+        }
+
+        .custom-btn::before,
+        .custom-btn::after {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .custom-btn::before {
+            content: "";
+            background: #000;
+            width: 120%;
+            left: -10%;
+            transform: skew(30deg);
+            transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+        }
+
+        .custom-btn:hover::before {
+            transform: translate3d(100%, 0, 0);
+        }
+
+        @keyframes loadingBar {
+            0% {
+                width: 0%;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+
+        @keyframes check1 {
+
+            0%,
+            28% {
+                transform: scale(0.75);
+                background-color: #535353;
+            }
+
+            29%,
+            100% {
+                transform: scale(1);
+                background-color: rgb(0, 205, 0);
+            }
+        }
+
+        @keyframes check2 {
+
+            0%,
+            58% {
+                transform: scale(0.75);
+                background-color: #535353;
+            }
+
+            59%,
+            100% {
+                transform: scale(1);
+                background-color: rgb(0, 205, 0);
+            }
+        }
+
+        @keyframes check3 {
+
+            0%,
+            88% {
+                transform: scale(0.75);
+                background-color: #535353;
+            }
+
+            89%,
+            100% {
+                transform: scale(1);
+                background-color: rgb(0, 205, 0);
+            }
+        }
+
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            z-index: 1050;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .loader {
+            position: relative;
+            background-color: #535353;
+            border-radius: 1em;
+            height: 1em;
+            width: 330px;
+        }
+
+        .bar {
+            position: relative;
+            background-color: rgb(0, 205, 0);
+            width: 40px;
+            height: 100%;
+            border-radius: 1em;
+            animation: loadingBar 2.5s linear forwards;
+        }
+
+        .check-bar-container {
+            position: absolute;
+            left: 0px;
+            top: -4px;
+            z-index: 69;
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            height: 0.5em;
+        }
+
+        .check {
+            border-radius: 1em;
+            height: 1.5em;
+            width: 1.5em;
+            padding: 3px;
+            background-color: #535353;
+            transform: scale(0.75);
+        }
+
+        .check-bar-container .check:nth-of-type(2) {
+            animation: check1 2.5s linear forwards;
+        }
+
+        .check-bar-container .check:nth-of-type(3) {
+            animation: check2 2.5s linear forwards;
+        }
+
+        .check-bar-container .check:nth-of-type(4) {
+            animation: check3 2.5s linear forwards;
+            transform-origin: right;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
+                <img src="https://res.cloudinary.com/dqveqz8cy/image/upload/v1753430042/IT_Logo_ptq112.png"
+                    alt="IT Helpdesk Logo" style="height: 40px; margin-right: 12px;">
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="form-card">
+            <div class="card-header fs-5 text-center">
+                <i class="bi bi-pencil-square me-2"></i>แบบฟอร์มแจ้งปัญหา
+            </div>
+            <div class="card-body p-4 p-lg-5">
+                <form id="helpdesk-form">
+                    <div class="mb-4">
+                        <label for="submitterName" class="form-label"><i class="bi bi-envelope me-2"></i>E-mail
+                            ผู้แจ้ง</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="emailUsername"
+                                placeholder="ชื่ออีเมล (ไม่ต้องใส่ @)" required
+                                data-tippy-content="กรอกชื่ออีเมลของคุณ (ไม่ต้องใส่ @)">
+                            <span class="input-group-text">@</span>
+                            <select class="form-select" id="emailDomain" style="max-width: 200px;" required>
+                                <option value="" selected disabled>เลือกเมลของท่าน</option>
+                                <option value="gfca.com">gfca.com</option>
+                                <option value="asiatic.co.th">asiatic.co.th</option>
+                                <option value="ifandbthailand.com">ifandbthailand.com</option>
+                                <option value="fit-biz.com">fit-biz.com</option>
+                            </select>
+                        </div>
+                        <input type="hidden" id="submitterName">
+                    </div>
+                    <div class="mb-4">
+                        <label for="contactNumber" class="form-label"><i class="bi bi-telephone me-2"></i>เบอร์ติดต่อ
+                            หรือ 3CX</label>
+                        <input type="tel" class="form-control" id="contactNumber" placeholder="กรุณากรอกเบอร์โทรศัพท์"
+                            required data-tippy-content="ใส่เบอร์มือถือ หรือ เบอร์ 3cx ของตัวเอง เช่น 1222">
+                    </div>
+                    <div class="mb-4">
+                        <!-- ***** CHANGE: เปลี่ยน Label, placeholder, และ Tooltip ***** -->
+                        <label for="department" class="form-label"><i
+                                class="bi bi-person-badge me-2"></i>รหัสพนักงาน</label>
+                        <input type="text" class="form-control" id="department" placeholder="กรุณากรอกรหัสพนักงาน"
+                            required data-tippy-content="กรุณากรอกรหัสพนักงานของคุณ">
+                    </div>
+                    <div class="mb-4">
+                        <label for="problemType" class="form-label"><i class="bi bi-tags me-2"></i>ประเภทปัญหา</label>
+                        <select class="form-select" id="problemType" required>
+                            <option selected disabled value="">-- กรุณาเลือกประเภทปัญหา --</option>
+                            <option>Hardware (อุปกรณ์คอมพิวเตอร์)</option>
+                            <option>Software (โปรแกรม)</option>
+                            <option>Network (ระบบเครือข่าย/อินเทอร์เน็ต)</option>
+                            <option>Printer (เครื่องพิมพ์)</option>
+                            <option>Claim Equipment (เคลมอุปกรณ์)</option>
+                            <option>เครื่องเปิดไม่ติด</option>
+                            <option>Outlook</option>
+                            <option>VPN</option>
+                            <option>เปิดสิทธิ์เข้าโฟลเดอร์</option>
+                            <option>Other (อื่นๆ)</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="problemDetails" class="form-label"><i
+                                class="bi bi-chat-text me-2"></i>รายละเอียดปัญหา</label>
+                        <textarea class="form-control" id="problemDetails" rows="4"
+                            placeholder="กรุณาอธิบายปัญหาที่พบโดยละเอียด..." required
+                            data-tippy-content="รบกวนใส่ รายละเอียดปัญหาที่เกิดเบื้องต้น"></textarea>
+                    </div>
+                    <button type="submit" class="custom-btn w-100 py-3 fs-5 mt-3">
+                        <span>
+                            <span class="spinner-border spinner-border-sm me-2" style="display: none;"></span>
+                            <i class="bi bi-send me-1"></i>ส่งเรื่องแจ้งปัญหา
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals and Loader -->
+    <div class="loader-container">
+        <div class="loader">
+            <div class="bar"></div>
+            <div class="check-bar-container">
+                <div></div>
+                <div class="check">
+                    <svg stroke="white" stroke-width="2" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="m4.5 12.75 6 6 9-13.5" stroke-linejoin="round" stroke-linecap="round"></path>
+                    </svg>
+                </div>
+                <div class="check">
+                    <svg stroke="white" stroke-width="2" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="m4.5 12.75 6 6 9-13.5" stroke-linejoin="round" stroke-linecap="round"></path>
+                    </svg>
+                </div>
+                <div class="check">
+                    <svg stroke="white" stroke-width="2" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="m4.5 12.75 6 6 9-13.5" stroke-linejoin="round" stroke-linecap="round"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alertModalLabel"></h5><button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="alertModalBody"></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">ปิด</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Libraries (load BEFORE inline script) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <!-- Supabase Config -->
+    <script src="js/supabase-config.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const helpdeskForm = document.getElementById('helpdesk-form');
+            const loaderContainer = document.querySelector('.loader-container');
+            const contactInput = document.getElementById('contactNumber');
+            const emailUsernameInput = document.getElementById('emailUsername');
+            const emailDomainSelect = document.getElementById('emailDomain');
+            const departmentInput = document.getElementById('department');
+
+            const getFullEmail = () => {
+                const username = emailUsernameInput.value.trim();
+                const domain = emailDomainSelect.value;
+                return username ? `${username}@${domain}` : '';
+            };
+
+            const alertModalEl = document.getElementById('alertModal');
+            const alertModal = (window.bootstrap && window.bootstrap.Modal)
+                ? new bootstrap.Modal(alertModalEl)
+                : null;
+
+            if (window.tippy) {
+                tippy('[data-tippy-content]', {
+                    theme: 'custom-dark',
+                    animation: 'fade',
+                    trigger: 'focus',
+                    placement: 'top',
+                });
+            }
+
+            const showAlert = (message, isSuccess = true) => {
+                const title = document.getElementById('alertModalLabel');
+                const body = document.getElementById('alertModalBody');
+                if (title) title.textContent = isSuccess ? 'สำเร็จ!' : 'เกิดข้อผิดพลาด';
+                if (body) body.textContent = message;
+
+                if (alertModal) {
+                    alertModal.show();
+                    setTimeout(() => alertModal.hide(), 3000);
+                } else {
+                    alert(message);
+                }
+            };
+
+            const showLoading = (show) => {
+                loaderContainer.style.display = show ? 'flex' : 'none';
+            };
+
+            const submitTicket = async (ticketData) => {
+                showLoading(true);
+                const submitBtn = helpdeskForm.querySelector('.custom-btn');
+                submitBtn.disabled = true;
+
+                try {
+                    const now = new Date();
+                    const thaiDate = supabase.getThaiDateTime(now);
+                    
+                    const ticket = {
+                        case_id: supabase.generateCaseId(),
+                        submitter_name: ticketData.submitterName,
+                        department: ticketData.department,
+                        problem_type: ticketData.problemType,
+                        problem_details: ticketData.problemDetails,
+                        contact_number: ticketData.contactNumber,
+                        status: 'Open',
+                        submission_date: thaiDate.date,
+                        submission_time: thaiDate.time,
+                        last_updated: Date.now()
+                    };
+
+                    // Insert into Supabase
+                    const result = await supabase.createTicket(ticket);
+                    
+                    if (result && !result.error) {
+                        // Send Teams notification
+                        await supabase.sendTeamsNotification(ticket, 'new');
+                        
+                        setTimeout(() => {
+                            showAlert('ส่งเรื่องแจ้งปัญหาสำเร็จแล้ว! เจ้าหน้าที่จะดำเนินการตรวจสอบในลำดับต่อไป');
+                            helpdeskForm.reset();
+                            helpdeskForm.classList.remove('was-validated');
+                            showLoading(false);
+                            submitBtn.disabled = false;
+                        }, 2500);
+                    } else {
+                        throw new Error(result.message || 'Failed to create ticket');
+                    }
+                } catch (error) {
+                    setTimeout(() => {
+                        showAlert('เกิดข้อผิดพลาดในการส่งข้อมูล: ' + error.message, false);
+                        showLoading(false);
+                        submitBtn.disabled = false;
+                    }, 2500);
+                }
+            };
+
+            helpdeskForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (helpdeskForm.checkValidity()) {
+                    const data = {
+                        submitterName: getFullEmail(),
+                        department: document.getElementById('department').value,
+                        contactNumber: document.getElementById('contactNumber').value,
+                        problemType: document.getElementById('problemType').value,
+                        problemDetails: document.getElementById('problemDetails').value
+                    };
+                    submitTicket(data);
+                } else {
+                    e.stopPropagation();
+                    helpdeskForm.classList.add('was-validated');
+                }
+            });
+
+            contactInput.addEventListener('input', (e) => {
+                const input = e.target;
+                let value = input.value;
+                let sanitized = value.replace(/[^0-9-]/g, '');
+                let digitCount = (sanitized.match(/\d/g) || []).length;
+
+                if (digitCount > 10) {
+                    let result = '';
+                    let digitsFound = 0;
+                    for (const char of sanitized) {
+                        if (/\d/.test(char)) {
+                            if (digitsFound < 10) {
+                                result += char;
+                                digitsFound++;
+                            }
+                        } else {
+                            result += char;
+                        }
+                    }
+                    sanitized = result;
+                }
+
+                if (input.value !== sanitized) {
+                    input.value = sanitized;
+                }
+            });
+
+            emailUsernameInput.addEventListener('input', (e) => {
+                const input = e.target;
+                let value = input.value;
+                let sanitized = value.replace(/[^a-zA-Z0-9._-]/g, '');
+                if (input.value !== sanitized) {
+                    input.value = sanitized;
+                }
+            });
+
+            departmentInput.addEventListener('input', (e) => {
+                const input = e.target;
+                let value = input.value;
+                let sanitized = value.replace(/[^a-zA-Z0-9]/g, '');
+                if (sanitized.length > 10) {
+                    sanitized = sanitized.substring(0, 10);
+                }
+                if (input.value !== sanitized) {
+                    input.value = sanitized;
+                }
+            });
+
+        });
+    </script>
+</body>
+
+</html>
