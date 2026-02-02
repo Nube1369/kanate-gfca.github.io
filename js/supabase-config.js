@@ -19,7 +19,7 @@ const SUPABASE_CONFIG = {
     TEAMS_WEBHOOK_URL: 'https://gfca01.webhook.office.com/webhookb2/de97901a-eefb-492a-8fb7-c03c603f6195@19af367e-c732-4ec7-8827-53efe436e9b4/IncomingWebhook/b3b24608d3b947228730d9c82a30262f/f3d1fd26-08ff-4a9f-abe5-849e27434f09/V2vUwqPWN-YVmEAjezmU9cTCSoI9WjUyLZpcOgGGbvNZI1',
 
     // GitHub Pages Base URL (สำหรับสร้าง link ในอีเมล)
-    BASE_URL: 'https://kanate-gfca.github.io'
+    BASE_URL: 'https://nube1369.github.io/kanate-gfca.github.io'
 };
 
 // Supabase Client
