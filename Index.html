@@ -331,6 +331,60 @@
             animation: check3 2.5s linear forwards;
             transform-origin: right;
         }
+
+        /* Queue Counter Styles */
+        .queue-badge-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 0.75rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .queue-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.75rem;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-radius: 0.5rem;
+            color: #000;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .queue-badge.no-queue {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+            animation: none;
+        }
+
+        .queue-badge .queue-number {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .queue-label {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 2px 16px rgba(245, 158, 11, 0.5);
+            }
+        }
     </style>
 </head>
 
@@ -342,6 +396,15 @@
                 <img src="https://res.cloudinary.com/dqveqz8cy/image/upload/v1753430042/IT_Logo_ptq112.png"
                     alt="IT Helpdesk Logo" style="height: 40px; margin-right: 12px;">
             </a>
+            <!-- Queue Counter -->
+            <div class="queue-badge-container" id="queueContainer">
+                <span class="queue-label"><i class="bi bi-people-fill me-1"></i>คิวรอดำเนินการ:</span>
+                <div class="queue-badge" id="queueBadge">
+                    <i class="bi bi-hourglass-split"></i>
+                    <span class="queue-number" id="queueCount">-</span>
+                    <span>เคส</span>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -474,6 +537,36 @@
             const emailDomainSelect = document.getElementById('emailDomain');
             const departmentInput = document.getElementById('department');
 
+            // ===== QUEUE COUNTER =====
+            const queueBadge = document.getElementById('queueBadge');
+            const queueCount = document.getElementById('queueCount');
+
+            const updateQueueCount = async () => {
+                try {
+                    const tickets = await supabase.getTickets();
+                    const openCount = tickets.filter(t => t.status === 'Open').length;
+
+                    queueCount.textContent = openCount;
+
+                    if (openCount === 0) {
+                        queueBadge.classList.add('no-queue');
+                        queueBadge.innerHTML = '<i class="bi bi-check-circle-fill"></i><span class="queue-number">0</span><span>เคส</span>';
+                    } else {
+                        queueBadge.classList.remove('no-queue');
+                        queueBadge.innerHTML = `<i class="bi bi-hourglass-split"></i><span class="queue-number">${openCount}</span><span>เคส</span>`;
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch queue count:', error);
+                    queueCount.textContent = '?';
+                }
+            };
+
+            // Initial load
+            updateQueueCount();
+
+            // Refresh every 30 seconds
+            setInterval(updateQueueCount, 30000);
+
             const getFullEmail = () => {
                 const username = emailUsernameInput.value.trim();
                 const domain = emailDomainSelect.value;
@@ -520,7 +613,7 @@
                 try {
                     const now = new Date();
                     const thaiDate = supabase.getThaiDateTime(now);
-                    
+
                     const ticket = {
                         case_id: supabase.generateCaseId(),
                         submitter_name: ticketData.submitterName,
@@ -536,11 +629,11 @@
 
                     // Insert into Supabase
                     const result = await supabase.createTicket(ticket);
-                    
+
                     if (result && !result.error) {
                         // Send Teams notification
                         await supabase.sendTeamsNotification(ticket, 'new');
-                        
+
                         setTimeout(() => {
                             showAlert('ส่งเรื่องแจ้งปัญหาสำเร็จแล้ว! เจ้าหน้าที่จะดำเนินการตรวจสอบในลำดับต่อไป');
                             helpdeskForm.reset();
