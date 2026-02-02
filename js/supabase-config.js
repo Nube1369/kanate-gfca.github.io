@@ -12,8 +12,8 @@ const SUPABASE_CONFIG = {
 
     // n8n Webhook URLs
     // ⚠️ แก้ไขค่านี้ให้ตรงกับ n8n instance ของคุณ
-    N8N_EVALUATION_EMAIL_WEBHOOK: 'https://YOUR_N8N_URL/webhook/evaluation-email',
-    N8N_FOLLOWUP_EMAIL_WEBHOOK: 'https://YOUR_N8N_URL/webhook/problem-followup-email',
+    N8N_EVALUATION_EMAIL_WEBHOOK: 'https://192.168.0.88:5678/webhook/evaluation-email',
+    N8N_FOLLOWUP_EMAIL_WEBHOOK: 'https://192.168.0.88:5678/webhook/problem-followup-email',
 
     // Teams Webhook URL (ใช้ค่าเดิม)
     TEAMS_WEBHOOK_URL: 'https://gfca01.webhook.office.com/webhookb2/de97901a-eefb-492a-8fb7-c03c603f6195@19af367e-c732-4ec7-8827-53efe436e9b4/IncomingWebhook/b3b24608d3b947228730d9c82a30262f/f3d1fd26-08ff-4a9f-abe5-849e27434f09/V2vUwqPWN-YVmEAjezmU9cTCSoI9WjUyLZpcOgGGbvNZI1',
