@@ -12,7 +12,10 @@
       "name": "Webhook Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [250, 300]
+      "position": [
+        250,
+        300
+      ]
     },
     {
       "parameters": {
@@ -21,14 +24,18 @@
         "toRecipients": "={{ $json.body.email }}",
         "subject": "=แจ้งปิดเคสงาน IT Helpdesk ({{ $json.body.caseId }}) และขอรับการประเมิน",
         "bodyContent": "=<div style=\"font-family: 'Sarabun', 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f3f4f6;\">\n    <div style=\"background: #f1f5f9; color: #000000; padding: 30px; border-radius: 12px 12px 0 0; text-align: center; border-bottom: 3px solid #f59e0b;\">\n        <h2 style=\"margin: 0 0 10px 0; color: #000000; font-size: 24px;\">🔧 IT Hardware</h2>\n        <p style=\"margin: 0; color: #000000; font-size: 16px;\">แจ้งปิดเคสและขอรับการประเมิน</p>\n    </div>\n    <div style=\"background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);\">\n        <p style=\"color: #000000; font-size: 16px; margin-bottom: 15px;\">เรียน ผู้ใช้งาน,</p>\n        <p style=\"color: #000000; font-size: 15px; line-height: 1.6;\">\n            <span style=\"color: #22c55e; font-size: 1.2em;\">✅</span> ปัญหาของคุณได้รับการแก้ไขและปิดเคสเรียบร้อยแล้ว\n        </p>\n        \n        <div style=\"background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0; border: 1px solid #e2e8f0;\">\n            <table style=\"width: 100%; font-size: 14px; border-collapse: collapse;\">\n                <tr><td style=\"color: #4b5563; padding: 8px 0; width: 120px;\">หมายเลขเคส:</td><td style=\"color: #f59e0b; font-weight: bold;\">{{ $json.body.caseId }}</td></tr>\n                <tr><td style=\"color: #4b5563; padding: 8px 0;\">ผู้แจ้ง:</td><td style=\"color: #000000; font-weight: 500;\">{{ $json.body.submitterName }}</td></tr>\n                <tr><td style=\"color: #4b5563; padding: 8px 0;\">วันที่แจ้ง:</td><td style=\"color: #000000; font-weight: 500;\">{{ $json.body.submissionDate }} {{ $json.body.submissionTime }}</td></tr>\n                <tr><td style=\"color: #4b5563; padding: 8px 0;\">รายละเอียด:</td><td style=\"color: #000000; font-weight: 500;\">{{ $json.body.problemDetails }}</td></tr>\n            </table>\n        </div>\n        \n        <p style=\"color: #000000; font-size: 15px; line-height: 1.6; text-align: center;\">\n            เพื่อพัฒนาคุณภาพการบริการ เราขอรบกวนเวลาเพียง <strong>1 นาที</strong><br>\n            ประเมินความพึงพอใจของท่านต่อการให้บริการครั้งนี้\n        </p>\n        \n        <div style=\"text-align: center; margin: 30px 0;\">\n            <a href=\"{{ $json.body.evaluationUrl }}\" style=\"display: inline-block; background-color: #f59e0b; color: #ffffff !important; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-weight: bold; font-size: 16px; border: 2px solid #f59e0b; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.4);\">\n                ⭐ ประเมินความพึงพอใจ\n            </a>\n        </div>\n        \n        <p style=\"color: #4b5563; font-size: 14px; text-align: center; margin-top: 20px;\">ขอขอบคุณที่ใช้บริการ</p>\n    </div>\n    <p style=\"text-align: center; color: #6b7280; font-size: 12px; margin-top: 20px;\">\n        © IT Hardware Team\n    </p>\n</div>",
-        "bodyContentHtml": true,
-        "additionalFields": {}
+        "additionalFields": {
+          "bodyContentType": "html"
+        }
       },
       "id": "outlook-send",
       "name": "Send Email via Outlook",
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
-      "position": [500, 300],
+      "position": [
+        500,
+        300
+      ],
       "credentials": {
         "microsoftOutlookOAuth2Api": {
           "id": "YOUR_OUTLOOK_CREDENTIAL_ID",
@@ -45,7 +52,10 @@
       "name": "Respond Success",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [750, 300]
+      "position": [
+        750,
+        300
+      ]
     }
   ],
   "connections": {
