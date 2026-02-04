@@ -1264,9 +1264,14 @@
                 <div id="admin-view-tickets" style="display: none;">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center"><span><i
-                                    class="bi bi-list-task me-2"></i>รายการแจ้งปัญหาทั้งหมด</span><button
-                                id="refresh-btn" class="btn btn-sm btn-outline-secondary"><i
-                                    class="bi bi-arrow-clockwise me-1"></i>รีเฟรช</button></div>
+                                    class="bi bi-list-task me-2"></i>รายการแจ้งปัญหาทั้งหมด</span>
+                            <div>
+                                <button id="export-excel-btn" class="btn btn-sm btn-success me-2"><i
+                                        class="bi bi-file-earmark-excel me-1"></i>ดาวน์โหลด Excel</button>
+                                <button id="refresh-btn" class="btn btn-sm btn-outline-secondary"><i
+                                        class="bi bi-arrow-clockwise me-1"></i>รีเฟรช</button>
+                            </div>
+                        </div>
                         <div class="card-body">
                             <div id="ticket-list" class="row"></div>
                         </div>
@@ -1435,6 +1440,8 @@
     <script src="assets/js/popper.min.js"></script>
     <script src="assets/js/tippy.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS for Excel Export with Thai language support -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <!-- Supabase Client -->
     <script src="js/supabase-config.js"></script>
 
@@ -1473,6 +1480,7 @@
                 loginError: document.getElementById('login-error'),
                 adminContent: document.getElementById('admin-content'),
                 refreshBtn: document.getElementById('refresh-btn'),
+                exportExcelBtn: document.getElementById('export-excel-btn'),
                 confirmModalBtn: document.getElementById('confirmModalBtn'),
                 newUsernameInput: document.getElementById('newUsername'),
                 newPasswordInput: document.getElementById('newPassword'),
@@ -2219,6 +2227,7 @@
                         SubmissionTime: t.submission_time,
                         ClosedDate: t.closed_date,
                         ClosedTime: t.closed_time,
+                        ClosedBy: t.closed_by,
                         ResolutionComment: t.resolution_comment,
                         EmailStatus: t.email_status,
                         ScoreQ: t.score_q,
@@ -2228,6 +2237,7 @@
                         LastEmailSentTime: t.last_email_sent_time,
                         EmailSendCount: t.email_send_count,
                         EmailProblem: t.email_problem_status,
+                        CommentProblem: t.comment_problem,
                         RowIndex: t.id // ใช้ UUID เป็น RowIndex
                     }));
 
@@ -2269,6 +2279,7 @@
                                 SubmissionTime: t.submission_time,
                                 ClosedDate: t.closed_date,
                                 ClosedTime: t.closed_time,
+                                ClosedBy: t.closed_by,
                                 ResolutionComment: t.resolution_comment,
                                 EmailStatus: t.email_status,
                                 ScoreQ: t.score_q,
@@ -2278,6 +2289,7 @@
                                 LastEmailSentTime: t.last_email_sent_time,
                                 EmailSendCount: t.email_send_count,
                                 EmailProblem: t.email_problem_status,
+                                CommentProblem: t.comment_problem,
                                 RowIndex: t.id
                             };
 
@@ -2465,6 +2477,68 @@
             DOMElements.editUsernameInput.addEventListener('input', sanitizeInput);
             DOMElements.editPasswordInput.addEventListener('input', sanitizeInput);
 
+
+            // Export to Excel function
+            const exportToExcel = () => {
+                if (allTickets.length === 0) {
+                    showAlert('ไม่มีข้อมูลให้ดาวน์โหลด', false);
+                    return;
+                }
+
+                // เตรียมข้อมูลสำหรับ Excel (แปลงชื่อ column เป็นภาษาไทย)
+                const dataForExcel = allTickets.map(ticket => ({
+                    'หมายเลขเคส': ticket.CaseID || ticket.case_id || '',
+                    'สถานะ': ticket.Status || ticket.status || '',
+                    'ชื่อผู้แจ้ง': ticket.SubmitterName || ticket.submitter_name || '',
+                    'เบอร์ติดต่อ': ticket.ContactNumber || ticket.contact_number || '',
+                    'รหัสพนักงาน': ticket.Department || ticket.department || '',
+                    'ประเภทปัญหา': ticket.ProblemType || ticket.problem_type || '',
+                    'รายละเอียดปัญหา': ticket.ProblemDetails || ticket.problem_details || '',
+                    'วันที่แจ้ง': ticket.SubmissionDate || ticket.submission_date || '',
+                    'เวลาที่แจ้ง': ticket.SubmissionTime || ticket.submission_time || '',
+                    'วันที่ปิด': ticket.ClosedDate || ticket.closed_date || '',
+                    'เวลาที่ปิด': ticket.ClosedTime || ticket.closed_time || '',
+                    'ผู้ปิดเคส': ticket.ClosedBy || ticket.closed_by || '',
+                    'หมายเหตุการแก้ไข': ticket.ResolutionComment || ticket.resolution_comment || '',
+                    'คะแนน Q': ticket.ScoreQ || ticket.score_q || '',
+                    'คะแนน D': ticket.ScoreD || ticket.score_d || '',
+                    'คะแนน C': ticket.ScoreC || ticket.score_c || '',
+                    'ความคิดเห็นประเมิน': ticket.EvaluationComment || ticket.evaluation_comment || '',
+                    'สถานะส่งเมลสอบถาม': ticket.EmailProblem || ticket.email_problem_status || '',
+                    'ความคิดเห็นปัญหา': ticket.CommentProblem || ticket.comment_problem || ''
+                }));
+
+                // สร้าง Workbook และ Worksheet
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(dataForExcel);
+
+                // ปรับความกว้าง column อัตโนมัติ
+                const colWidths = Object.keys(dataForExcel[0]).map(key => ({
+                    wch: Math.max(key.length * 2, 15)
+                }));
+                ws['!cols'] = colWidths;
+
+                // เพิ่ม Worksheet ลง Workbook
+                XLSX.utils.book_append_sheet(wb, ws, 'รายการปัญหา');
+
+                // สร้างชื่อไฟล์พร้อมวันที่
+                const today = new Date();
+                const dateStr = today.toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).replace(/\//g, '-');
+                const fileName = `IT_Helpdesk_Tickets_${dateStr}.xlsx`;
+
+                // ดาวน์โหลดไฟล์
+                XLSX.writeFile(wb, fileName);
+                showAlert(`ดาวน์โหลดไฟล์ ${fileName} สำเร็จ<br>จำนวน ${allTickets.length} รายการ`, true);
+            };
+
+            // Event listener for Export Excel button
+            if (DOMElements.exportExcelBtn) {
+                DOMElements.exportExcelBtn.addEventListener('click', exportToExcel);
+            }
 
             initializeApp();
         });
