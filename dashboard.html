@@ -1109,6 +1109,259 @@
         .problem-countdown-sent .countdown-timer {
             color: #22c55e;
         }
+
+        /* Evaluation Card Styles */
+        .evaluation-card {
+            background: var(--gradient-secondary);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .evaluation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-primary);
+        }
+
+        .evaluation-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .evaluation-score-section {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .evaluation-score-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .evaluation-score-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .evaluation-score-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .star-rating .bi-star-fill {
+            color: #fbbf24;
+            font-size: 1.1rem;
+        }
+
+        .star-rating .bi-star {
+            color: #4b5563;
+            font-size: 1.1rem;
+        }
+
+        .evaluation-details {
+            font-size: 0.9rem;
+        }
+
+        .evaluation-details p {
+            margin-bottom: 0.5rem;
+        }
+
+        .evaluation-case-id {
+            font-size: 0.85rem;
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .evaluation-badge {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #000;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+        }
+
+        /* Evaluation Summary Chart Cards */
+        .evaluation-summary-card {
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .evaluation-summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
+            opacity: 0.8;
+        }
+
+        .evaluation-summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(251, 191, 36, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-color: rgba(251, 191, 36, 0.5);
+        }
+
+        .summary-chart-container {
+            width: 120px;
+            height: 120px;
+            flex-shrink: 0;
+        }
+
+        .summary-info {
+            flex: 1;
+        }
+
+        .summary-label {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fbbf24;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .summary-sublabel {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        /* Monthly Score Card Styles */
+        .monthly-score-card {
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .monthly-score-card .card-header {
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+        }
+
+        .monthly-score-card .form-select {
+            background-color: rgba(31, 41, 55, 0.9);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+            font-weight: 600;
+        }
+
+        .monthly-score-card .form-select:focus {
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 0.25rem rgba(251, 191, 36, 0.25);
+        }
+
+        .monthly-score-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.8) 0%, rgba(51, 65, 85, 0.8) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .monthly-score-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .monthly-score-item.quality-item {
+            border-left: 4px solid #22c55e;
+        }
+
+        .monthly-score-item.delivery-item {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .monthly-score-item.cost-item {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .monthly-score-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .quality-item .monthly-score-icon {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .delivery-item .monthly-score-icon {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .cost-item .monthly-score-icon {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .monthly-score-info {
+            flex: 1;
+        }
+
+        .monthly-score-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .monthly-score-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .quality-item .monthly-score-value {
+            color: #22c55e;
+        }
+
+        .delivery-item .monthly-score-value {
+            color: #3b82f6;
+        }
+
+        .cost-item .monthly-score-value {
+            color: #f59e0b;
+        }
+
+        .monthly-score-count {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-align: right;
+        }
     </style>
 </head>
 
@@ -1145,6 +1398,9 @@
                             class="bi bi-grid-1x2-fill me-1"></i> ภาพรวม</a></li>
                 <li class="nav-item"><a class="nav-link" id="nav-tickets" href="#"><i class="bi bi-list-task me-1"></i>
                         รายการปัญหา</a></li>
+                <li class="nav-item"><a class="nav-link" id="nav-evaluation" href="#"><i
+                            class="bi bi-star-fill me-1"></i>
+                        ประเมิน</a></li>
                 <li class="nav-item"><a class="nav-link" id="nav-users" href="#"><i class="bi bi-people me-1"></i>
                         จัดการผู้ใช้</a></li>
             </ul>
@@ -1305,6 +1561,116 @@
                                     <tbody id="user-table-body"></tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="admin-view-evaluation" style="display: none;">
+                    <!-- Evaluation Summary Charts -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="evaluation-summary-card h-100"
+                                data-tippy-content="คะแนนเฉลี่ยความพึงพอใจด้านคุณภาพการแก้ไขปัญหา">
+                                <div class="summary-chart-container">
+                                    <canvas id="qualityChart"></canvas>
+                                </div>
+                                <div class="summary-info">
+                                    <div class="summary-label">Quality</div>
+                                    <div class="summary-sublabel">แก้ไขปัญหาได้ถูกต้อง</div>
+                                    <div class="summary-value" id="quality-avg">0.0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="evaluation-summary-card h-100"
+                                data-tippy-content="คะแนนเฉลี่ยความพึงพอใจด้านความรวดเร็ว">
+                                <div class="summary-chart-container">
+                                    <canvas id="deliveryChart"></canvas>
+                                </div>
+                                <div class="summary-info">
+                                    <div class="summary-label">Delivery</div>
+                                    <div class="summary-sublabel">ความรวดเร็วในการแก้ไข</div>
+                                    <div class="summary-value" id="delivery-avg">0.0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-12">
+                            <div class="evaluation-summary-card h-100"
+                                data-tippy-content="คะแนนเฉลี่ยความพึงพอใจด้านขั้นตอนการติดต่อ">
+                                <div class="summary-chart-container">
+                                    <canvas id="costChart"></canvas>
+                                </div>
+                                <div class="summary-info">
+                                    <div class="summary-label">Cost</div>
+                                    <div class="summary-sublabel">ขั้นตอนการแจ้งซ่อม</div>
+                                    <div class="summary-value" id="cost-avg">0.0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Score Section -->
+                    <div class="card mb-4 monthly-score-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-calendar-month me-2"></i>คะแนนประจำเดือน</span>
+                            <select id="month-selector" class="form-select form-select-sm w-auto">
+                                <option value="1">มกราคม</option>
+                                <option value="2">กุมภาพันธ์</option>
+                                <option value="3">มีนาคม</option>
+                                <option value="4">เมษายน</option>
+                                <option value="5">พฤษภาคม</option>
+                                <option value="6">มิถุนายน</option>
+                                <option value="7">กรกฎาคม</option>
+                                <option value="8">สิงหาคม</option>
+                                <option value="9">กันยายน</option>
+                                <option value="10">ตุลาคม</option>
+                                <option value="11">พฤศจิกายน</option>
+                                <option value="12">ธันวาคม</option>
+                            </select>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-lg-4">
+                                    <div class="monthly-score-item quality-item">
+                                        <div class="monthly-score-icon"><i class="bi bi-patch-check-fill"></i></div>
+                                        <div class="monthly-score-info">
+                                            <div class="monthly-score-label">Quality</div>
+                                            <div class="monthly-score-value" id="monthly-quality">0.0</div>
+                                        </div>
+                                        <div class="monthly-score-count" id="monthly-quality-count">0 รายการ</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="monthly-score-item delivery-item">
+                                        <div class="monthly-score-icon"><i class="bi bi-lightning-charge-fill"></i>
+                                        </div>
+                                        <div class="monthly-score-info">
+                                            <div class="monthly-score-label">Delivery</div>
+                                            <div class="monthly-score-value" id="monthly-delivery">0.0</div>
+                                        </div>
+                                        <div class="monthly-score-count" id="monthly-delivery-count">0 รายการ</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="monthly-score-item cost-item">
+                                        <div class="monthly-score-icon"><i class="bi bi-hand-thumbs-up-fill"></i></div>
+                                        <div class="monthly-score-info">
+                                            <div class="monthly-score-label">Cost</div>
+                                            <div class="monthly-score-value" id="monthly-cost">0.0</div>
+                                        </div>
+                                        <div class="monthly-score-count" id="monthly-cost-count">0 รายการ</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-star-fill me-2"></i>รายการประเมินทั้งหมด</span>
+                            <span id="evaluation-count" class="badge bg-warning text-dark">0 รายการ</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="evaluation-list" class="row"></div>
                         </div>
                     </div>
                 </div>
@@ -1485,7 +1851,9 @@
                 newUsernameInput: document.getElementById('newUsername'),
                 newPasswordInput: document.getElementById('newPassword'),
                 editUsernameInput: document.getElementById('editUsername'),
-                editPasswordInput: document.getElementById('editPassword')
+                editPasswordInput: document.getElementById('editPassword'),
+                evaluationList: document.getElementById('evaluation-list'),
+                evaluationCount: document.getElementById('evaluation-count')
             };
             const Modals = {
                 alert: new bootstrap.Modal(document.getElementById('alertModal')),
@@ -1541,6 +1909,7 @@
                 }
                 if (targetId === 'admin-view-dashboard') renderDashboard(allTickets);
                 if (targetId === 'admin-view-tickets') renderTickets(allTickets);
+                if (targetId === 'admin-view-evaluation') renderEvaluationCards(allTickets);
             };
 
             const postToAction = async (action, data) => {
@@ -2012,6 +2381,230 @@
                 DOMElements.addUserForm.querySelector('button').disabled = userCount >= 5;
             };
 
+            // ===== EVALUATION SUMMARY CHARTS =====
+            let evaluationCharts = { quality: null, delivery: null, cost: null };
+
+            const createGaugeChart = (canvasId, score, color) => {
+                const ctx = document.getElementById(canvasId);
+                if (!ctx) return null;
+
+                const maxScore = 5;
+                const percentage = (score / maxScore) * 100;
+
+                return new Chart(ctx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [score, maxScore - score],
+                            backgroundColor: [
+                                color,
+                                'rgba(75, 85, 99, 0.3)'
+                            ],
+                            borderWidth: 0,
+                            cutout: '75%',
+                            circumference: 270,
+                            rotation: 225
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        },
+                        animation: {
+                            animateRotate: true,
+                            duration: 1500,
+                            easing: 'easeInOutQuart'
+                        }
+                    }
+                });
+            };
+
+            const renderEvaluationCharts = (tickets) => {
+                // กรองเคสที่ประเมินแล้ว
+                const evaluatedTickets = (tickets || []).filter(t =>
+                    t.ScoreQ && t.ScoreQ.toString().trim() !== ''
+                );
+
+                // คำนวณค่าเฉลี่ย
+                let avgQ = 0, avgD = 0, avgC = 0;
+                if (evaluatedTickets.length > 0) {
+                    const totalQ = evaluatedTickets.reduce((sum, t) => sum + (parseInt(t.ScoreQ) || 0), 0);
+                    const totalD = evaluatedTickets.reduce((sum, t) => sum + (parseInt(t.ScoreD) || 0), 0);
+                    const totalC = evaluatedTickets.reduce((sum, t) => sum + (parseInt(t.ScoreC) || 0), 0);
+                    avgQ = totalQ / evaluatedTickets.length;
+                    avgD = totalD / evaluatedTickets.length;
+                    avgC = totalC / evaluatedTickets.length;
+                }
+
+                // อัปเดตค่าที่แสดง
+                document.getElementById('quality-avg').textContent = avgQ.toFixed(1);
+                document.getElementById('delivery-avg').textContent = avgD.toFixed(1);
+                document.getElementById('cost-avg').textContent = avgC.toFixed(1);
+
+                // ลบ chart เก่าถ้ามี
+                if (evaluationCharts.quality) evaluationCharts.quality.destroy();
+                if (evaluationCharts.delivery) evaluationCharts.delivery.destroy();
+                if (evaluationCharts.cost) evaluationCharts.cost.destroy();
+
+                // สร้าง chart ใหม่
+                evaluationCharts.quality = createGaugeChart('qualityChart', avgQ, '#22c55e');
+                evaluationCharts.delivery = createGaugeChart('deliveryChart', avgD, '#3b82f6');
+                evaluationCharts.cost = createGaugeChart('costChart', avgC, '#f59e0b');
+            };
+
+            // ===== MONTHLY SCORE CALCULATION =====
+            const renderMonthlyScores = (tickets, month) => {
+                // กรองเคสที่ประเมินแล้วและอยู่ในเดือนที่เลือก
+                const evaluatedTickets = (tickets || []).filter(t => {
+                    if (!t.ScoreQ || t.ScoreQ.toString().trim() === '') return false;
+
+                    // ดึงเดือนจาก ClosedDate (รูปแบบ dd/mm/yyyy)
+                    const closedDate = t.ClosedDate || '';
+                    if (!closedDate) return false;
+
+                    const dateParts = closedDate.split('/');
+                    if (dateParts.length >= 2) {
+                        const ticketMonth = parseInt(dateParts[1]);
+                        return ticketMonth === month;
+                    }
+                    return false;
+                });
+
+                const count = evaluatedTickets.length;
+
+                // คำนวณค่าเฉลี่ย
+                let avgQ = 0, avgD = 0, avgC = 0;
+                if (count > 0) {
+                    const totalQ = evaluatedTickets.reduce((sum, t) => sum + (parseInt(t.ScoreQ) || 0), 0);
+                    const totalD = evaluatedTickets.reduce((sum, t) => sum + (parseInt(t.ScoreD) || 0), 0);
+                    const totalC = evaluatedTickets.reduce((sum, t) => sum + (parseInt(t.ScoreC) || 0), 0);
+                    avgQ = totalQ / count;
+                    avgD = totalD / count;
+                    avgC = totalC / count;
+                }
+
+                // อัปเดต UI
+                document.getElementById('monthly-quality').textContent = avgQ.toFixed(1);
+                document.getElementById('monthly-delivery').textContent = avgD.toFixed(1);
+                document.getElementById('monthly-cost').textContent = avgC.toFixed(1);
+                document.getElementById('monthly-quality-count').textContent = `${count} รายการ`;
+                document.getElementById('monthly-delivery-count').textContent = `${count} รายการ`;
+                document.getElementById('monthly-cost-count').textContent = `${count} รายการ`;
+            };
+
+            // Initialize month selector to current month
+            const initMonthSelector = () => {
+                const currentMonth = new Date().getMonth() + 1; // 1-12
+                const monthSelector = document.getElementById('month-selector');
+                if (monthSelector) {
+                    monthSelector.value = currentMonth;
+                    monthSelector.addEventListener('change', (e) => {
+                        renderMonthlyScores(allTickets, parseInt(e.target.value));
+                    });
+                }
+            };
+
+            // ===== RENDER EVALUATION CARDS =====
+            const generateStars = (score) => {
+                const maxStars = 5;
+                const filledStars = Math.min(Math.max(parseInt(score) || 0, 0), maxStars);
+                let starsHtml = '';
+                for (let i = 0; i < maxStars; i++) {
+                    if (i < filledStars) {
+                        starsHtml += '<i class="bi bi-star-fill"></i>';
+                    } else {
+                        starsHtml += '<i class="bi bi-star"></i>';
+                    }
+                }
+                return starsHtml;
+            };
+
+            const renderEvaluationCards = (tickets) => {
+                const evaluationListEl = DOMElements.evaluationList;
+                evaluationListEl.innerHTML = '';
+
+                // กรองเฉพาะ tickets ที่มีการประเมินแล้ว (มี ScoreQ)
+                const evaluatedTickets = (tickets || []).filter(t =>
+                    t.ScoreQ && t.ScoreQ.toString().trim() !== ''
+                );
+
+                // อัปเดตจำนวน
+                DOMElements.evaluationCount.textContent = `${evaluatedTickets.length} รายการ`;
+
+                // Render summary charts
+                renderEvaluationCharts(tickets);
+
+                // Render monthly scores (current month)
+                const monthSelector = document.getElementById('month-selector');
+                const currentMonth = new Date().getMonth() + 1; // 1-12
+
+                if (monthSelector) {
+                    // Set current month as default
+                    monthSelector.value = currentMonth;
+
+                    // Remove old listener and add new one
+                    const newSelector = monthSelector.cloneNode(true);
+                    monthSelector.parentNode.replaceChild(newSelector, monthSelector);
+                    newSelector.addEventListener('change', (e) => {
+                        renderMonthlyScores(allTickets, parseInt(e.target.value));
+                    });
+                }
+
+                renderMonthlyScores(tickets, currentMonth);
+
+                if (evaluatedTickets.length === 0) {
+                    evaluationListEl.innerHTML = '<p class="text-center text-muted p-5">ยังไม่มีรายการประเมิน</p>';
+                    return;
+                }
+
+                evaluatedTickets.forEach(ticket => {
+                    const cardHtml = `
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="evaluation-card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="evaluation-case-id">${sanitizeHTML(ticket.CaseID)}</span>
+                                <span class="evaluation-badge"><i class="bi bi-star-fill me-1"></i>ประเมินแล้ว</span>
+                            </div>
+                            
+                            <div class="evaluation-score-section">
+                                <div class="evaluation-score-item">
+                                    <div class="evaluation-score-label">แก้ไขปัญหาได้ถูกต้อง และใช้งานได้เป็นปกติ (Quality)</div>
+                                    <div class="star-rating">${generateStars(ticket.ScoreQ)}</div>
+                                </div>
+                                <div class="evaluation-score-item">
+                                    <div class="evaluation-score-label">ความรวดเร็วในการเข้าดำเนินการแก้ไข (Delivery)</div>
+                                    <div class="star-rating">${generateStars(ticket.ScoreD)}</div>
+                                </div>
+                                <div class="evaluation-score-item">
+                                    <div class="evaluation-score-label">ขั้นตอนการแจ้งซ่อมและการติดต่อขอความช่วยเหลือ (Cost)</div>
+                                    <div class="star-rating">${generateStars(ticket.ScoreC)}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="evaluation-details">
+                                <p class="mb-1"><strong>ผู้แจ้ง:</strong> ${sanitizeHTML(ticket.SubmitterName)}</p>
+                                <p class="mb-1"><strong>เบอร์ติดต่อ:</strong> ${sanitizeHTML(ticket.ContactNumber)}</p>
+                                <p class="mb-1"><strong>รหัสพนักงาน:</strong> ${sanitizeHTML(ticket.Department)}</p>
+                                <p class="mb-1"><strong>ประเภท:</strong> ${sanitizeHTML(ticket.ProblemType)}</p>
+                                <p class="mb-1"><strong>รายละเอียด:</strong></p>
+                                <p class="text-white-50" style="white-space: pre-wrap;">${sanitizeHTML(ticket.ProblemDetails)}</p>
+                            </div>
+                            
+                            <div class="mt-auto pt-3 border-top border-secondary-subtle small text-muted">
+                                <div>แจ้งเมื่อ: ${sanitizeHTML(ticket.SubmissionDate) || 'N/A'} ${sanitizeHTML(ticket.SubmissionTime) || ''}</div>
+                                <div>ปิดเมื่อ: ${sanitizeHTML(ticket.ClosedDate) || 'N/A'} ${sanitizeHTML(ticket.ClosedTime) || ''}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                    evaluationListEl.insertAdjacentHTML('beforeend', cardHtml);
+                });
+            };
+
             // ===== COUNTDOWN TIMER & AUTO RESEND EVALUATION EMAIL =====
             let countdownIntervalId = null;
             const RESEND_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
@@ -2324,6 +2917,7 @@
                 renderDashboard(allTickets);
                 renderTickets(allTickets);
                 renderUsers(adminUsers);
+                renderEvaluationCards(allTickets);
                 startPolling();
                 startCountdownTimers();
                 startProblemFollowupCountdownTimers();
