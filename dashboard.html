@@ -2304,7 +2304,8 @@
                             if (emailStatus === 'Sent' || emailStatus === 'Resent') {
                                 return `<span class="badge rounded-pill bg-info bg-opacity-75" style="font-size: 0.75rem;"><i class="bi bi-envelope-check-fill me-1"></i>${emailStatus === 'Resent' ? 'ส่งซ้ำแล้ว' : 'ส่งเมลแล้ว'}</span>`;
                             } else if (emailStatus.includes('Failed')) {
-                                return `<span class="badge rounded-pill bg-danger bg-opacity-75" style="font-size: 0.75rem;"><i class="bi bi-envelope-x-fill me-1"></i>ส่งไม่ผ่าน</span>`;
+                                return `<span class="badge rounded-pill bg-danger bg-opacity-75" style="font-size: 0.75rem;" data-tippy-content="${sanitizeHTML(emailStatus)}"><i class="bi bi-envelope-x-fill me-1"></i>ส่งไม่ผ่าน</span>
+                                <button class="btn btn-outline-danger btn-sm resend-eval-email-btn mt-1" data-case-id="${sanitizeHTML(ticket.CaseID)}" style="font-size: 0.7rem; padding: 0.15rem 0.4rem;" data-tippy-content="กดเพื่อส่งเมลขอประเมินใหม่"><i class="bi bi-arrow-repeat me-1"></i>ส่งซ้ำ</button>`;
                             }
                             return '';
                         })()}
@@ -2608,7 +2609,9 @@
             // ===== COUNTDOWN TIMER & AUTO RESEND EVALUATION EMAIL =====
             let countdownIntervalId = null;
             const RESEND_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+            const MAX_RESEND_COUNT = 5; // Maximum number of times to auto-resend evaluation email
             const pendingResends = new Set(); // Track cases that are currently being resent
+            const recentlySentCases = new Map(); // Track recently sent cases with timestamp to prevent rapid re-triggers
 
             const startCountdownTimers = () => {
                 if (countdownIntervalId) clearInterval(countdownIntervalId);
@@ -2634,9 +2637,17 @@
 
                         if (timeLeft <= 0) {
                             // Time's up - trigger auto resend
-                            // Allow resending regardless of emailStatus (Sent, Resent)
-                            if (!pendingResends.has(caseId)) {
+                            // Check if we should resend: not pending, not recently sent, and within max count
+                            const sendCount = parseInt(container.dataset.sendCount) || 1;
+                            const recentlySentTime = recentlySentCases.get(caseId);
+                            const isRecentlySent = recentlySentTime && (Date.now() - recentlySentTime) < 60000; // 1 minute cooldown after send
+
+                            if (!pendingResends.has(caseId) && !isRecentlySent && sendCount < MAX_RESEND_COUNT) {
                                 triggerAutoResend(caseId, rowIndex, container);
+                            } else if (sendCount >= MAX_RESEND_COUNT) {
+                                // Max count reached, show message
+                                container.querySelector('.countdown-status-text').textContent = 'ถึงจำนวนสูงสุดที่ส่งได้แล้ว';
+                                container.querySelector('.countdown-timer').textContent = `${sendCount}/${MAX_RESEND_COUNT}`;
                             }
                         } else {
                             // Display countdown
@@ -2683,8 +2694,18 @@
                             countBadge.textContent = `ครั้งที่ ${newCount}`;
                         }
 
-                        // Refresh data after a short delay to get updated LastEmailSentDate/Time
-                        setTimeout(() => initializeApp(true), 2000);
+                        // Mark as recently sent to prevent rapid re-triggers
+                        recentlySentCases.set(caseId, Date.now());
+
+                        // Clean up old entries from recentlySentCases (older than 2 minutes)
+                        for (const [id, time] of recentlySentCases.entries()) {
+                            if (Date.now() - time > 120000) {
+                                recentlySentCases.delete(id);
+                            }
+                        }
+
+                        // Refresh data after a longer delay to ensure DB is synced
+                        setTimeout(() => initializeApp(true), 5000);
                     } else {
                         container.querySelector('.countdown-status-text').textContent = 'ส่งไม่สำเร็จ: ' + (result.message || 'Unknown error');
                         container.querySelector('.countdown-timer').textContent = '✗';
@@ -2982,6 +3003,7 @@
                 const editBtn = e.target.closest('.edit-user-btn');
                 const deleteBtn = e.target.closest('.delete-user-btn');
                 const sendProblemFollowupBtn = e.target.closest('.send-problem-followup-btn');
+                const resendEvalEmailBtn = e.target.closest('.resend-eval-email-btn');
 
                 if (closeBtn) {
                     document.getElementById('resolutionRowIndex').value = closeBtn.dataset.rowIndex;
@@ -3003,6 +3025,32 @@
                 if (sendProblemFollowupBtn) {
                     const caseId = sendProblemFollowupBtn.dataset.caseId;
                     showConfirm('ต้องการส่งเมลสอบถามปัญหาหลังแก้ไขไปยังผู้ใช้หรือไม่?', () => postToAction('sendProblemFollowupEmail', { caseId: caseId }));
+                }
+
+                // Resend evaluation email button handler (for failed emails)
+                if (resendEvalEmailBtn) {
+                    const caseId = resendEvalEmailBtn.dataset.caseId;
+                    showConfirm('ต้องการส่งเมลขอประเมินใหม่หรือไม่?', async () => {
+                        showLoading(true);
+                        try {
+                            const ticket = await supabase.getTicketByCaseId(caseId);
+                            if (!ticket) {
+                                showAlert('ไม่พบเคส', false);
+                                return;
+                            }
+                            const result = await supabase.sendEvaluationEmail(ticket);
+                            if (result.success) {
+                                showAlert('ส่งเมลขอประเมินสำเร็จ!', true);
+                                initializeApp(true);
+                            } else {
+                                showAlert('ส่งเมลไม่สำเร็จ: ' + (result.message || 'Unknown error'), false);
+                            }
+                        } catch (error) {
+                            showAlert('เกิดข้อผิดพลาด: ' + error.message, false);
+                        } finally {
+                            showLoading(false);
+                        }
+                    });
                 }
             });
 

@@ -175,60 +175,101 @@ class SupabaseClient {
     async sendEvaluationEmail(ticket) {
         const evaluationUrl = `${SUPABASE_CONFIG.BASE_URL}/evaluate.html?caseId=${ticket.case_id}`;
 
-        const response = await fetch(SUPABASE_CONFIG.N8N_EVALUATION_EMAIL_WEBHOOK, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: ticket.submitter_name,
-                caseId: ticket.case_id,
-                submitterName: ticket.submitter_name,
-                problemDetails: ticket.problem_details,
-                submissionDate: ticket.submission_date,
-                submissionTime: ticket.submission_time,
-                evaluationUrl: evaluationUrl
-            })
-        });
+        try {
+            const response = await fetch(SUPABASE_CONFIG.N8N_EVALUATION_EMAIL_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: ticket.submitter_name,
+                    caseId: ticket.case_id,
+                    submitterName: ticket.submitter_name,
+                    problemDetails: ticket.problem_details,
+                    submissionDate: ticket.submission_date,
+                    submissionTime: ticket.submission_time,
+                    evaluationUrl: evaluationUrl
+                })
+            });
 
-        const result = await response.json();
+            if (!response.ok) {
+                const errorText = await response.text();
+                // Failed - only update status with error, don't update timestamp
+                await this.updateTicket(ticket.case_id, {
+                    email_status: `Failed: ${errorText.substring(0, 100)}`
+                });
+                return { success: false, message: errorText };
+            }
 
-        // Update email status in database
-        const now = new Date();
-        const thaiDate = this.getThaiDateTime(now);
-        await this.updateTicket(ticket.case_id, {
-            email_status: result.success ? 'Sent' : 'Failed',
-            last_email_sent_date: thaiDate.date,
-            last_email_sent_time: thaiDate.time,
-            email_send_count: (ticket.email_send_count || 0) + 1
-        });
+            const result = await response.json();
 
-        return result;
+            if (result.success) {
+                // Success - update everything
+                const now = new Date();
+                const thaiDate = this.getThaiDateTime(now);
+                await this.updateTicket(ticket.case_id, {
+                    email_status: 'Sent',
+                    last_email_sent_date: thaiDate.date,
+                    last_email_sent_time: thaiDate.time,
+                    email_send_count: (ticket.email_send_count || 0) + 1
+                });
+            } else {
+                // n8n returned failure - only update status with error
+                await this.updateTicket(ticket.case_id, {
+                    email_status: `Failed: ${result.message || 'Unknown error'}`
+                });
+            }
+
+            return result;
+        } catch (error) {
+            // Network error - only update status, don't update timestamp
+            await this.updateTicket(ticket.case_id, {
+                email_status: `Failed: ${error.message}`
+            });
+            return { success: false, message: error.message };
+        }
     }
 
     async sendProblemFollowupEmail(ticket) {
         const followupUrl = `${SUPABASE_CONFIG.BASE_URL}/problem-followup.html?caseId=${ticket.case_id}`;
 
-        const response = await fetch(SUPABASE_CONFIG.N8N_FOLLOWUP_EMAIL_WEBHOOK, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: ticket.submitter_name,
-                caseId: ticket.case_id,
-                problem: ticket.problem_details,
-                closedDate: ticket.closed_date,
-                followupUrl: followupUrl
-            })
-        });
+        try {
+            const response = await fetch(SUPABASE_CONFIG.N8N_FOLLOWUP_EMAIL_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: ticket.submitter_name,
+                    caseId: ticket.case_id,
+                    problem: ticket.problem_details,
+                    closedDate: ticket.closed_date,
+                    followupUrl: followupUrl
+                })
+            });
 
-        const result = await response.json();
+            if (!response.ok) {
+                const errorText = await response.text();
+                // Failed - only update status with error
+                await this.updateTicket(ticket.case_id, {
+                    email_problem_status: `Failed: ${errorText.substring(0, 100)}`
+                });
+                return { success: false, message: errorText };
+            }
 
-        // Update status
-        const now = new Date();
-        const thaiDate = this.getThaiDateTime(now);
-        await this.updateTicket(ticket.case_id, {
-            email_problem_status: result.success ? `SENT: ${thaiDate.date} ${thaiDate.time}` : 'Failed'
-        });
+            const result = await response.json();
 
-        return result;
+            // Only update with timestamp when success
+            const now = new Date();
+            const thaiDate = this.getThaiDateTime(now);
+            await this.updateTicket(ticket.case_id, {
+                email_problem_status: result.success ? `SENT: ${thaiDate.date} ${thaiDate.time}` : `Failed: ${result.message || 'Unknown error'}`
+            });
+
+            return result;
+        } catch (error) {
+            // Network error - only update status with error
+            await this.updateTicket(ticket.case_id, {
+                email_problem_status: `Failed: ${error.message}`
+            });
+            return { success: false, message: error.message };
+        }
     }
 
     async sendTeamsNotification(ticket, type = 'new') {
