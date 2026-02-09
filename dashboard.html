@@ -2637,12 +2637,18 @@
 
                         if (timeLeft <= 0) {
                             // Time's up - trigger auto resend
-                            // Check if we should resend: not pending, not recently sent, and within max count
+                            // Check if we should resend: not pending, not recently sent, within max count, and NOT failed
                             const sendCount = parseInt(container.dataset.sendCount) || 1;
                             const recentlySentTime = recentlySentCases.get(caseId);
                             const isRecentlySent = recentlySentTime && (Date.now() - recentlySentTime) < 60000; // 1 minute cooldown after send
+                            const isFailed = emailStatus && emailStatus.includes('Failed');
 
-                            if (!pendingResends.has(caseId) && !isRecentlySent && sendCount < MAX_RESEND_COUNT) {
+                            if (isFailed) {
+                                // Email failed - show message and resend button instead of auto-resend
+                                container.querySelector('.countdown-status-text').innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>ส่งไม่สำเร็จ กดปุ่มส่งซ้ำ';
+                                container.querySelector('.countdown-timer').textContent = '✗';
+                                container.classList.add('countdown-failed');
+                            } else if (!pendingResends.has(caseId) && !isRecentlySent && sendCount < MAX_RESEND_COUNT) {
                                 triggerAutoResend(caseId, rowIndex, container);
                             } else if (sendCount >= MAX_RESEND_COUNT) {
                                 // Max count reached, show message
@@ -2710,11 +2716,21 @@
                         container.querySelector('.countdown-status-text').textContent = 'ส่งไม่สำเร็จ: ' + (result.message || 'Unknown error');
                         container.querySelector('.countdown-timer').textContent = '✗';
                         container.classList.remove('countdown-sending');
+                        container.classList.add('countdown-failed');
+                        // Mark as recently sent to prevent rapid re-triggers even on failure
+                        recentlySentCases.set(caseId, Date.now());
+                        // Update emailStatus in container to prevent further auto-retries
+                        container.dataset.emailStatus = 'Failed';
                     }
                 } catch (error) {
                     container.querySelector('.countdown-status-text').textContent = 'เกิดข้อผิดพลาด';
                     container.querySelector('.countdown-timer').textContent = error.message;
                     container.classList.remove('countdown-sending');
+                    container.classList.add('countdown-failed');
+                    // Mark as recently sent to prevent rapid re-triggers even on failure
+                    recentlySentCases.set(caseId, Date.now());
+                    // Update emailStatus in container to prevent further auto-retries
+                    container.dataset.emailStatus = 'Failed';
                 } finally {
                     pendingResends.delete(caseId);
                 }
