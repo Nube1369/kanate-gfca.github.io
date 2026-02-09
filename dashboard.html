@@ -1942,8 +1942,10 @@
                                     );
                                     // ส่ง Teams notification
                                     const updatedTicket = await supabase.getTicketByCaseId(ticketToClose.CaseID);
+                                    console.log('Close ticket - updatedTicket:', updatedTicket);
                                     if (updatedTicket) {
-                                        await supabase.sendTeamsNotification(updatedTicket, 'closed');
+                                        const teamsResult = await supabase.sendTeamsNotification(updatedTicket, 'closed');
+                                        console.log('Teams notification result:', teamsResult);
                                         // ส่ง evaluation email
                                         await supabase.sendEvaluationEmail(updatedTicket);
                                     }
