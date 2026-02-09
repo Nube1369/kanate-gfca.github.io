@@ -15,8 +15,8 @@ const SUPABASE_CONFIG = {
     N8N_EVALUATION_EMAIL_WEBHOOK: 'https://192.168.0.88:5678/webhook/evaluation-email',
     N8N_FOLLOWUP_EMAIL_WEBHOOK: 'https://192.168.0.88:5678/webhook/problem-followup-email',
 
-    // Teams Webhook URL (ใช้ค่าเดิม)
-    TEAMS_WEBHOOK_URL: 'https://gfca01.webhook.office.com/webhookb2/de97901a-eefb-492a-8fb7-c03c603f6195@19af367e-c732-4ec7-8827-53efe436e9b4/IncomingWebhook/b3b24608d3b947228730d9c82a30262f/f3d1fd26-08ff-4a9f-abe5-849e27434f09/V2vUwqPWN-YVmEAjezmU9cTCSoI9WjUyLZpcOgGGbvNZI1',
+    // Teams Notification via Supabase Edge Function (ป้องกัน CORS)
+    TEAMS_EDGE_FUNCTION_URL: 'https://edcxqxbktztoovdnshxr.supabase.co/functions/v1/teams-notify',
 
     // GitHub Pages Base URL (สำหรับสร้าง link ในอีเมล)
     BASE_URL: 'https://nube1369.github.io/kanate-gfca.github.io'
@@ -273,56 +273,18 @@ class SupabaseClient {
     }
 
     async sendTeamsNotification(ticket, type = 'new') {
-        const dashboardUrl = `${SUPABASE_CONFIG.BASE_URL}/dashboard.html?ticketId=${ticket.case_id}`;
-
-        let payload;
-        if (type === 'new') {
-            payload = {
-                "@type": "MessageCard",
-                "@context": "http://schema.org/extensions",
-                "summary": "IT Helpdesk - แจ้งปัญหาใหม่",
-                "themeColor": "0072C6",
-                "title": "มีปัญหาใหม่ถูกแจ้งเข้ามา",
-                "sections": [{
-                    "activityTitle": "แบบฟอร์มแจ้งปัญหา",
-                    "activitySubtitle": "มีการส่งคำร้องขอความช่วยเหลือใหม่เข้ามา",
-                    "facts": [
-                        { "name": "ชื่อผู้แจ้ง", "value": ticket.submitter_name },
-                        { "name": "เบอร์ติดต่อกลับ / 3CX", "value": ticket.contact_number },
-                        { "name": "รหัสพนักงาน", "value": ticket.department },
-                        { "name": "ประเภทปัญหา", "value": ticket.problem_type }
-                    ],
-                    "text": `**รายละเอียดปัญหา:**\n${ticket.problem_details}\n\n[คลิกเพื่อจัดการงานนี้](${dashboardUrl})`
-                }]
-            };
-        } else {
-            payload = {
-                "@type": "MessageCard",
-                "@context": "http://schema.org/extensions",
-                "summary": "IT Helpdesk - ปิดเคสแล้ว",
-                "themeColor": "22C55E",
-                "title": "✅ เคสถูกปิดเรียบร้อยแล้ว",
-                "sections": [{
-                    "activityTitle": "แจ้งปิดเคส IT Helpdesk",
-                    "activitySubtitle": `เคส ${ticket.case_id} ได้รับการแก้ไขและปิดเรียบร้อยแล้ว`,
-                    "facts": [
-                        { "name": "หมายเลขเคส", "value": ticket.case_id },
-                        { "name": "ผู้แจ้ง", "value": ticket.submitter_name },
-                        { "name": "ประเภทปัญหา", "value": ticket.problem_type },
-                        { "name": "วันที่ปิดเคส", "value": `${ticket.closed_date} ${ticket.closed_time}` }
-                    ],
-                    "text": `**สรุปการแก้ไข:**\n${ticket.resolution_comment || 'ไม่มีหมายเหตุ'}\n\n[คลิกเพื่อดูรายละเอียด](${dashboardUrl})`
-                }]
-            };
-        }
-
         try {
-            await fetch(SUPABASE_CONFIG.TEAMS_WEBHOOK_URL, {
+            const response = await fetch(SUPABASE_CONFIG.TEAMS_EDGE_FUNCTION_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.key}`
+                },
+                body: JSON.stringify({ ticket, type })
             });
-            return { success: true };
+
+            const result = await response.json();
+            return result;
         } catch (e) {
             console.error('Teams notification failed:', e);
             return { success: false, error: e.message };
