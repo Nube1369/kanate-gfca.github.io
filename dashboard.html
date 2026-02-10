@@ -2358,7 +2358,9 @@
                             <div class="mt-auto text-end pt-3">
                             ${ticket.Status === 'Open' ? `<button class="btn btn-success btn-sm close-ticket-btn" data-row-index="${ticket.RowIndex}"><i class="bi bi-check-circle"></i> ปิดเคส</button>` : ''}
                             ${ticket.Status === 'Closed' && (!ticket.EmailProblem || ticket.EmailProblem.toString().trim() === '') ? `<button class="btn btn-outline-warning btn-sm send-problem-followup-btn" data-case-id="${sanitizeHTML(ticket.CaseID)}" data-tippy-content="ส่งเมลสอบถามปัญหาหลังแก้ไข"><i class="bi bi-envelope-exclamation"></i> สอบถามปัญหา</button>` : ''}
-                            ${ticket.Status === 'Closed' && ticket.EmailProblem && ticket.EmailProblem.toString().trim() !== '' ? `<span class="badge bg-info bg-opacity-25 text-info border border-info" data-tippy-content="${sanitizeHTML(ticket.EmailProblem)}"><i class="bi bi-envelope-check me-1"></i>ส่งเมลสอบถามแล้ว</span>` : ''}
+                            ${ticket.Status === 'Closed' && ticket.EmailProblem && ticket.EmailProblem.toString().includes('Failed') ? `<span class="badge bg-danger bg-opacity-75" style="font-size: 0.75rem;" data-tippy-content="${sanitizeHTML(ticket.EmailProblem)}"><i class="bi bi-envelope-x-fill me-1"></i>ส่งไม่ผ่าน</span>
+                            <button class="btn btn-outline-danger btn-sm resend-problem-followup-btn mt-1" data-case-id="${sanitizeHTML(ticket.CaseID)}" style="font-size: 0.7rem; padding: 0.15rem 0.4rem;" data-tippy-content="กดเพื่อส่งเมลสอบถามปัญหาใหม่"><i class="bi bi-arrow-repeat me-1"></i>ส่งซ้ำ</button>` : ''}
+                            ${ticket.Status === 'Closed' && ticket.EmailProblem && ticket.EmailProblem.toString().trim() !== '' && !ticket.EmailProblem.toString().includes('Failed') ? `<span class="badge bg-info bg-opacity-25 text-info border border-info" data-tippy-content="${sanitizeHTML(ticket.EmailProblem)}"><i class="bi bi-envelope-check me-1"></i>ส่งเมลสอบถามแล้ว</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -3070,6 +3072,7 @@
                 const editBtn = e.target.closest('.edit-user-btn');
                 const deleteBtn = e.target.closest('.delete-user-btn');
                 const sendProblemFollowupBtn = e.target.closest('.send-problem-followup-btn');
+                const resendProblemFollowupBtn = e.target.closest('.resend-problem-followup-btn');
                 const resendEvalEmailBtn = e.target.closest('.resend-eval-email-btn');
 
                 if (closeBtn) {
@@ -3108,6 +3111,32 @@
                             const result = await supabase.sendEvaluationEmail(ticket);
                             if (result.success) {
                                 showAlert('ส่งเมลขอประเมินสำเร็จ!', true);
+                                initializeApp(true);
+                            } else {
+                                showAlert('ส่งเมลไม่สำเร็จ: ' + (result.message || 'Unknown error'), false);
+                            }
+                        } catch (error) {
+                            showAlert('เกิดข้อผิดพลาด: ' + error.message, false);
+                        } finally {
+                            showLoading(false);
+                        }
+                    });
+                }
+
+                // Resend problem follow-up email button handler (for failed emails)
+                if (resendProblemFollowupBtn) {
+                    const caseId = resendProblemFollowupBtn.dataset.caseId;
+                    showConfirm('ต้องการส่งเมลสอบถามปัญหาหลังแก้ไขใหม่หรือไม่?', async () => {
+                        showLoading(true);
+                        try {
+                            const ticket = await supabase.getTicketByCaseId(caseId);
+                            if (!ticket) {
+                                showAlert('ไม่พบเคส', false);
+                                return;
+                            }
+                            const result = await supabase.sendProblemFollowupEmail(ticket);
+                            if (result.success) {
+                                showAlert('ส่งเมลสอบถามปัญหาสำเร็จ!', true);
                                 initializeApp(true);
                             } else {
                                 showAlert('ส่งเมลไม่สำเร็จ: ' + (result.message || 'Unknown error'), false);
