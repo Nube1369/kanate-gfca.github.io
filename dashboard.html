@@ -2615,6 +2615,23 @@
             const pendingResends = new Set(); // Track cases that are currently being resent
             const recentlySentCases = new Map(); // Track recently sent cases with timestamp to prevent rapid re-triggers
 
+            // Cross-tab lock: ป้องกันหลายแท็บส่งเมลซ้ำ
+            const isLockedByAnotherTab = (caseId) => {
+                const lockKey = `email_lock_${caseId}`;
+                const lockData = localStorage.getItem(lockKey);
+                if (!lockData) return false;
+                const lockTime = parseInt(lockData);
+                // Lock หมดอายุหลัง 10 นาที
+                if (Date.now() - lockTime > 600000) {
+                    localStorage.removeItem(lockKey);
+                    return false;
+                }
+                return true;
+            };
+            const setTabLock = (caseId) => {
+                localStorage.setItem(`email_lock_${caseId}`, Date.now().toString());
+            };
+
             const startCountdownTimers = () => {
                 if (countdownIntervalId) clearInterval(countdownIntervalId);
 
@@ -2642,14 +2659,19 @@
                             // Check if we should resend: not pending, not recently sent, within max count, and NOT failed
                             const sendCount = parseInt(container.dataset.sendCount) || 1;
                             const recentlySentTime = recentlySentCases.get(caseId);
-                            const isRecentlySent = recentlySentTime && (Date.now() - recentlySentTime) < 60000; // 1 minute cooldown after send
+                            const isRecentlySent = recentlySentTime && (Date.now() - recentlySentTime) < 600000; // 10 minute cooldown after send
                             const isFailed = emailStatus && emailStatus.includes('Failed');
+                            const isAlreadySent = emailStatus === 'Sent' || emailStatus === 'Resent';
 
                             if (isFailed) {
                                 // Email failed - show message and resend button instead of auto-resend
                                 container.querySelector('.countdown-status-text').innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>ส่งไม่สำเร็จ กดปุ่มส่งซ้ำ';
                                 container.querySelector('.countdown-timer').textContent = '✗';
                                 container.classList.add('countdown-failed');
+                            } else if (isAlreadySent && isRecentlySent) {
+                                // Already sent recently - show waiting message
+                                container.querySelector('.countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>ส่งเมลแล้ว รอนับถอยหลังรอบถัดไป';
+                                container.querySelector('.countdown-timer').textContent = '✓';
                             } else if (!pendingResends.has(caseId) && !isRecentlySent && sendCount < MAX_RESEND_COUNT) {
                                 triggerAutoResend(caseId, rowIndex, container);
                             } else if (sendCount >= MAX_RESEND_COUNT) {
@@ -2670,7 +2692,15 @@
             };
 
             const triggerAutoResend = async (caseId, rowIndex, container) => {
+                // Cross-tab lock check
+                if (isLockedByAnotherTab(caseId)) {
+                    container.querySelector('.countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>กำลังส่งจากแท็บอื่น...';
+                    container.querySelector('.countdown-timer').textContent = '⏳';
+                    return;
+                }
+
                 pendingResends.add(caseId);
+                setTabLock(caseId);
 
                 // Update UI to show sending state
                 container.classList.add('countdown-sending');
@@ -2678,10 +2708,29 @@
                 container.querySelector('.countdown-timer').textContent = 'โปรดรอสักครู่';
 
                 try {
-                    // ใช้ Supabase client แทน Google Apps Script
+                    // ดึงข้อมูลล่าสุดจาก DB ก่อนส่ง เพื่อเช็คว่ายังไม่ถูกส่งจากแท็บอื่น
                     const ticket = await supabase.getTicketByCaseId(caseId);
                     if (!ticket) {
                         throw new Error('ไม่พบเคส');
+                    }
+
+                    // เช็ค email_status จาก DB - ถ้าเพิ่งส่งไปแล้ว (ส่งภายใน 10 นาที) ไม่ต้องส่งอีก
+                    if (ticket.email_status === 'Sent' || ticket.email_status === 'Resent') {
+                        const lastSentDate = ticket.last_email_sent_date;
+                        const lastSentTime = ticket.last_email_sent_time;
+                        if (lastSentDate && lastSentTime) {
+                            const lastSentDateTime = parseThaiDateTime(lastSentDate, lastSentTime);
+                            if (lastSentDateTime && (Date.now() - lastSentDateTime.getTime()) < 600000) {
+                                // ส่งไปแล้วใน 10 นาทีที่ผ่านมา - skip
+                                container.classList.remove('countdown-sending');
+                                container.querySelector('.countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>ส่งเมลแล้วจากแท็บอื่น';
+                                container.querySelector('.countdown-timer').textContent = '✓';
+                                recentlySentCases.set(caseId, Date.now());
+                                container.dataset.emailStatus = 'Sent';
+                                pendingResends.delete(caseId);
+                                return;
+                            }
+                        }
                     }
 
                     const result = await supabase.sendEvaluationEmail(ticket);
@@ -2705,9 +2754,9 @@
                         // Mark as recently sent to prevent rapid re-triggers
                         recentlySentCases.set(caseId, Date.now());
 
-                        // Clean up old entries from recentlySentCases (older than 2 minutes)
+                        // Clean up old entries from recentlySentCases (older than 10 minutes)
                         for (const [id, time] of recentlySentCases.entries()) {
-                            if (Date.now() - time > 120000) {
+                            if (Date.now() - time > 600000) {
                                 recentlySentCases.delete(id);
                             }
                         }
