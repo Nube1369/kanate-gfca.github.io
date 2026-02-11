@@ -1899,7 +1899,7 @@
 
             const switchAdminView = (targetId) => {
                 // ป้องกัน non-super-admin เข้าถึงหน้าจัดการผู้ใช้
-                if (targetId === 'admin-view-users' && supabase.getCurrentUser() !== 'kanate') {
+                if (targetId === 'admin-view-users' && supabase.getCurrentRole() !== 'superadmin') {
                     return;
                 }
                 document.querySelectorAll('#admin-content > div').forEach(p => p.style.display = 'none');
@@ -1936,7 +1936,7 @@
 
                         // เช็คสิทธิ์สำหรับ action ที่ต้องเป็น super admin
                         const userManagementActions = ['addUser', 'editUser', 'deleteUser'];
-                        if (userManagementActions.includes(action) && supabase.getCurrentUser() !== 'kanate') {
+                        if (userManagementActions.includes(action) && supabase.getCurrentRole() !== 'superadmin') {
                             alertMsg = 'คุณไม่มีสิทธิ์ในการจัดการผู้ใช้';
                             alertSuccess = false;
                             showLoading(false);
@@ -3058,9 +3058,8 @@
             }
 
             function showDashboard() {
-                const SUPER_ADMIN = 'kanate';
-                const currentUser = supabase.getCurrentUser();
-                const isSuperAdmin = currentUser === SUPER_ADMIN;
+                const currentRole = supabase.getCurrentRole();
+                const isSuperAdmin = currentRole === 'superadmin';
 
                 DOMElements.adminDashboard.style.display = 'block';
                 DOMElements.logoutBtn.style.display = 'inline-flex';

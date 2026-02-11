@@ -112,21 +112,23 @@ class SupabaseClient {
     // ==================== USERS ====================
 
     async getUsers() {
-        const url = `${this.url}/rest/v1/users?select=id,username,created_at`;
+        const url = `${this.url}/rest/v1/users?select=id,username,role,created_at`;
         const response = await fetch(url, { headers: this.headers });
         return response.json();
     }
 
     async login(username, password) {
-        const url = `${this.url}/rest/v1/users?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&select=id,username`;
+        const url = `${this.url}/rest/v1/users?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&select=id,username,role`;
         const response = await fetch(url, { headers: this.headers });
         const users = await response.json();
 
         if (users.length > 0) {
             const token = this.generateToken();
+            const role = users[0].role || 'admin';
             sessionStorage.setItem('authToken', token);
             sessionStorage.setItem('authUser', username);
-            return { success: true, token, username };
+            sessionStorage.setItem('authRole', role);
+            return { success: true, token, username, role };
         }
         return { success: false, message: 'Invalid credentials' };
     }
@@ -317,10 +319,15 @@ class SupabaseClient {
     logout() {
         sessionStorage.removeItem('authToken');
         sessionStorage.removeItem('authUser');
+        sessionStorage.removeItem('authRole');
     }
 
     getCurrentUser() {
         return sessionStorage.getItem('authUser');
+    }
+
+    getCurrentRole() {
+        return sessionStorage.getItem('authRole') || 'admin';
     }
 }
 
