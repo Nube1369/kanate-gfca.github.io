@@ -10,9 +10,12 @@ const SUPABASE_CONFIG = {
     URL: 'https://edcxqxbktztoovdnshxr.supabase.co',
     ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkY3hxeGJrdHp0b292ZG5zaHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNjQsImV4cCI6MjA4NTM0NzI2NH0.hUEm4xN0XmBJknUgBry59bqebI9MuLg3hpD63tlhFW0',
 
-    // Edge Function URLs (ซ่อน internal URLs ไว้ฝั่ง server)
+    // Edge Function URLs
     AUTH_EDGE_FUNCTION_URL: 'https://edcxqxbktztoovdnshxr.supabase.co/functions/v1/auth',
-    SEND_EMAIL_EDGE_FUNCTION_URL: 'https://edcxqxbktztoovdnshxr.supabase.co/functions/v1/send-email',
+
+    // n8n Webhook URLs (TODO: ย้ายไป Edge Function เมื่อตั้ง Cloudflare Tunnel แล้ว)
+    N8N_EVALUATION_EMAIL_WEBHOOK: 'https://192.168.0.88:5678/webhook/evaluation-email',
+    N8N_FOLLOWUP_EMAIL_WEBHOOK: 'https://192.168.0.88:5678/webhook/problem-followup-email',
 
     // Teams Notification via Supabase Edge Function (ป้องกัน CORS)
     TEAMS_EDGE_FUNCTION_URL: 'https://edcxqxbktztoovdnshxr.supabase.co/functions/v1/teams-notify',
@@ -179,14 +182,10 @@ class SupabaseClient {
         const evaluationUrl = `${SUPABASE_CONFIG.BASE_URL}/evaluate.html?caseId=${ticket.case_id}`;
 
         try {
-            const response = await fetch(SUPABASE_CONFIG.SEND_EMAIL_EDGE_FUNCTION_URL, {
+            const response = await fetch(SUPABASE_CONFIG.N8N_EVALUATION_EMAIL_WEBHOOK, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.key}`
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type: 'evaluation',
                     email: ticket.submitter_name,
                     caseId: ticket.case_id,
                     submitterName: ticket.submitter_name,
@@ -239,14 +238,10 @@ class SupabaseClient {
         const followupUrl = `${SUPABASE_CONFIG.BASE_URL}/problem-followup.html?caseId=${ticket.case_id}`;
 
         try {
-            const response = await fetch(SUPABASE_CONFIG.SEND_EMAIL_EDGE_FUNCTION_URL, {
+            const response = await fetch(SUPABASE_CONFIG.N8N_FOLLOWUP_EMAIL_WEBHOOK, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.key}`
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type: 'problem-followup',
                     email: ticket.submitter_name,
                     caseId: ticket.case_id,
                     problem: ticket.problem_details,
