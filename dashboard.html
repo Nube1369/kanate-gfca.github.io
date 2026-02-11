@@ -1401,7 +1401,8 @@
                 <li class="nav-item"><a class="nav-link" id="nav-evaluation" href="#"><i
                             class="bi bi-star-fill me-1"></i>
                         ประเมิน</a></li>
-                <li class="nav-item"><a class="nav-link" id="nav-users" href="#"><i class="bi bi-people me-1"></i>
+                <li class="nav-item super-admin-only"><a class="nav-link" id="nav-users" href="#"><i
+                            class="bi bi-people me-1"></i>
                         จัดการผู้ใช้</a></li>
             </ul>
             <div id="admin-content">
@@ -1897,6 +1898,10 @@
             const showLoading = (show) => { DOMElements.loadingSpinner.style.display = show ? 'flex' : 'none'; };
 
             const switchAdminView = (targetId) => {
+                // ป้องกัน non-super-admin เข้าถึงหน้าจัดการผู้ใช้
+                if (targetId === 'admin-view-users' && supabase.getCurrentUser() !== 'kanate') {
+                    return;
+                }
                 document.querySelectorAll('#admin-content > div').forEach(p => p.style.display = 'none');
                 const targetElement = document.getElementById(targetId);
                 if (targetElement) {
@@ -1928,6 +1933,16 @@
                 } else {
                     try {
                         let result = { success: false, message: 'Unknown action' };
+
+                        // เช็คสิทธิ์สำหรับ action ที่ต้องเป็น super admin
+                        const userManagementActions = ['addUser', 'editUser', 'deleteUser'];
+                        if (userManagementActions.includes(action) && supabase.getCurrentUser() !== 'kanate') {
+                            alertMsg = 'คุณไม่มีสิทธิ์ในการจัดการผู้ใช้';
+                            alertSuccess = false;
+                            showLoading(false);
+                            setTimeout(() => { if (alertMsg) showAlert(alertMsg, alertSuccess); }, 100);
+                            return;
+                        }
 
                         // เรียกใช้ Supabase API ตาม action
                         switch (action) {
@@ -3043,11 +3058,21 @@
             }
 
             function showDashboard() {
+                const SUPER_ADMIN = 'kanate';
+                const currentUser = supabase.getCurrentUser();
+                const isSuperAdmin = currentUser === SUPER_ADMIN;
+
                 DOMElements.adminDashboard.style.display = 'block';
                 DOMElements.logoutBtn.style.display = 'inline-flex';
+
+                // ซ่อน/แสดง แท็บจัดการผู้ใช้ ตาม role
+                document.querySelectorAll('.super-admin-only').forEach(el => {
+                    el.style.display = isSuperAdmin ? '' : 'none';
+                });
+
                 renderDashboard(allTickets);
                 renderTickets(allTickets);
-                renderUsers(adminUsers);
+                if (isSuperAdmin) renderUsers(adminUsers);
                 renderEvaluationCards(allTickets);
                 startPolling();
                 startCountdownTimers();
