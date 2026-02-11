@@ -2800,6 +2800,7 @@
             let problemCountdownIntervalId = null;
             const PROBLEM_FOLLOWUP_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
             const pendingProblemFollowups = new Set(); // Track cases being sent
+            const recentlySentProblemCases = new Map(); // Track recently sent problem followup cases with timestamp
 
             const startProblemFollowupCountdownTimers = () => {
                 if (problemCountdownIntervalId) clearInterval(problemCountdownIntervalId);
@@ -2823,7 +2824,14 @@
 
                         if (timeLeft <= 0) {
                             // Time's up - trigger auto send
-                            if (!pendingProblemFollowups.has(caseId)) {
+                            const recentlySentTime = recentlySentProblemCases.get(caseId);
+                            const isRecentlySent = recentlySentTime && (Date.now() - recentlySentTime) < 600000; // 10 minute cooldown
+
+                            if (isRecentlySent) {
+                                container.querySelector('.problem-countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>ส่งเมลสอบถามปัญหาแล้ว';
+                                container.querySelector('.problem-countdown-timer').textContent = '✓';
+                                container.classList.add('problem-countdown-sent');
+                            } else if (!pendingProblemFollowups.has(caseId)) {
                                 triggerAutoProblemFollowup(caseId, container);
                             }
                         } else {
@@ -2839,7 +2847,15 @@
             };
 
             const triggerAutoProblemFollowup = async (caseId, container) => {
+                // Cross-tab lock check
+                if (isLockedByAnotherTab(`problem_${caseId}`)) {
+                    container.querySelector('.problem-countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>กำลังส่งจากแท็บอื่น...';
+                    container.querySelector('.problem-countdown-timer').textContent = '⏳';
+                    return;
+                }
+
                 pendingProblemFollowups.add(caseId);
+                setTabLock(`problem_${caseId}`);
 
                 // Update UI to show sending state
                 container.classList.add('problem-countdown-sending');
@@ -2847,10 +2863,21 @@
                 container.querySelector('.problem-countdown-timer').textContent = 'โปรดรอสักครู่';
 
                 try {
-                    // ใช้ Supabase client แทน Google Apps Script
+                    // ดึงข้อมูลล่าสุดจาก DB ก่อนส่ง เพื่อเช็คว่ายังไม่ถูกส่งจากแท็บอื่น
                     const ticket = await supabase.getTicketByCaseId(caseId);
                     if (!ticket) {
                         throw new Error('ไม่พบเคส');
+                    }
+
+                    // เช็ค email_problem_status จาก DB - ถ้าส่งไปแล้ว ไม่ต้องส่งอีก
+                    if (ticket.email_problem_status && ticket.email_problem_status.trim() !== '' && !ticket.email_problem_status.includes('Failed')) {
+                        container.classList.remove('problem-countdown-sending');
+                        container.classList.add('problem-countdown-sent');
+                        container.querySelector('.problem-countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>ส่งเมลสอบถามปัญหาแล้ว';
+                        container.querySelector('.problem-countdown-timer').textContent = '✓';
+                        recentlySentProblemCases.set(caseId, Date.now());
+                        pendingProblemFollowups.delete(caseId);
+                        return;
                     }
 
                     const result = await supabase.sendProblemFollowupEmail(ticket);
@@ -2861,17 +2888,24 @@
                         container.querySelector('.problem-countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>ส่งเมลสอบถามปัญหาสำเร็จ!';
                         container.querySelector('.problem-countdown-timer').textContent = '✓';
 
+                        // Mark as recently sent to prevent rapid re-triggers
+                        recentlySentProblemCases.set(caseId, Date.now());
+
                         // Refresh data after a short delay
-                        setTimeout(() => initializeApp(true), 2000);
+                        setTimeout(() => initializeApp(true), 3000);
                     } else {
                         container.querySelector('.problem-countdown-status-text').textContent = 'ส่งไม่สำเร็จ: ' + (result.message || 'Unknown error');
                         container.querySelector('.problem-countdown-timer').textContent = '✗';
                         container.classList.remove('problem-countdown-sending');
+                        // Mark as recently sent to prevent rapid re-triggers even on failure
+                        recentlySentProblemCases.set(caseId, Date.now());
                     }
                 } catch (error) {
                     container.querySelector('.problem-countdown-status-text').textContent = 'เกิดข้อผิดพลาด';
                     container.querySelector('.problem-countdown-timer').textContent = error.message;
                     container.classList.remove('problem-countdown-sending');
+                    // Mark as recently sent to prevent rapid re-triggers even on error
+                    recentlySentProblemCases.set(caseId, Date.now());
                 } finally {
                     pendingProblemFollowups.delete(caseId);
                 }
