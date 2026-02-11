@@ -10,10 +10,9 @@ const SUPABASE_CONFIG = {
     URL: 'https://edcxqxbktztoovdnshxr.supabase.co',
     ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkY3hxeGJrdHp0b292ZG5zaHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNjQsImV4cCI6MjA4NTM0NzI2NH0.hUEm4xN0XmBJknUgBry59bqebI9MuLg3hpD63tlhFW0',
 
-    // n8n Webhook URLs
-    // ⚠️ แก้ไขค่านี้ให้ตรงกับ n8n instance ของคุณ
-    N8N_EVALUATION_EMAIL_WEBHOOK: 'https://192.168.0.88:5678/webhook/evaluation-email',
-    N8N_FOLLOWUP_EMAIL_WEBHOOK: 'https://192.168.0.88:5678/webhook/problem-followup-email',
+    // Edge Function URLs (ซ่อน internal URLs ไว้ฝั่ง server)
+    AUTH_EDGE_FUNCTION_URL: 'https://edcxqxbktztoovdnshxr.supabase.co/functions/v1/auth',
+    SEND_EMAIL_EDGE_FUNCTION_URL: 'https://edcxqxbktztoovdnshxr.supabase.co/functions/v1/send-email',
 
     // Teams Notification via Supabase Edge Function (ป้องกัน CORS)
     TEAMS_EDGE_FUNCTION_URL: 'https://edcxqxbktztoovdnshxr.supabase.co/functions/v1/teams-notify',
@@ -118,58 +117,60 @@ class SupabaseClient {
     }
 
     async login(username, password) {
-        const url = `${this.url}/rest/v1/users?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&select=id,username,role`;
-        const response = await fetch(url, { headers: this.headers });
-        const users = await response.json();
+        const response = await fetch(SUPABASE_CONFIG.AUTH_EDGE_FUNCTION_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.key}`
+            },
+            body: JSON.stringify({ action: 'login', username, password })
+        });
+        const result = await response.json();
 
-        if (users.length > 0) {
+        if (result.success) {
             const token = this.generateToken();
-            const role = users[0].role || 'admin';
             sessionStorage.setItem('authToken', token);
-            sessionStorage.setItem('authUser', username);
-            sessionStorage.setItem('authRole', role);
-            return { success: true, token, username, role };
+            sessionStorage.setItem('authUser', result.username);
+            sessionStorage.setItem('authRole', result.role || 'admin');
+            return { success: true, token, username: result.username, role: result.role };
         }
-        return { success: false, message: 'Invalid credentials' };
+        return { success: false, message: result.message || 'Invalid credentials' };
     }
 
     async addUser(username, password) {
-        const url = `${this.url}/rest/v1/users`;
-        const response = await fetch(url, {
+        const response = await fetch(SUPABASE_CONFIG.AUTH_EDGE_FUNCTION_URL, {
             method: 'POST',
-            headers: this.headers,
-            body: JSON.stringify({ username, password })
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.key}`
+            },
+            body: JSON.stringify({ action: 'addUser', username, password })
         });
-
-        if (response.ok) {
-            return { success: true };
-        }
-        const error = await response.json();
-        return { success: false, message: error.message || 'Failed to add user' };
+        return response.json();
     }
 
     async updateUser(userId, username, password) {
-        const url = `${this.url}/rest/v1/users?id=eq.${userId}`;
-        const updates = { username };
-        if (password) updates.password = password;
-
-        const response = await fetch(url, {
-            method: 'PATCH',
-            headers: this.headers,
-            body: JSON.stringify(updates)
+        const response = await fetch(SUPABASE_CONFIG.AUTH_EDGE_FUNCTION_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.key}`
+            },
+            body: JSON.stringify({ action: 'updateUser', userId, username, password })
         });
-
-        return { success: response.ok };
+        return response.json();
     }
 
     async deleteUser(userId) {
-        const url = `${this.url}/rest/v1/users?id=eq.${userId}`;
-        const response = await fetch(url, {
-            method: 'DELETE',
-            headers: this.headers
+        const response = await fetch(SUPABASE_CONFIG.AUTH_EDGE_FUNCTION_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.key}`
+            },
+            body: JSON.stringify({ action: 'deleteUser', userId })
         });
-
-        return { success: response.ok };
+        return response.json();
     }
 
     // ==================== EMAIL WEBHOOKS ====================
@@ -178,10 +179,14 @@ class SupabaseClient {
         const evaluationUrl = `${SUPABASE_CONFIG.BASE_URL}/evaluate.html?caseId=${ticket.case_id}`;
 
         try {
-            const response = await fetch(SUPABASE_CONFIG.N8N_EVALUATION_EMAIL_WEBHOOK, {
+            const response = await fetch(SUPABASE_CONFIG.SEND_EMAIL_EDGE_FUNCTION_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.key}`
+                },
                 body: JSON.stringify({
+                    type: 'evaluation',
                     email: ticket.submitter_name,
                     caseId: ticket.case_id,
                     submitterName: ticket.submitter_name,
@@ -234,10 +239,14 @@ class SupabaseClient {
         const followupUrl = `${SUPABASE_CONFIG.BASE_URL}/problem-followup.html?caseId=${ticket.case_id}`;
 
         try {
-            const response = await fetch(SUPABASE_CONFIG.N8N_FOLLOWUP_EMAIL_WEBHOOK, {
+            const response = await fetch(SUPABASE_CONFIG.SEND_EMAIL_EDGE_FUNCTION_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.key}`
+                },
                 body: JSON.stringify({
+                    type: 'problem-followup',
                     email: ticket.submitter_name,
                     caseId: ticket.case_id,
                     problem: ticket.problem_details,
