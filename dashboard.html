@@ -1968,7 +1968,12 @@
                             case 'sendProblemFollowupEmail':
                                 const ticket = await supabase.getTicketByCaseId(data.caseId);
                                 if (ticket) {
-                                    result = await supabase.sendProblemFollowupEmail(ticket);
+                                    // เช็ค email_problem_status ก่อนส่ง - ถ้าส่งไปแล้ว ไม่ต้องส่งอีก
+                                    if (ticket.email_problem_status && ticket.email_problem_status.trim() !== '' && !ticket.email_problem_status.includes('Failed')) {
+                                        result = { success: true, message: 'ส่งเมลสอบถามไปแล้วก่อนหน้านี้' };
+                                    } else {
+                                        result = await supabase.sendProblemFollowupEmail(ticket);
+                                    }
                                 }
                                 break;
 
@@ -2349,6 +2354,8 @@
                             // Problem Followup Countdown - Show only for closed tickets without EmailProblem
                             if (ticket.Status !== 'Closed') return '';
                             if (ticket.EmailProblem && ticket.EmailProblem.toString().trim() !== '') return '';
+                            // ถ้าเพิ่งส่งไปเร็วๆ นี้ (อยู่ใน recentlySentProblemCases) ไม่ต้องแสดง countdown
+                            if (recentlySentProblemCases.has(ticket.CaseID)) return `<span class="badge bg-info bg-opacity-25 text-info border border-info"><i class="bi bi-envelope-check me-1"></i>ส่งเมลสอบถามแล้ว</span>`;
 
                             return `<div class="problem-countdown-container" data-case-id="${sanitizeHTML(ticket.CaseID)}" data-closed-date="${sanitizeHTML(ticket.ClosedDate)}" data-closed-time="${sanitizeHTML(ticket.ClosedTime)}">
                                     <div class="countdown-label"><i class="bi bi-envelope-exclamation"></i> <span class="problem-countdown-status-text">ส่งเมลสอบถามปัญหาอัตโนมัติใน</span></div>
@@ -2357,7 +2364,7 @@
                         })()}
                             <div class="mt-auto text-end pt-3">
                             ${ticket.Status === 'Open' ? `<button class="btn btn-success btn-sm close-ticket-btn" data-row-index="${ticket.RowIndex}"><i class="bi bi-check-circle"></i> ปิดเคส</button>` : ''}
-                            ${ticket.Status === 'Closed' && (!ticket.EmailProblem || ticket.EmailProblem.toString().trim() === '') ? `<button class="btn btn-outline-warning btn-sm send-problem-followup-btn" data-case-id="${sanitizeHTML(ticket.CaseID)}" data-tippy-content="ส่งเมลสอบถามปัญหาหลังแก้ไข"><i class="bi bi-envelope-exclamation"></i> สอบถามปัญหา</button>` : ''}
+                            ${ticket.Status === 'Closed' && (!ticket.EmailProblem || ticket.EmailProblem.toString().trim() === '') && !recentlySentProblemCases.has(ticket.CaseID) ? `<button class="btn btn-outline-warning btn-sm send-problem-followup-btn" data-case-id="${sanitizeHTML(ticket.CaseID)}" data-tippy-content="ส่งเมลสอบถามปัญหาหลังแก้ไข"><i class="bi bi-envelope-exclamation"></i> สอบถามปัญหา</button>` : ''}
                             ${ticket.Status === 'Closed' && ticket.EmailProblem && ticket.EmailProblem.toString().includes('Failed') ? `<span class="badge bg-danger bg-opacity-75" style="font-size: 0.75rem;" data-tippy-content="${sanitizeHTML(ticket.EmailProblem)}"><i class="bi bi-envelope-x-fill me-1"></i>ส่งไม่ผ่าน</span>
                             <button class="btn btn-outline-danger btn-sm resend-problem-followup-btn mt-1" data-case-id="${sanitizeHTML(ticket.CaseID)}" style="font-size: 0.7rem; padding: 0.15rem 0.4rem;" data-tippy-content="กดเพื่อส่งเมลสอบถามปัญหาใหม่"><i class="bi bi-arrow-repeat me-1"></i>ส่งซ้ำ</button>` : ''}
                             ${ticket.Status === 'Closed' && ticket.EmailProblem && ticket.EmailProblem.toString().trim() !== '' && !ticket.EmailProblem.toString().includes('Failed') ? `<span class="badge bg-info bg-opacity-25 text-info border border-info" data-tippy-content="${sanitizeHTML(ticket.EmailProblem)}"><i class="bi bi-envelope-check me-1"></i>ส่งเมลสอบถามแล้ว</span>` : ''}
