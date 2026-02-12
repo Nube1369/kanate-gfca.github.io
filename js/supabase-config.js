@@ -199,13 +199,9 @@ class SupabaseClient {
                 }
             }
 
-            // Block if 'Sending...' AND NOT expired
+            // Block ONLY if actively sending (not expired)
+            // Note: 'Sent' check is NOT here — callers handle resend logic with cooldowns
             if (currentStatus === 'Sending...' && !isLockExpired) return false;
-
-            // Block if already sent successfully ('Sent', 'SENT:...')
-            if (currentStatus && typeof currentStatus === 'string' && currentStatus.toUpperCase().startsWith('SENT') && !currentStatus.includes('Failed')) {
-                return false;
-            }
 
             // 3. Set status to 'Sending...' using standard updateTicket
             await this.updateTicket(caseId, { [statusCol]: 'Sending...' });
