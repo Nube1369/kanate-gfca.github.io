@@ -180,27 +180,19 @@ class SupabaseClient {
         const statusCol = type === 'evaluation' ? 'email_status' : 'email_problem_status';
 
         try {
-            // 1. Fetch current status and last_updated
-            // We select directly to inspect the raw values
-            const urlGet = `${this.url}/rest/v1/tickets?case_id=eq.${caseId}&select=${statusCol},last_updated`;
-            const responseGet = await fetch(urlGet, { headers: this.headers });
-            if (!responseGet.ok) return false;
+            // 1. Fetch current status
+            const ticket = await this.getTicketByCaseId(caseId);
+            if (!ticket) return false;
 
-            const rows = await responseGet.json();
-            if (!rows || rows.length === 0) return false;
-
-            const ticket = rows[0];
             const currentStatus = ticket[statusCol];
             const lastUpdated = ticket.last_updated;
 
-            // 2. Lock Expiration Check & Client-side Validation
+            // 2. Lock Expiration Check
             const LOCK_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
             let isLockExpired = false;
 
             if (currentStatus === 'Sending...') {
-                const updatedTime = lastUpdated ? new Date(lastUpdated).getTime() : 0;
-                // If invalid date or no date, assume 0 (very old) -> expired
-                const timeDiff = Date.now() - (isNaN(updatedTime) ? 0 : updatedTime);
+                const timeDiff = Date.now() - (lastUpdated || 0);
                 if (timeDiff > LOCK_TIMEOUT_MS) {
                     isLockExpired = true;
                     console.log(`Lock expired for ${caseId} (${Math.round(timeDiff / 1000)}s), stealing lock...`);
@@ -210,41 +202,16 @@ class SupabaseClient {
             // Block if 'Sending...' AND NOT expired
             if (currentStatus === 'Sending...' && !isLockExpired) return false;
 
-            // Block if 'Sent...' (unless Failed)
-            if (currentStatus && typeof currentStatus === 'string' && currentStatus.startsWith('Sent') && !currentStatus.includes('Failed')) {
+            // Block if already sent successfully ('Sent', 'SENT:...')
+            if (currentStatus && typeof currentStatus === 'string' && currentStatus.toUpperCase().startsWith('SENT') && !currentStatus.includes('Failed')) {
                 return false;
             }
 
-            // 3. Optimistic Lock: Update only if last_updated hasn't changed
-            let updateUrl = `${this.url}/rest/v1/tickets?case_id=eq.${caseId}`;
-
-            // If last_updated exists, match it. If null, match null.
-            if (lastUpdated) {
-                updateUrl += `&last_updated=eq.${lastUpdated}`;
-            } else {
-                updateUrl += `&last_updated=is.null`;
-            }
-
-            const responsePatch = await fetch(updateUrl, {
-                method: 'PATCH',
-                headers: {
-                    ...this.headers,
-                    'Prefer': 'return=representation'
-                },
-                body: JSON.stringify({
-                    [statusCol]: 'Sending...',
-                    last_updated: Date.now()
-                })
-            });
-
-            if (!responsePatch.ok) return false;
-            const data = await responsePatch.json();
-
-            // If rows > 0, we successfully updated -> lock acquired
-            return data && data.length > 0;
+            // 3. Set status to 'Sending...' using standard updateTicket
+            await this.updateTicket(caseId, { [statusCol]: 'Sending...' });
+            return true;
         } catch (error) {
             console.error('Error locking ticket:', error);
-            // On error, better to fail safe (don't send) than duplicate
             return false;
         }
     }
