@@ -178,16 +178,44 @@ class SupabaseClient {
 
     async tryLockTicketForEmail(caseId, type) {
         const statusCol = type === 'evaluation' ? 'email_status' : 'email_problem_status';
-        // PostgREST conditional update: Only update if status is NULL OR Empty OR starts with 'Failed'
-        const filter = `&or=(${statusCol}.is.null,${statusCol}.eq.,${statusCol}.like.Failed*)`;
-        const url = `${this.url}/rest/v1/tickets?case_id=eq.${caseId}${filter}`;
 
         try {
-            const response = await fetch(url, {
+            // 1. Fetch current status and last_updated
+            // We select directly to inspect the raw values
+            const urlGet = `${this.url}/rest/v1/tickets?case_id=eq.${caseId}&select=${statusCol},last_updated`;
+            const responseGet = await fetch(urlGet, { headers: this.headers });
+            if (!responseGet.ok) return false;
+
+            const rows = await responseGet.json();
+            if (!rows || rows.length === 0) return false;
+
+            const ticket = rows[0];
+            const currentStatus = ticket[statusCol];
+            const lastUpdated = ticket.last_updated;
+
+            // 2. Client-side check: Is it safe to send?
+            // Allow if NULL, Empty, or 'Failed...'
+            // Block if 'Sending...' or 'Sent...' (unless Failed)
+            if (currentStatus === 'Sending...') return false;
+            if (currentStatus && typeof currentStatus === 'string' && currentStatus.startsWith('Sent') && !currentStatus.includes('Failed')) {
+                return false;
+            }
+
+            // 3. Optimistic Lock: Update only if last_updated hasn't changed
+            let updateUrl = `${this.url}/rest/v1/tickets?case_id=eq.${caseId}`;
+
+            // If last_updated exists, match it. If null, match null.
+            if (lastUpdated) {
+                updateUrl += `&last_updated=eq.${lastUpdated}`;
+            } else {
+                updateUrl += `&last_updated=is.null`;
+            }
+
+            const responsePatch = await fetch(updateUrl, {
                 method: 'PATCH',
                 headers: {
                     ...this.headers,
-                    'Prefer': 'return=representation' // Return rows if updated
+                    'Prefer': 'return=representation'
                 },
                 body: JSON.stringify({
                     [statusCol]: 'Sending...',
@@ -195,12 +223,14 @@ class SupabaseClient {
                 })
             });
 
-            if (!response.ok) return false;
-            const data = await response.json();
+            if (!responsePatch.ok) return false;
+            const data = await responsePatch.json();
+
             // If rows > 0, we successfully updated -> lock acquired
             return data && data.length > 0;
         } catch (error) {
             console.error('Error locking ticket:', error);
+            // On error, better to fail safe (don't send) than duplicate
             return false;
         }
     }
