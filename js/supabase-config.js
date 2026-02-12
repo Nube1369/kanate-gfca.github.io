@@ -182,6 +182,11 @@ class SupabaseClient {
         const evaluationUrl = `${SUPABASE_CONFIG.BASE_URL}/evaluate.html?caseId=${ticket.case_id}`;
 
         try {
+            // Set status to Sending... to prevent race conditions
+            await this.updateTicket(ticket.case_id, {
+                email_status: 'Sending...'
+            });
+
             const response = await fetch(SUPABASE_CONFIG.N8N_EVALUATION_EMAIL_WEBHOOK, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -238,6 +243,11 @@ class SupabaseClient {
         const followupUrl = `${SUPABASE_CONFIG.BASE_URL}/problem-followup.html?caseId=${ticket.case_id}`;
 
         try {
+            // Set status to Sending... to prevent race conditions
+            await this.updateTicket(ticket.case_id, {
+                email_problem_status: 'Sending...'
+            });
+
             const response = await fetch(SUPABASE_CONFIG.N8N_FOLLOWUP_EMAIL_WEBHOOK, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

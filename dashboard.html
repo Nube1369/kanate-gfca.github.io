@@ -1961,8 +1961,10 @@
                                     if (updatedTicket) {
                                         const teamsResult = await supabase.sendTeamsNotification(updatedTicket, 'closed');
                                         console.log('Teams notification result:', teamsResult);
-                                        // ส่ง evaluation email
-                                        await supabase.sendEvaluationEmail(updatedTicket);
+                                        // ส่ง evaluation email Check if already sent/sending
+                                        if (!updatedTicket.email_status || updatedTicket.email_status.includes('Failed')) {
+                                            await supabase.sendEvaluationEmail(updatedTicket);
+                                        }
                                     }
                                     result = { success: true };
                                 }
@@ -1984,8 +1986,10 @@
                                 const ticket = await supabase.getTicketByCaseId(data.caseId);
                                 if (ticket) {
                                     // เช็ค email_problem_status ก่อนส่ง - ถ้าส่งไปแล้ว ไม่ต้องส่งอีก
+                                    // เช็ค email_problem_status ก่อนส่ง - ถ้าส่งไปแล้ว ไม่ต้องส่งอีก
                                     if (ticket.email_problem_status && ticket.email_problem_status.trim() !== '' && !ticket.email_problem_status.includes('Failed')) {
-                                        result = { success: true, message: 'ส่งเมลสอบถามไปแล้วก่อนหน้านี้' };
+                                        const isSending = ticket.email_problem_status === 'Sending...';
+                                        result = { success: true, message: isSending ? 'กำลังส่งเมลอยู่...' : 'ส่งเมลสอบถามไปแล้วก่อนหน้านี้' };
                                     } else {
                                         result = await supabase.sendProblemFollowupEmail(ticket);
                                     }
@@ -2774,8 +2778,17 @@
                         throw new Error('ไม่พบเคส');
                     }
 
-                    // เช็ค email_status จาก DB - ถ้าเพิ่งส่งไปแล้ว (ส่งภายใน 10 นาที) ไม่ต้องส่งอีก
-                    if (ticket.email_status === 'Sent' || ticket.email_status === 'Resent') {
+                    // เช็ค email_status จาก DB - ถ้าเพิ่งส่งไปแล้ว (ส่งภายใน 10 นาที) หรือกำลังส่งอยู่ ไม่ต้องส่งอีก
+                    if (ticket.email_status === 'Sent' || ticket.email_status === 'Resent' || ticket.email_status === 'Sending...') {
+                        // ถ้ากำลังส่งอยู่ ก็ถือว่าส่งแล้ว
+                        if (ticket.email_status === 'Sending...') {
+                            container.classList.remove('countdown-sending');
+                            container.querySelector('.countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>กำลังส่งจากแท็บอื่น...';
+                            container.querySelector('.countdown-timer').textContent = '⏳';
+                            pendingResends.delete(caseId);
+                            return;
+                        }
+
                         const lastSentDate = ticket.last_email_sent_date;
                         const lastSentTime = ticket.last_email_sent_time;
                         if (lastSentDate && lastSentTime) {
@@ -2930,8 +2943,16 @@
                         throw new Error('ไม่พบเคส');
                     }
 
-                    // เช็ค email_problem_status จาก DB - ถ้าส่งไปแล้ว ไม่ต้องส่งอีก
+                    // เช็ค email_problem_status จาก DB - ถ้าส่งไปแล้ว หรือกำลังส่งอยู่ ไม่ต้องส่งอีก
                     if (ticket.email_problem_status && ticket.email_problem_status.trim() !== '' && !ticket.email_problem_status.includes('Failed')) {
+                        if (ticket.email_problem_status === 'Sending...') {
+                            container.classList.remove('problem-countdown-sending');
+                            container.querySelector('.problem-countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>กำลังส่งจากแท็บอื่น...';
+                            container.querySelector('.problem-countdown-timer').textContent = '⏳';
+                            pendingProblemFollowups.delete(caseId);
+                            return;
+                        }
+
                         container.classList.remove('problem-countdown-sending');
                         container.classList.add('problem-countdown-sent');
                         container.querySelector('.problem-countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>ส่งเมลสอบถามปัญหาแล้ว';
@@ -3213,6 +3234,10 @@
                                 showAlert('ไม่พบเคส', false);
                                 return;
                             }
+                            // Check if recently sent (within 10 minutes) or sending
+                            if (ticket.email_status === 'Sending...') {
+                                showAlert('กำลังส่งเมลอยู่ กรุณารอสักครู่', false); return;
+                            }
                             const result = await supabase.sendEvaluationEmail(ticket);
                             if (result.success) {
                                 showAlert('ส่งเมลขอประเมินสำเร็จ!', true);
@@ -3238,6 +3263,10 @@
                             if (!ticket) {
                                 showAlert('ไม่พบเคส', false);
                                 return;
+                            }
+                            // Check if already sent/sending
+                            if (ticket.email_problem_status && !ticket.email_problem_status.includes('Failed')) {
+                                showAlert('ส่งเมลสอบถามปัญหาไปแล้ว หรือกำลังส่งอยู่', false); return;
                             }
                             const result = await supabase.sendProblemFollowupEmail(ticket);
                             if (result.success) {
