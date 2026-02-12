@@ -176,16 +176,47 @@ class SupabaseClient {
         return response.json();
     }
 
+    async tryLockTicketForEmail(caseId, type) {
+        const statusCol = type === 'evaluation' ? 'email_status' : 'email_problem_status';
+        // PostgREST conditional update: Only update if status is NULL OR Empty OR starts with 'Failed'
+        const filter = `&or=(${statusCol}.is.null,${statusCol}.eq.,${statusCol}.like.Failed*)`;
+        const url = `${this.url}/rest/v1/tickets?case_id=eq.${caseId}${filter}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    ...this.headers,
+                    'Prefer': 'return=representation' // Return rows if updated
+                },
+                body: JSON.stringify({
+                    [statusCol]: 'Sending...',
+                    last_updated: Date.now()
+                })
+            });
+
+            if (!response.ok) return false;
+            const data = await response.json();
+            // If rows > 0, we successfully updated -> lock acquired
+            return data && data.length > 0;
+        } catch (error) {
+            console.error('Error locking ticket:', error);
+            return false;
+        }
+    }
+
     // ==================== EMAIL WEBHOOKS ====================
 
     async sendEvaluationEmail(ticket) {
         const evaluationUrl = `${SUPABASE_CONFIG.BASE_URL}/evaluate.html?caseId=${ticket.case_id}`;
 
         try {
-            // Set status to Sending... to prevent race conditions
-            await this.updateTicket(ticket.case_id, {
-                email_status: 'Sending...'
-            });
+            // Attempt to acquire atomic lock
+            const locked = await this.tryLockTicketForEmail(ticket.case_id, 'evaluation');
+            if (!locked) {
+                // Failed to acquire lock -> another tab is handling it
+                return { success: true, message: 'Already sending from another tab' };
+            }
 
             const response = await fetch(SUPABASE_CONFIG.N8N_EVALUATION_EMAIL_WEBHOOK, {
                 method: 'POST',
@@ -243,10 +274,12 @@ class SupabaseClient {
         const followupUrl = `${SUPABASE_CONFIG.BASE_URL}/problem-followup.html?caseId=${ticket.case_id}`;
 
         try {
-            // Set status to Sending... to prevent race conditions
-            await this.updateTicket(ticket.case_id, {
-                email_problem_status: 'Sending...'
-            });
+            // Attempt to acquire atomic lock
+            const locked = await this.tryLockTicketForEmail(ticket.case_id, 'problem');
+            if (!locked) {
+                // Failed to acquire lock -> another tab is handling it
+                return { success: true, message: 'Already sending from another tab' };
+            }
 
             const response = await fetch(SUPABASE_CONFIG.N8N_FOLLOWUP_EMAIL_WEBHOOK, {
                 method: 'POST',
