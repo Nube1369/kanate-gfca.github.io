@@ -193,10 +193,24 @@ class SupabaseClient {
             const currentStatus = ticket[statusCol];
             const lastUpdated = ticket.last_updated;
 
-            // 2. Client-side check: Is it safe to send?
-            // Allow if NULL, Empty, or 'Failed...'
-            // Block if 'Sending...' or 'Sent...' (unless Failed)
-            if (currentStatus === 'Sending...') return false;
+            // 2. Lock Expiration Check & Client-side Validation
+            const LOCK_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
+            let isLockExpired = false;
+
+            if (currentStatus === 'Sending...') {
+                const updatedTime = lastUpdated ? new Date(lastUpdated).getTime() : 0;
+                // If invalid date or no date, assume 0 (very old) -> expired
+                const timeDiff = Date.now() - (isNaN(updatedTime) ? 0 : updatedTime);
+                if (timeDiff > LOCK_TIMEOUT_MS) {
+                    isLockExpired = true;
+                    console.log(`Lock expired for ${caseId} (${Math.round(timeDiff / 1000)}s), stealing lock...`);
+                }
+            }
+
+            // Block if 'Sending...' AND NOT expired
+            if (currentStatus === 'Sending...' && !isLockExpired) return false;
+
+            // Block if 'Sent...' (unless Failed)
             if (currentStatus && typeof currentStatus === 'string' && currentStatus.startsWith('Sent') && !currentStatus.includes('Failed')) {
                 return false;
             }
