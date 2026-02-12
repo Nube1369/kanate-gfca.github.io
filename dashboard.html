@@ -2750,15 +2750,17 @@
             };
 
             const triggerAutoResend = async (caseId, rowIndex, container) => {
+                // Guard against re-entry from setInterval BEFORE async lock acquire
+                pendingResends.add(caseId);
+
                 // Atomic cross-tab lock acquire
                 const gotLock = await acquireLock(caseId);
                 if (!gotLock) {
+                    pendingResends.delete(caseId);
                     container.querySelector('.countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>กำลังส่งจากแท็บอื่น...';
                     container.querySelector('.countdown-timer').textContent = '⏳';
                     return;
                 }
-
-                pendingResends.add(caseId);
 
                 // Update UI to show sending state
                 container.classList.add('countdown-sending');
@@ -2841,6 +2843,7 @@
                     // Update emailStatus in container to prevent further auto-retries
                     container.dataset.emailStatus = 'Failed';
                 } finally {
+                    releaseLock(caseId);
                     pendingResends.delete(caseId);
                 }
             };
@@ -2903,15 +2906,17 @@
             };
 
             const triggerAutoProblemFollowup = async (caseId, container) => {
+                // Guard against re-entry from setInterval BEFORE async lock acquire
+                pendingProblemFollowups.add(caseId);
+
                 // Atomic cross-tab lock acquire
                 const gotLock = await acquireLock(`problem_${caseId}`);
                 if (!gotLock) {
+                    pendingProblemFollowups.delete(caseId);
                     container.querySelector('.problem-countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>กำลังส่งจากแท็บอื่น...';
                     container.querySelector('.problem-countdown-timer').textContent = '⏳';
                     return;
                 }
-
-                pendingProblemFollowups.add(caseId);
 
                 // Update UI to show sending state
                 container.classList.add('problem-countdown-sending');
@@ -2963,6 +2968,7 @@
                     // Mark as recently sent to prevent rapid re-triggers even on error
                     recentlySentProblemCases.set(caseId, Date.now());
                 } finally {
+                    releaseLock(`problem_${caseId}`);
                     pendingProblemFollowups.delete(caseId);
                 }
             };
