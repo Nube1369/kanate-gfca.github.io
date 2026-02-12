@@ -2635,7 +2635,7 @@
             // ===== COUNTDOWN TIMER & AUTO RESEND EVALUATION EMAIL =====
             let countdownIntervalId = null;
             const RESEND_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-            const MAX_RESEND_COUNT = 5; // Maximum number of times to auto-resend evaluation email
+            // No maximum limit - auto-resend indefinitely until evaluated
             const pendingResends = new Set(); // Track cases that are currently being resent
             const recentlySentCases = new Map(); // Track recently sent cases with timestamp to prevent rapid re-triggers
 
@@ -2696,12 +2696,8 @@
                                 // Already sent recently - show waiting message
                                 container.querySelector('.countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>ส่งเมลแล้ว รอนับถอยหลังรอบถัดไป';
                                 container.querySelector('.countdown-timer').textContent = '✓';
-                            } else if (!pendingResends.has(caseId) && !isRecentlySent && sendCount < MAX_RESEND_COUNT) {
+                            } else if (!pendingResends.has(caseId) && !isRecentlySent) {
                                 triggerAutoResend(caseId, rowIndex, container);
-                            } else if (sendCount >= MAX_RESEND_COUNT) {
-                                // Max count reached, show message
-                                container.querySelector('.countdown-status-text').textContent = 'ถึงจำนวนสูงสุดที่ส่งได้แล้ว';
-                                container.querySelector('.countdown-timer').textContent = `${sendCount}/${MAX_RESEND_COUNT}`;
                             }
                         } else {
                             // Display countdown
