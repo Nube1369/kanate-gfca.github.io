@@ -2639,21 +2639,59 @@
             const pendingResends = new Set(); // Track cases that are currently being resent
             const recentlySentCases = new Map(); // Track recently sent cases with timestamp to prevent rapid re-triggers
 
-            // Cross-tab lock: ป้องกันหลายแท็บส่งเมลซ้ำ
-            const isLockedByAnotherTab = (caseId) => {
-                const lockKey = `email_lock_${caseId}`;
+            // Cross-tab lock: ป้องกันหลายแท็บส่งเมลซ้ำ (Atomic pattern)
+            const TAB_ID = `tab_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+            // Atomic lock acquire: set our tab ID, wait, then verify we still own the lock
+            const acquireLock = async (lockName) => {
+                const lockKey = `email_lock_${lockName}`;
                 const lockData = localStorage.getItem(lockKey);
-                if (!lockData) return false;
-                const lockTime = parseInt(lockData);
-                // Lock หมดอายุหลัง 10 นาที
-                if (Date.now() - lockTime > 600000) {
-                    localStorage.removeItem(lockKey);
+
+                // Check if another tab holds a non-expired lock
+                if (lockData) {
+                    try {
+                        const parsed = JSON.parse(lockData);
+                        if (parsed.tabId !== TAB_ID && (Date.now() - parsed.time) < 600000) {
+                            return false; // Another tab holds the lock
+                        }
+                    } catch (e) {
+                        // Old format lock data - check expiry
+                        const lockTime = parseInt(lockData);
+                        if (!isNaN(lockTime) && (Date.now() - lockTime) < 600000) {
+                            return false;
+                        }
+                    }
+                }
+
+                // Write our tab ID as the lock owner
+                localStorage.setItem(lockKey, JSON.stringify({ tabId: TAB_ID, time: Date.now() }));
+
+                // Wait random delay (100-500ms) to let other tabs also write
+                await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 400));
+
+                // Verify we still own the lock (last writer wins)
+                const currentLock = localStorage.getItem(lockKey);
+                try {
+                    const parsed = JSON.parse(currentLock);
+                    return parsed.tabId === TAB_ID;
+                } catch (e) {
                     return false;
                 }
-                return true;
             };
-            const setTabLock = (caseId) => {
-                localStorage.setItem(`email_lock_${caseId}`, Date.now().toString());
+
+            const releaseLock = (lockName) => {
+                const lockKey = `email_lock_${lockName}`;
+                const lockData = localStorage.getItem(lockKey);
+                if (lockData) {
+                    try {
+                        const parsed = JSON.parse(lockData);
+                        if (parsed.tabId === TAB_ID) {
+                            // Keep the lock for 10 minutes to prevent re-entry
+                            // But mark it as completed
+                            localStorage.setItem(lockKey, JSON.stringify({ tabId: TAB_ID, time: Date.now(), done: true }));
+                        }
+                    } catch (e) { /* ignore */ }
+                }
             };
 
             const startCountdownTimers = () => {
@@ -2712,15 +2750,15 @@
             };
 
             const triggerAutoResend = async (caseId, rowIndex, container) => {
-                // Cross-tab lock check
-                if (isLockedByAnotherTab(caseId)) {
+                // Atomic cross-tab lock acquire
+                const gotLock = await acquireLock(caseId);
+                if (!gotLock) {
                     container.querySelector('.countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>กำลังส่งจากแท็บอื่น...';
                     container.querySelector('.countdown-timer').textContent = '⏳';
                     return;
                 }
 
                 pendingResends.add(caseId);
-                setTabLock(caseId);
 
                 // Update UI to show sending state
                 container.classList.add('countdown-sending');
@@ -2865,15 +2903,15 @@
             };
 
             const triggerAutoProblemFollowup = async (caseId, container) => {
-                // Cross-tab lock check
-                if (isLockedByAnotherTab(`problem_${caseId}`)) {
+                // Atomic cross-tab lock acquire
+                const gotLock = await acquireLock(`problem_${caseId}`);
+                if (!gotLock) {
                     container.querySelector('.problem-countdown-status-text').innerHTML = '<i class="bi bi-check-circle me-1"></i>กำลังส่งจากแท็บอื่น...';
                     container.querySelector('.problem-countdown-timer').textContent = '⏳';
                     return;
                 }
 
                 pendingProblemFollowups.add(caseId);
-                setTabLock(`problem_${caseId}`);
 
                 // Update UI to show sending state
                 container.classList.add('problem-countdown-sending');
