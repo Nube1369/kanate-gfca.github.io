@@ -269,11 +269,17 @@ class SupabaseClient {
 
             return result;
         } catch (error) {
-            // Network error - only update status, don't update timestamp
+            // Network error - check for SSL/CORS issue
+            let errorMessage = error.message;
+            if (errorMessage === 'Failed to fetch') {
+                errorMessage = 'Certificate Error: กรุณาเปิด https://192.168.0.88:5678 ใน tab ใหม่แล้วกด Advanced > Proceed';
+            }
+
+            // Only update status, don't update timestamp
             await this.updateTicket(ticket.case_id, {
-                email_status: `Failed: ${error.message}`
+                email_status: `Failed: ${errorMessage}`
             });
-            return { success: false, message: error.message };
+            return { success: false, message: errorMessage };
         }
     }
 
@@ -320,11 +326,17 @@ class SupabaseClient {
 
             return result;
         } catch (error) {
-            // Network error - only update status with error
+            // Network error - check for SSL/CORS issue
+            let errorMessage = error.message;
+            if (errorMessage === 'Failed to fetch') {
+                errorMessage = 'Certificate Error: กรุณาเปิด https://192.168.0.88:5678 ใน tab ใหม่แล้วกด Advanced > Proceed';
+            }
+
+            // Only update status with error
             await this.updateTicket(ticket.case_id, {
-                email_problem_status: `Failed: ${error.message}`
+                email_problem_status: `Failed: ${errorMessage}`
             });
-            return { success: false, message: error.message };
+            return { success: false, message: errorMessage };
         }
     }
 

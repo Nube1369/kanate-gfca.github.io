@@ -1362,6 +1362,333 @@
             color: #64748b;
             text-align: right;
         }
+
+        /* ===== ADVANCED FILTER PANEL STYLES ===== */
+        .filter-toggle-btn {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+            padding: 0.35rem 0.85rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .filter-toggle-btn:hover {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #93bbfc;
+            transform: translateY(-1px);
+        }
+
+        .filter-toggle-btn.active {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .filter-active-count {
+            background: #3b82f6;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            animation: filterCountPop 0.3s ease;
+        }
+
+        @keyframes filterCountPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .filter-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.3s ease;
+            opacity: 0;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            border-top: 1px solid transparent;
+            padding: 0 1.5rem;
+        }
+
+        .filter-panel.open {
+            max-height: 800px;
+            opacity: 1;
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid rgba(59, 130, 246, 0.15);
+        }
+
+        .filter-section {
+            margin-bottom: 1rem;
+        }
+
+        .filter-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-section-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .filter-section-label i {
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        /* Search Input */
+        .filter-search-input {
+            width: 100%;
+            background: rgba(55, 65, 81, 0.6);
+            border: 1px solid rgba(107, 114, 128, 0.3);
+            border-radius: 0.65rem;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            color: #e2e8f0;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .filter-search-input:focus {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: rgba(55, 65, 81, 0.8);
+        }
+
+        .filter-search-input::placeholder {
+            color: #6b7280;
+        }
+
+        .filter-search-wrapper {
+            position: relative;
+        }
+
+        .filter-search-wrapper i {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        /* Filter Chips */
+        .filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .filter-chip {
+            background: rgba(55, 65, 81, 0.5);
+            border: 1px solid rgba(107, 114, 128, 0.25);
+            color: #94a3b8;
+            padding: 0.3rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .filter-chip:hover {
+            background: rgba(55, 65, 81, 0.8);
+            border-color: rgba(148, 163, 184, 0.4);
+            color: #cbd5e1;
+        }
+
+        .filter-chip.selected {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #93bbfc;
+            font-weight: 600;
+        }
+
+        .filter-chip.chip-open.selected {
+            background: rgba(245, 158, 11, 0.2);
+            border-color: rgba(245, 158, 11, 0.5);
+            color: #fbbf24;
+        }
+
+        .filter-chip.chip-closed.selected {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.5);
+            color: #4ade80;
+        }
+
+        .filter-chip.chip-evaluated.selected {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: rgba(251, 191, 36, 0.5);
+            color: #fbbf24;
+        }
+
+        .filter-chip.chip-pending.selected {
+            background: rgba(148, 163, 184, 0.2);
+            border-color: rgba(148, 163, 184, 0.5);
+            color: #cbd5e1;
+        }
+
+        .filter-chip.chip-email-sent.selected {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: rgba(56, 189, 248, 0.5);
+            color: #38bdf8;
+        }
+
+        .filter-chip.chip-email-failed.selected {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.5);
+            color: #f87171;
+        }
+
+        /* Date Range Filter */
+        .filter-date-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-date-input {
+            background: rgba(55, 65, 81, 0.6);
+            border: 1px solid rgba(107, 114, 128, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.4rem 0.65rem;
+            color: #e2e8f0;
+            font-size: 0.8rem;
+            outline: none;
+            transition: all 0.3s ease;
+            max-width: 165px;
+        }
+
+        .filter-date-input:focus {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-date-separator {
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Star Score Filter */
+        .filter-star-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-star-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .filter-star-label {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            min-width: 20px;
+        }
+
+        .filter-star-select {
+            background: rgba(55, 65, 81, 0.6);
+            border: 1px solid rgba(107, 114, 128, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.3rem 0.4rem;
+            color: #fbbf24;
+            font-size: 0.8rem;
+            outline: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filter-star-select:focus {
+            border-color: rgba(251, 191, 36, 0.5);
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+        }
+
+        /* Filter Actions Row */
+        .filter-actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(107, 114, 128, 0.15);
+            margin-top: 0.5rem;
+        }
+
+        .filter-results-count {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .filter-results-count strong {
+            color: #60a5fa;
+        }
+
+        .filter-clear-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #f87171;
+            padding: 0.3rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .filter-clear-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .filter-panel.open {
+                padding: 1rem;
+            }
+            .filter-date-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-date-input {
+                max-width: 100%;
+            }
+            .filter-star-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 
@@ -1522,11 +1849,85 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center"><span><i
                                     class="bi bi-list-task me-2"></i>รายการแจ้งปัญหาทั้งหมด</span>
-                            <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button id="ticket-filter-toggle" class="filter-toggle-btn" onclick="document.getElementById('ticket-filter-panel').classList.toggle('open'); this.classList.toggle('active');">
+                                    <i class="bi bi-funnel"></i> ตัวกรอง <span id="ticket-filter-count" class="filter-active-count" style="display:none;">0</span>
+                                </button>
                                 <button id="export-excel-btn" class="btn btn-sm btn-success me-2"><i
                                         class="bi bi-file-earmark-excel me-1"></i>ดาวน์โหลด Excel</button>
                                 <button id="refresh-btn" class="btn btn-sm btn-outline-secondary"><i
                                         class="bi bi-arrow-clockwise me-1"></i>รีเฟรช</button>
+                            </div>
+                        </div>
+                        <!-- Ticket Filter Panel -->
+                        <div id="ticket-filter-panel" class="filter-panel">
+                            <div class="row g-3">
+                                <!-- Search -->
+                                <div class="col-12">
+                                    <div class="filter-section">
+                                        <div class="filter-section-label"><i class="bi bi-search"></i> ค้นหา</div>
+                                        <div class="filter-search-wrapper">
+                                            <i class="bi bi-search"></i>
+                                            <input type="text" id="ticket-filter-search" class="filter-search-input" placeholder="ค้นหา Case ID, ชื่อผู้แจ้ง, รายละเอียด, เบอร์, รหัสพนักงาน...">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Status -->
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="filter-section">
+                                        <div class="filter-section-label"><i class="bi bi-circle-fill"></i> สถานะ</div>
+                                        <div class="filter-chips" id="ticket-filter-status">
+                                            <span class="filter-chip chip-open" data-value="Open"><i class="bi bi-folder2-open"></i> Open</span>
+                                            <span class="filter-chip chip-closed" data-value="Closed"><i class="bi bi-patch-check"></i> Closed</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Problem Type -->
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="filter-section">
+                                        <div class="filter-section-label"><i class="bi bi-tag"></i> ประเภทปัญหา</div>
+                                        <div class="filter-chips" id="ticket-filter-type">
+                                            <!-- populated dynamically -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Evaluation Status -->
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="filter-section">
+                                        <div class="filter-section-label"><i class="bi bi-star-half"></i> สถานะประเมิน</div>
+                                        <div class="filter-chips" id="ticket-filter-eval">
+                                            <span class="filter-chip chip-evaluated" data-value="evaluated"><i class="bi bi-star-fill"></i> ประเมินแล้ว</span>
+                                            <span class="filter-chip chip-pending" data-value="pending"><i class="bi bi-hourglass-split"></i> รอประเมิน</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Date Range -->
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="filter-section">
+                                        <div class="filter-section-label"><i class="bi bi-calendar-range"></i> ช่วงวันที่แจ้ง</div>
+                                        <div class="filter-date-group">
+                                            <input type="date" id="ticket-filter-date-from" class="filter-date-input" title="จากวันที่">
+                                            <span class="filter-date-separator">ถึง</span>
+                                            <input type="date" id="ticket-filter-date-to" class="filter-date-input" title="ถึงวันที่">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Email Status -->
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="filter-section">
+                                        <div class="filter-section-label"><i class="bi bi-envelope"></i> สถานะอีเมล</div>
+                                        <div class="filter-chips" id="ticket-filter-email">
+                                            <span class="filter-chip chip-email-sent" data-value="sent"><i class="bi bi-envelope-check"></i> ส่งแล้ว</span>
+                                            <span class="filter-chip chip-email-failed" data-value="failed"><i class="bi bi-envelope-x"></i> ส่งไม่สำเร็จ</span>
+                                            <span class="filter-chip" data-value="none"><i class="bi bi-envelope"></i> ยังไม่ส่ง</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Actions Row -->
+                            <div class="filter-actions-row">
+                                <span class="filter-results-count" id="ticket-filter-results">แสดง <strong>0</strong> จาก <strong>0</strong> รายการ</span>
+                                <button class="filter-clear-btn" id="ticket-filter-clear"><i class="bi bi-x-circle"></i> ล้างตัวกรองทั้งหมด</button>
                             </div>
                         </div>
                         <div class="card-body">
@@ -1668,7 +2069,113 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <span><i class="bi bi-star-fill me-2"></i>รายการประเมินทั้งหมด</span>
-                            <span id="evaluation-count" class="badge bg-warning text-dark">0 รายการ</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <button id="eval-filter-toggle" class="filter-toggle-btn" onclick="document.getElementById('eval-filter-panel').classList.toggle('open'); this.classList.toggle('active');">
+                                    <i class="bi bi-funnel"></i> ตัวกรอง <span id="eval-filter-count" class="filter-active-count" style="display:none;">0</span>
+                                </button>
+                                <span id="evaluation-count" class="badge bg-warning text-dark">0 รายการ</span>
+                            </div>
+                        </div>
+                        <!-- Evaluation Filter Panel -->
+                        <div id="eval-filter-panel" class="filter-panel">
+                            <div class="row g-3">
+                                <!-- Search -->
+                                <div class="col-12">
+                                    <div class="filter-section">
+                                        <div class="filter-section-label"><i class="bi bi-search"></i> ค้นหา</div>
+                                        <div class="filter-search-wrapper">
+                                            <i class="bi bi-search"></i>
+                                            <input type="text" id="eval-filter-search" class="filter-search-input" placeholder="ค้นหา Case ID, ชื่อผู้แจ้ง, รายละเอียด...">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Problem Type -->
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="filter-section">
+                                        <div class="filter-section-label"><i class="bi bi-tag"></i> ประเภทปัญหา</div>
+                                        <div class="filter-chips" id="eval-filter-type">
+                                            <!-- populated dynamically -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Month -->
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="filter-section">
+                                        <div class="filter-section-label"><i class="bi bi-calendar-month"></i> เดือน</div>
+                                        <div class="filter-chips" id="eval-filter-month">
+                                            <span class="filter-chip" data-value="1">ม.ค.</span>
+                                            <span class="filter-chip" data-value="2">ก.พ.</span>
+                                            <span class="filter-chip" data-value="3">มี.ค.</span>
+                                            <span class="filter-chip" data-value="4">เม.ย.</span>
+                                            <span class="filter-chip" data-value="5">พ.ค.</span>
+                                            <span class="filter-chip" data-value="6">มิ.ย.</span>
+                                            <span class="filter-chip" data-value="7">ก.ค.</span>
+                                            <span class="filter-chip" data-value="8">ส.ค.</span>
+                                            <span class="filter-chip" data-value="9">ก.ย.</span>
+                                            <span class="filter-chip" data-value="10">ต.ค.</span>
+                                            <span class="filter-chip" data-value="11">พ.ย.</span>
+                                            <span class="filter-chip" data-value="12">ธ.ค.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Star Score Filter -->
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="filter-section">
+                                        <div class="filter-section-label"><i class="bi bi-star-fill" style="color: #fbbf24;"></i> คะแนนขั้นต่ำ</div>
+                                        <div class="filter-star-group">
+                                            <div class="filter-star-item">
+                                                <span class="filter-star-label">Q</span>
+                                                <select id="eval-filter-score-q" class="filter-star-select">
+                                                    <option value="">ทั้งหมด</option>
+                                                    <option value="1">≥ 1 ★</option>
+                                                    <option value="2">≥ 2 ★</option>
+                                                    <option value="3">≥ 3 ★</option>
+                                                    <option value="4">≥ 4 ★</option>
+                                                    <option value="5">= 5 ★</option>
+                                                </select>
+                                            </div>
+                                            <div class="filter-star-item">
+                                                <span class="filter-star-label">D</span>
+                                                <select id="eval-filter-score-d" class="filter-star-select">
+                                                    <option value="">ทั้งหมด</option>
+                                                    <option value="1">≥ 1 ★</option>
+                                                    <option value="2">≥ 2 ★</option>
+                                                    <option value="3">≥ 3 ★</option>
+                                                    <option value="4">≥ 4 ★</option>
+                                                    <option value="5">= 5 ★</option>
+                                                </select>
+                                            </div>
+                                            <div class="filter-star-item">
+                                                <span class="filter-star-label">C</span>
+                                                <select id="eval-filter-score-c" class="filter-star-select">
+                                                    <option value="">ทั้งหมด</option>
+                                                    <option value="1">≥ 1 ★</option>
+                                                    <option value="2">≥ 2 ★</option>
+                                                    <option value="3">≥ 3 ★</option>
+                                                    <option value="4">≥ 4 ★</option>
+                                                    <option value="5">= 5 ★</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Date Range -->
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="filter-section">
+                                        <div class="filter-section-label"><i class="bi bi-calendar-range"></i> ช่วงวันที่ปิดเคส</div>
+                                        <div class="filter-date-group">
+                                            <input type="date" id="eval-filter-date-from" class="filter-date-input" title="จากวันที่">
+                                            <span class="filter-date-separator">ถึง</span>
+                                            <input type="date" id="eval-filter-date-to" class="filter-date-input" title="ถึงวันที่">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Actions Row -->
+                            <div class="filter-actions-row">
+                                <span class="filter-results-count" id="eval-filter-results">แสดง <strong>0</strong> จาก <strong>0</strong> รายการ</span>
+                                <button class="filter-clear-btn" id="eval-filter-clear"><i class="bi bi-x-circle"></i> ล้างตัวกรองทั้งหมด</button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div id="evaluation-list" class="row"></div>
@@ -2290,10 +2797,76 @@
                 ticketListEl.innerHTML = '';
                 if (!tickets || tickets.length === 0) {
                     ticketListEl.innerHTML = '<p class="text-center text-muted p-5">ไม่พบรายการปัญหา</p>';
+                    updateTicketFilterCount(0, 0);
                     return;
                 }
 
-                tickets.sort((a, b) => {
+                const totalCount = tickets.length;
+
+                // ===== APPLY FILTERS =====
+                const searchVal = (document.getElementById('ticket-filter-search')?.value || '').trim().toLowerCase();
+                const statusChips = getSelectedChipValues('ticket-filter-status');
+                const typeChips = getSelectedChipValues('ticket-filter-type');
+                const evalChips = getSelectedChipValues('ticket-filter-eval');
+                const emailChips = getSelectedChipValues('ticket-filter-email');
+                const dateFrom = document.getElementById('ticket-filter-date-from')?.value || '';
+                const dateTo = document.getElementById('ticket-filter-date-to')?.value || '';
+
+                let filtered = tickets.filter(ticket => {
+                    // Text search
+                    if (searchVal) {
+                        const searchFields = [
+                            ticket.CaseID, ticket.SubmitterName, ticket.ContactNumber,
+                            ticket.Department, ticket.ProblemType, ticket.ProblemDetails,
+                            ticket.ResolutionComment
+                        ].map(f => (f || '').toLowerCase()).join(' ');
+                        if (!searchFields.includes(searchVal)) return false;
+                    }
+                    // Status chips
+                    if (statusChips.length > 0 && !statusChips.includes(ticket.Status)) return false;
+                    // Type chips
+                    if (typeChips.length > 0 && !typeChips.includes(ticket.ProblemType)) return false;
+                    // Evaluation status
+                    if (evalChips.length > 0) {
+                        const isEvaluated = ticket.ScoreQ && ticket.ScoreQ.toString().trim() !== '';
+                        if (evalChips.includes('evaluated') && !evalChips.includes('pending') && !isEvaluated) return false;
+                        if (evalChips.includes('pending') && !evalChips.includes('evaluated') && isEvaluated) return false;
+                    }
+                    // Email status
+                    if (emailChips.length > 0) {
+                        const emailStatus = ticket.EmailStatus ? ticket.EmailStatus.toString().trim() : '';
+                        let match = false;
+                        if (emailChips.includes('sent') && (emailStatus === 'Sent' || emailStatus === 'Resent')) match = true;
+                        if (emailChips.includes('failed') && emailStatus.includes('Failed')) match = true;
+                        if (emailChips.includes('none') && emailStatus === '') match = true;
+                        if (!match) return false;
+                    }
+                    // Date range
+                    if (dateFrom || dateTo) {
+                        const subDate = parseThaiDateTime(ticket.SubmissionDate, ticket.SubmissionTime);
+                        if (!subDate) return false;
+                        if (dateFrom) {
+                            const from = new Date(dateFrom);
+                            from.setHours(0, 0, 0, 0);
+                            if (subDate < from) return false;
+                        }
+                        if (dateTo) {
+                            const to = new Date(dateTo);
+                            to.setHours(23, 59, 59, 999);
+                            if (subDate > to) return false;
+                        }
+                    }
+                    return true;
+                });
+
+                updateTicketFilterCount(filtered.length, totalCount);
+
+                if (filtered.length === 0) {
+                    ticketListEl.innerHTML = '<p class="text-center text-muted p-5"><i class="bi bi-funnel me-2"></i>ไม่พบรายการที่ตรงกับตัวกรอง</p>';
+                    return;
+                }
+
+                filtered.sort((a, b) => {
                     if (a.Status === 'Open' && b.Status !== 'Open') {
                         return -1;
                     }
@@ -2562,6 +3135,8 @@
                     t.ScoreQ && t.ScoreQ.toString().trim() !== ''
                 );
 
+                const totalEvalCount = evaluatedTickets.length;
+
                 // อัปเดตจำนวน
                 DOMElements.evaluationCount.textContent = `${evaluatedTickets.length} รายการ`;
 
@@ -2586,12 +3161,69 @@
 
                 renderMonthlyScores(tickets, currentMonth);
 
-                if (evaluatedTickets.length === 0) {
-                    evaluationListEl.innerHTML = '<p class="text-center text-muted p-5">ยังไม่มีรายการประเมิน</p>';
+                // ===== APPLY EVAL FILTERS =====
+                const searchVal = (document.getElementById('eval-filter-search')?.value || '').trim().toLowerCase();
+                const typeChips = getSelectedChipValues('eval-filter-type');
+                const monthChips = getSelectedChipValues('eval-filter-month');
+                const scoreQ = document.getElementById('eval-filter-score-q')?.value || '';
+                const scoreD = document.getElementById('eval-filter-score-d')?.value || '';
+                const scoreC = document.getElementById('eval-filter-score-c')?.value || '';
+                const dateFrom = document.getElementById('eval-filter-date-from')?.value || '';
+                const dateTo = document.getElementById('eval-filter-date-to')?.value || '';
+
+                const filteredEvals = evaluatedTickets.filter(ticket => {
+                    // Text search
+                    if (searchVal) {
+                        const searchFields = [
+                            ticket.CaseID, ticket.SubmitterName, ticket.ContactNumber,
+                            ticket.Department, ticket.ProblemType, ticket.ProblemDetails
+                        ].map(f => (f || '').toLowerCase()).join(' ');
+                        if (!searchFields.includes(searchVal)) return false;
+                    }
+                    // Type chips
+                    if (typeChips.length > 0 && !typeChips.includes(ticket.ProblemType)) return false;
+                    // Month chips
+                    if (monthChips.length > 0) {
+                        const closedDate = ticket.ClosedDate || '';
+                        if (!closedDate) return false;
+                        const dateParts = closedDate.split('/');
+                        if (dateParts.length >= 2) {
+                            const ticketMonth = parseInt(dateParts[1]).toString();
+                            if (!monthChips.includes(ticketMonth)) return false;
+                        } else return false;
+                    }
+                    // Star score filters
+                    if (scoreQ && (parseInt(ticket.ScoreQ) || 0) < parseInt(scoreQ)) return false;
+                    if (scoreD && (parseInt(ticket.ScoreD) || 0) < parseInt(scoreD)) return false;
+                    if (scoreC && (parseInt(ticket.ScoreC) || 0) < parseInt(scoreC)) return false;
+                    // Date range (closed date)
+                    if (dateFrom || dateTo) {
+                        const closedDateTime = parseThaiDateTime(ticket.ClosedDate, ticket.ClosedTime);
+                        if (!closedDateTime) return false;
+                        if (dateFrom) {
+                            const from = new Date(dateFrom);
+                            from.setHours(0, 0, 0, 0);
+                            if (closedDateTime < from) return false;
+                        }
+                        if (dateTo) {
+                            const to = new Date(dateTo);
+                            to.setHours(23, 59, 59, 999);
+                            if (closedDateTime > to) return false;
+                        }
+                    }
+                    return true;
+                });
+
+                updateEvalFilterCount(filteredEvals.length, totalEvalCount);
+
+                if (filteredEvals.length === 0) {
+                    evaluationListEl.innerHTML = evaluatedTickets.length === 0
+                        ? '<p class="text-center text-muted p-5">ยังไม่มีรายการประเมิน</p>'
+                        : '<p class="text-center text-muted p-5"><i class="bi bi-funnel me-2"></i>ไม่พบรายการที่ตรงกับตัวกรอง</p>';
                     return;
                 }
 
-                evaluatedTickets.forEach(ticket => {
+                filteredEvals.forEach(ticket => {
                     const cardHtml = `
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="evaluation-card h-100">
@@ -2634,6 +3266,192 @@
                 </div>`;
                     evaluationListEl.insertAdjacentHTML('beforeend', cardHtml);
                 });
+            };
+
+            // ===== FILTER HELPER FUNCTIONS =====
+            const getSelectedChipValues = (containerId) => {
+                const container = document.getElementById(containerId);
+                if (!container) return [];
+                return Array.from(container.querySelectorAll('.filter-chip.selected')).map(c => c.dataset.value);
+            };
+
+            const updateTicketFilterCount = (shown, total) => {
+                const resultsEl = document.getElementById('ticket-filter-results');
+                if (resultsEl) {
+                    resultsEl.innerHTML = `แสดง <strong>${shown}</strong> จาก <strong>${total}</strong> รายการ`;
+                }
+                // Update active filter count badge
+                const countBadge = document.getElementById('ticket-filter-count');
+                const activeCount = countActiveTicketFilters();
+                if (countBadge) {
+                    if (activeCount > 0) {
+                        countBadge.textContent = activeCount;
+                        countBadge.style.display = 'inline-flex';
+                    } else {
+                        countBadge.style.display = 'none';
+                    }
+                }
+            };
+
+            const updateEvalFilterCount = (shown, total) => {
+                const resultsEl = document.getElementById('eval-filter-results');
+                if (resultsEl) {
+                    resultsEl.innerHTML = `แสดง <strong>${shown}</strong> จาก <strong>${total}</strong> รายการ`;
+                }
+                // Update active filter count badge
+                const countBadge = document.getElementById('eval-filter-count');
+                const activeCount = countActiveEvalFilters();
+                if (countBadge) {
+                    if (activeCount > 0) {
+                        countBadge.textContent = activeCount;
+                        countBadge.style.display = 'inline-flex';
+                    } else {
+                        countBadge.style.display = 'none';
+                    }
+                }
+            };
+
+            const countActiveTicketFilters = () => {
+                let count = 0;
+                if ((document.getElementById('ticket-filter-search')?.value || '').trim()) count++;
+                if (getSelectedChipValues('ticket-filter-status').length > 0) count++;
+                if (getSelectedChipValues('ticket-filter-type').length > 0) count++;
+                if (getSelectedChipValues('ticket-filter-eval').length > 0) count++;
+                if (getSelectedChipValues('ticket-filter-email').length > 0) count++;
+                if (document.getElementById('ticket-filter-date-from')?.value) count++;
+                if (document.getElementById('ticket-filter-date-to')?.value) count++;
+                return count;
+            };
+
+            const countActiveEvalFilters = () => {
+                let count = 0;
+                if ((document.getElementById('eval-filter-search')?.value || '').trim()) count++;
+                if (getSelectedChipValues('eval-filter-type').length > 0) count++;
+                if (getSelectedChipValues('eval-filter-month').length > 0) count++;
+                if (document.getElementById('eval-filter-score-q')?.value) count++;
+                if (document.getElementById('eval-filter-score-d')?.value) count++;
+                if (document.getElementById('eval-filter-score-c')?.value) count++;
+                if (document.getElementById('eval-filter-date-from')?.value) count++;
+                if (document.getElementById('eval-filter-date-to')?.value) count++;
+                return count;
+            };
+
+            const populateDynamicFilterChips = (tickets) => {
+                // Populate problem type chips for both pages
+                const uniqueTypes = [...new Set((tickets || []).map(t => t.ProblemType).filter(Boolean))].sort();
+                
+                const ticketTypeContainer = document.getElementById('ticket-filter-type');
+                const evalTypeContainer = document.getElementById('eval-filter-type');
+                
+                const typeChipsHtml = uniqueTypes.map(type =>
+                    `<span class="filter-chip" data-value="${sanitizeHTML(type)}"><i class="bi bi-tag"></i> ${sanitizeHTML(type)}</span>`
+                ).join('');
+                
+                if (ticketTypeContainer) ticketTypeContainer.innerHTML = typeChipsHtml;
+                if (evalTypeContainer) evalTypeContainer.innerHTML = typeChipsHtml;
+                
+                // Re-attach chip click handlers
+                attachChipClickHandlers();
+            };
+
+            const clearAllTicketFilters = () => {
+                const search = document.getElementById('ticket-filter-search');
+                if (search) search.value = '';
+                document.querySelectorAll('#ticket-filter-panel .filter-chip.selected').forEach(c => c.classList.remove('selected'));
+                const dateFrom = document.getElementById('ticket-filter-date-from');
+                const dateTo = document.getElementById('ticket-filter-date-to');
+                if (dateFrom) dateFrom.value = '';
+                if (dateTo) dateTo.value = '';
+                renderTickets(allTickets);
+            };
+
+            const clearAllEvalFilters = () => {
+                const search = document.getElementById('eval-filter-search');
+                if (search) search.value = '';
+                document.querySelectorAll('#eval-filter-panel .filter-chip.selected').forEach(c => c.classList.remove('selected'));
+                const scoreQ = document.getElementById('eval-filter-score-q');
+                const scoreD = document.getElementById('eval-filter-score-d');
+                const scoreC = document.getElementById('eval-filter-score-c');
+                const dateFrom = document.getElementById('eval-filter-date-from');
+                const dateTo = document.getElementById('eval-filter-date-to');
+                if (scoreQ) scoreQ.value = '';
+                if (scoreD) scoreD.value = '';
+                if (scoreC) scoreC.value = '';
+                if (dateFrom) dateFrom.value = '';
+                if (dateTo) dateTo.value = '';
+                renderEvaluationCards(allTickets);
+            };
+
+            const attachChipClickHandlers = () => {
+                document.querySelectorAll('.filter-chip').forEach(chip => {
+                    // Remove old listener by cloning
+                    const newChip = chip.cloneNode(true);
+                    chip.parentNode.replaceChild(newChip, chip);
+                    newChip.addEventListener('click', () => {
+                        newChip.classList.toggle('selected');
+                        // Determine which page to re-render
+                        const panel = newChip.closest('.filter-panel');
+                        if (panel && panel.id === 'ticket-filter-panel') {
+                            renderTickets(allTickets);
+                        } else if (panel && panel.id === 'eval-filter-panel') {
+                            renderEvaluationCards(allTickets);
+                        }
+                    });
+                });
+            };
+
+            let ticketSearchDebounce = null;
+            let evalSearchDebounce = null;
+            let filterListenersInitialized = false;
+
+            const setupFilterEventListeners = () => {
+                if (filterListenersInitialized) return;
+                filterListenersInitialized = true;
+                // Ticket search with debounce
+                const ticketSearch = document.getElementById('ticket-filter-search');
+                if (ticketSearch) {
+                    ticketSearch.addEventListener('input', () => {
+                        clearTimeout(ticketSearchDebounce);
+                        ticketSearchDebounce = setTimeout(() => renderTickets(allTickets), 250);
+                    });
+                }
+
+                // Eval search with debounce
+                const evalSearch = document.getElementById('eval-filter-search');
+                if (evalSearch) {
+                    evalSearch.addEventListener('input', () => {
+                        clearTimeout(evalSearchDebounce);
+                        evalSearchDebounce = setTimeout(() => renderEvaluationCards(allTickets), 250);
+                    });
+                }
+
+                // Date inputs - ticket
+                ['ticket-filter-date-from', 'ticket-filter-date-to'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('change', () => renderTickets(allTickets));
+                });
+
+                // Date inputs - eval
+                ['eval-filter-date-from', 'eval-filter-date-to'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('change', () => renderEvaluationCards(allTickets));
+                });
+
+                // Star score selects
+                ['eval-filter-score-q', 'eval-filter-score-d', 'eval-filter-score-c'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('change', () => renderEvaluationCards(allTickets));
+                });
+
+                // Clear buttons
+                const ticketClear = document.getElementById('ticket-filter-clear');
+                if (ticketClear) ticketClear.addEventListener('click', clearAllTicketFilters);
+
+                const evalClear = document.getElementById('eval-filter-clear');
+                if (evalClear) evalClear.addEventListener('click', clearAllEvalFilters);
+
+                // Chip click handlers
+                attachChipClickHandlers();
             };
 
             // ===== COUNTDOWN TIMER & AUTO RESEND EVALUATION EMAIL =====
@@ -3104,10 +3922,14 @@
                         });
 
                         if (hasChanges) {
+                            populateDynamicFilterChips(allTickets);
                             renderDashboard(allTickets);
 
                             if (document.getElementById('admin-view-tickets').style.display === 'block') {
                                 renderTickets(allTickets);
+                            }
+                            if (document.getElementById('admin-view-evaluation').style.display === 'block') {
+                                renderEvaluationCards(allTickets);
                             }
                         }
                     }
@@ -3129,6 +3951,10 @@
                 document.querySelectorAll('.super-admin-only').forEach(el => {
                     el.style.display = isSuperAdmin ? '' : 'none';
                 });
+
+                // Initialize filters with dynamic data
+                populateDynamicFilterChips(allTickets);
+                setupFilterEventListeners();
 
                 renderDashboard(allTickets);
                 renderTickets(allTickets);
