@@ -1672,6 +1672,139 @@
             color: #fca5a5;
         }
 
+        /* ===== RESEND FAILED EMAILS MODAL ===== */
+        .failed-email-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .failed-email-item {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(107, 114, 128, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .failed-email-item:hover {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(239, 68, 68, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .failed-email-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #ef4444;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .failed-email-item.type-eval::before {
+            background: #f59e0b; /* Amber for evaluation */
+        }
+
+        .failed-email-item.type-prob::before {
+            background: #3b82f6; /* Blue for problem followup */
+        }
+
+        .failed-email-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .failed-email-case-id {
+            font-weight: 700;
+            color: #f1f5f9;
+            font-size: 0.95rem;
+        }
+
+        .failed-email-type-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 1rem;
+            font-weight: 600;
+        }
+
+        .failed-email-type-badge.type-eval {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .failed-email-type-badge.type-prob {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .failed-email-details {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+
+        .failed-email-details span {
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .failed-email-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            border: 1px dashed rgba(239, 68, 68, 0.3);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .failed-email-error i {
+            color: #ef4444;
+            margin-top: 0.1rem;
+        }
+
+        .resend-progress-container {
+            display: none;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .resend-progress-status {
+            text-align: center;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .resend-progress-bar-bg {
+            height: 10px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .resend-progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .filter-panel.open {
@@ -1852,6 +1985,9 @@
                             <div class="d-flex align-items-center gap-2">
                                 <button id="ticket-filter-toggle" class="filter-toggle-btn" onclick="document.getElementById('ticket-filter-panel').classList.toggle('open'); this.classList.toggle('active');">
                                     <i class="bi bi-funnel"></i> ตัวกรอง <span id="ticket-filter-count" class="filter-active-count" style="display:none;">0</span>
+                                </button>
+                                <button id="bulk-resend-btn" class="btn btn-sm btn-outline-danger me-2" style="display:none;" data-tippy-content="มีอีเมลที่ส่งไม่สำเร็จ กดเพื่อจัดการ">
+                                    <i class="bi bi-envelope-exclamation me-1"></i>ส่งอีเมลที่ล้มเหลวใหม่
                                 </button>
                                 <button id="export-excel-btn" class="btn btn-sm btn-success me-2"><i
                                         class="bi bi-file-earmark-excel me-1"></i>ดาวน์โหลด Excel</button>
@@ -2211,6 +2347,34 @@
                 <div class="modal-body" id="alertModalBody"></div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                         id="alertModalCloseBtn">ปิด</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="resendFailedModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-bottom border-secondary-subtle">
+                    <h5 class="modal-title"><i class="bi bi-envelope-exclamation text-danger me-2"></i> ส่งอีเมลที่ล้มเหลวใหม่</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-3">พบอีเมลที่ส่งไม่สำเร็จจำนวน <strong id="failed-email-total" class="text-white">0</strong> รายการ คุณต้องการส่งใหม่ทั้งหมดหรือไม่?</p>
+                    
+                    <div class="failed-email-list" id="failed-email-list-container">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="resend-progress-container" id="resend-progress-container">
+                        <div class="resend-progress-status" id="resend-progress-status">กำลังเตรียมการส่ง... 0/0</div>
+                        <div class="resend-progress-bar-bg">
+                            <div class="resend-progress-bar-fill" id="resend-progress-bar"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary-subtle">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="resend-cancel-btn">ยกเลิก</button>
+                    <button type="button" class="btn btn-danger" id="resend-confirm-btn"><i class="bi bi-send me-2"></i> ยืนยันส่งทั้งหมด</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2859,6 +3023,22 @@
                     return true;
                 });
 
+                // Check for failed emails to show bulk resend button
+                const failedEmails = (tickets || []).filter(t => 
+                    (t.EmailStatus && t.EmailStatus.toString().includes('Failed')) || 
+                    (t.EmailProblem && t.EmailProblem.toString().includes('Failed'))
+                );
+                const bulkBtn = document.getElementById('bulk-resend-btn');
+                if (bulkBtn) {
+                    if (failedEmails.length > 0) {
+                        bulkBtn.style.display = 'inline-block';
+                        window.currentFailedEmails = failedEmails;
+                    } else {
+                        bulkBtn.style.display = 'none';
+                        window.currentFailedEmails = [];
+                    }
+                }
+
                 updateTicketFilterCount(filtered.length, totalCount);
 
                 if (filtered.length === 0) {
@@ -3449,6 +3629,142 @@
 
                 const evalClear = document.getElementById('eval-filter-clear');
                 if (evalClear) evalClear.addEventListener('click', clearAllEvalFilters);
+
+                // Bulk Resend Failed Emails Logic
+                const bulkResendBtn = document.getElementById('bulk-resend-btn');
+                if (bulkResendBtn) {
+                    bulkResendBtn.addEventListener('click', () => {
+                        const failedEmails = window.currentFailedEmails || [];
+                        if (failedEmails.length === 0) return;
+
+                        // Update counts
+                        document.getElementById('failed-email-total').textContent = failedEmails.length;
+                        
+                        // Populate list
+                        const listContainer = document.getElementById('failed-email-list-container');
+                        listContainer.innerHTML = failedEmails.map(t => {
+                            const isEvalFailed = t.EmailStatus && t.EmailStatus.toString().includes('Failed');
+                            const isProbFailed = t.EmailProblem && t.EmailProblem.toString().includes('Failed');
+                            
+                            let typeClass = '';
+                            let typeText = '';
+                            let errorText = '';
+                            
+                            if (isEvalFailed) {
+                                typeClass = 'type-eval';
+                                typeText = 'อีเมลประเมิน';
+                                errorText = t.EmailStatus;
+                            } else if (isProbFailed) {
+                                typeClass = 'type-prob';
+                                typeText = 'อีเมลสอบถาม';
+                                errorText = t.EmailProblem;
+                            }
+
+                            return `
+                                <div class="failed-email-item ${typeClass}" id="failed-item-${t.CaseID}">
+                                    <div class="failed-email-header">
+                                        <div class="failed-email-case-id">${sanitizeHTML(t.CaseID)}</div>
+                                        <div class="failed-email-type-badge ${typeClass}">${typeText}</div>
+                                    </div>
+                                    <div class="failed-email-details">
+                                        ผู้แจ้ง: <span>${sanitizeHTML(t.SubmitterName)}</span> | ประเภท: <span>${sanitizeHTML(t.ProblemType)}</span>
+                                    </div>
+                                    <div class="failed-email-error">
+                                        <i class="bi bi-exclamation-triangle-fill"></i>
+                                        <span>${sanitizeHTML(errorText)}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+
+                        // Reset progress UI
+                        document.getElementById('resend-progress-container').style.display = 'none';
+                        document.getElementById('resend-progress-bar').style.width = '0%';
+                        document.getElementById('resend-confirm-btn').disabled = false;
+                        document.getElementById('resend-cancel-btn').disabled = false;
+
+                        Modals.resendFailed = new bootstrap.Modal(document.getElementById('resendFailedModal'));
+                        Modals.resendFailed.show();
+                    });
+                }
+
+                // Bulk Resend Confirm Handler
+                const resendConfirmBtn = document.getElementById('resend-confirm-btn');
+                if (resendConfirmBtn) {
+                    resendConfirmBtn.addEventListener('click', async () => {
+                        const failedEmails = window.currentFailedEmails || [];
+                        if (failedEmails.length === 0) return;
+
+                        // UI Setup for Progress
+                        resendConfirmBtn.disabled = true;
+                        document.getElementById('resend-cancel-btn').disabled = true;
+                        const progressContainer = document.getElementById('resend-progress-container');
+                        const statusText = document.getElementById('resend-progress-status');
+                        const progressBar = document.getElementById('resend-progress-bar');
+                        
+                        progressContainer.style.display = 'block';
+                        
+                        let successCount = 0;
+                        let errorCount = 0;
+                        
+                        for (let i = 0; i < failedEmails.length; i++) {
+                            const ticket = failedEmails[i];
+                            const isEvalFailed = ticket.EmailStatus && ticket.EmailStatus.toString().includes('Failed');
+                            
+                            statusText.textContent = `กำลังส่ง... ${i + 1}/${failedEmails.length} (${ticket.CaseID})`;
+                            progressBar.style.width = `${((i) / failedEmails.length) * 100}%`;
+                            
+                            const itemEl = document.getElementById(`failed-item-${ticket.CaseID}`);
+                            if (itemEl) itemEl.style.opacity = '0.5';
+
+                            try {
+                                // Refresh ticket data to ensure we have the latest before sending
+                                const freshTicket = await supabase.getTicketByCaseId(ticket.CaseID);
+                                let result;
+                                
+                                if (freshTicket) {
+                                    if (isEvalFailed) {
+                                        result = await supabase.sendEvaluationEmail(freshTicket);
+                                    } else {
+                                        result = await supabase.sendProblemFollowupEmail(freshTicket);
+                                    }
+                                    
+                                    if (result && result.success) {
+                                        successCount++;
+                                        if (itemEl) {
+                                            itemEl.style.borderColor = '#22c55e';
+                                            itemEl.style.opacity = '1';
+                                            itemEl.innerHTML += '<div class="mt-2 text-success" style="font-size:0.75rem;"><i class="bi bi-check-circle-fill"></i> ส่งสำเร็จ</div>';
+                                        }
+                                    } else {
+                                        errorCount++;
+                                    }
+                                } else {
+                                    errorCount++;
+                                }
+                            } catch (e) {
+                                console.error('Error sending bulk email', e);
+                                errorCount++;
+                            }
+                            
+                            // Small delay to prevent rate limits
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        }
+
+                        progressBar.style.width = '100%';
+                        statusText.innerHTML = `<span class="text-success"><i class="bi bi-check-circle-fill"></i> เสร็จสิ้น: สำเร็จ ${successCount}, ล้มเหลว ${errorCount}</span>`;
+                        
+                        setTimeout(() => {
+                            if (Modals.resendFailed) Modals.resendFailed.hide();
+                            if (successCount > 0) {
+                                showAlert(`ส่งอีเมลเสร็จสิ้น! สำเร็จ ${successCount} รายการ`, true);
+                                initializeApp(true);
+                            } else {
+                                showAlert(`ส่งอีเมลล้มเหลวทั้งหมด กรุณาตรวจสอบระบบอีกครั้ง`, false);
+                            }
+                        }, 2000);
+                    });
+                }
 
                 // Chip click handlers
                 attachChipClickHandlers();
