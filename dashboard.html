@@ -3240,7 +3240,12 @@
             };
 
             // ===== MONTHLY SCORE CALCULATION =====
-            const renderMonthlyScores = (tickets, month) => {
+            let monthSelectorInitialized = false;
+
+            const renderMonthlyScores = (tickets, months) => {
+                // รองรับทั้ง single month (number) และ array of months
+                const monthArray = Array.isArray(months) ? months : [months];
+
                 // กรองเคสที่ประเมินแล้วและอยู่ในเดือนที่เลือก
                 const evaluatedTickets = (tickets || []).filter(t => {
                     if (!t.ScoreQ || t.ScoreQ.toString().trim() === '') return false;
@@ -3252,7 +3257,7 @@
                     const dateParts = closedDate.split('/');
                     if (dateParts.length >= 2) {
                         const ticketMonth = parseInt(dateParts[1]);
-                        return ticketMonth === month;
+                        return monthArray.includes(ticketMonth);
                     }
                     return false;
                 });
@@ -3317,34 +3322,51 @@
 
                 const totalEvalCount = evaluatedTickets.length;
 
-                // อัปเดตจำนวน
-                DOMElements.evaluationCount.textContent = `${evaluatedTickets.length} รายการ`;
-
                 // Render summary charts
                 renderEvaluationCharts(tickets);
 
-                // Render monthly scores (current month)
+                // === Sync month-selector dropdown กับ month chips ===
                 const monthSelector = document.getElementById('month-selector');
-                const currentMonth = new Date().getMonth() + 1; // 1-12
 
                 if (monthSelector) {
-                    // Set current month as default
-                    monthSelector.value = currentMonth;
+                    // ครั้งแรก: set dropdown เป็นเดือนปัจจุบัน + select chip ที่ตรงกัน
+                    if (!monthSelectorInitialized) {
+                        const currentMonth = new Date().getMonth() + 1; // 1-12
+                        monthSelector.value = currentMonth;
+                        // Auto-select chip ของเดือนปัจจุบัน
+                        const currentChip = document.querySelector(`#eval-filter-month .filter-chip[data-value="${currentMonth}"]`);
+                        if (currentChip && !currentChip.classList.contains('selected')) {
+                            currentChip.classList.add('selected');
+                        }
+                        monthSelectorInitialized = true;
+                    }
 
                     // Remove old listener and add new one
                     const newSelector = monthSelector.cloneNode(true);
+                    newSelector.value = monthSelector.value; // Preserve selected value after clone
                     monthSelector.parentNode.replaceChild(newSelector, monthSelector);
                     newSelector.addEventListener('change', (e) => {
-                        renderMonthlyScores(allTickets, parseInt(e.target.value));
+                        const selectedVal = e.target.value;
+                        // Deselect all month chips แล้ว select เฉพาะเดือนที่เลือก
+                        document.querySelectorAll('#eval-filter-month .filter-chip').forEach(chip => {
+                            chip.classList.remove('selected');
+                        });
+                        const targetChip = document.querySelector(`#eval-filter-month .filter-chip[data-value="${selectedVal}"]`);
+                        if (targetChip) targetChip.classList.add('selected');
+                        renderEvaluationCards(allTickets);
                     });
                 }
 
-                renderMonthlyScores(tickets, currentMonth);
+                // อ่านค่า month chips ที่ selected (เป็น source of truth สำหรับ filter)
+                const monthChips = getSelectedChipValues('eval-filter-month');
+                const selectedMonths = monthChips.length > 0 ? monthChips.map(m => parseInt(m)) : [new Date().getMonth() + 1];
+
+                // Render monthly scores ตามเดือนที่เลือก (รวมหลายเดือนได้)
+                renderMonthlyScores(tickets, selectedMonths);
 
                 // ===== APPLY EVAL FILTERS =====
                 const searchVal = (document.getElementById('eval-filter-search')?.value || '').trim().toLowerCase();
                 const typeChips = getSelectedChipValues('eval-filter-type');
-                const monthChips = getSelectedChipValues('eval-filter-month');
                 const scoreQ = document.getElementById('eval-filter-score-q')?.value || '';
                 const scoreD = document.getElementById('eval-filter-score-d')?.value || '';
                 const scoreC = document.getElementById('eval-filter-score-c')?.value || '';
@@ -3352,6 +3374,16 @@
                 const dateTo = document.getElementById('eval-filter-date-to')?.value || '';
 
                 const filteredEvals = evaluatedTickets.filter(ticket => {
+                    // Filter by selected months (from chips - synced with dropdown)
+                    const closedDate = ticket.ClosedDate || '';
+                    if (closedDate) {
+                        const dateParts = closedDate.split('/');
+                        if (dateParts.length >= 2) {
+                            const ticketMonth = parseInt(dateParts[1]);
+                            if (!selectedMonths.includes(ticketMonth)) return false;
+                        } else return false;
+                    } else return false;
+
                     // Text search
                     if (searchVal) {
                         const searchFields = [
@@ -3362,16 +3394,6 @@
                     }
                     // Type chips
                     if (typeChips.length > 0 && !typeChips.includes(ticket.ProblemType)) return false;
-                    // Month chips
-                    if (monthChips.length > 0) {
-                        const closedDate = ticket.ClosedDate || '';
-                        if (!closedDate) return false;
-                        const dateParts = closedDate.split('/');
-                        if (dateParts.length >= 2) {
-                            const ticketMonth = parseInt(dateParts[1]).toString();
-                            if (!monthChips.includes(ticketMonth)) return false;
-                        } else return false;
-                    }
                     // Star score filters
                     if (scoreQ && (parseInt(ticket.ScoreQ) || 0) < parseInt(scoreQ)) return false;
                     if (scoreD && (parseInt(ticket.ScoreD) || 0) < parseInt(scoreD)) return false;
@@ -3394,6 +3416,8 @@
                     return true;
                 });
 
+                // อัปเดตจำนวนรายการตามเดือนที่เลือก
+                DOMElements.evaluationCount.textContent = `${filteredEvals.length} รายการ`;
                 updateEvalFilterCount(filteredEvals.length, totalEvalCount);
 
                 if (filteredEvals.length === 0) {
@@ -3559,6 +3583,12 @@
                 if (scoreC) scoreC.value = '';
                 if (dateFrom) dateFrom.value = '';
                 if (dateTo) dateTo.value = '';
+                // Reset month dropdown + select current month chip
+                const currentMonth = new Date().getMonth() + 1;
+                const ms = document.getElementById('month-selector');
+                if (ms) ms.value = currentMonth;
+                const currentChip = document.querySelector(`#eval-filter-month .filter-chip[data-value="${currentMonth}"]`);
+                if (currentChip) currentChip.classList.add('selected');
                 renderEvaluationCards(allTickets);
             };
 
