@@ -14,8 +14,8 @@ const SUPABASE_CONFIG = {
     AUTH_EDGE_FUNCTION_URL: 'https://edcxqxbktztoovdnshxr.supabase.co/functions/v1/auth',
 
     // n8n Webhook URLs (TODO: ย้ายไป Edge Function เมื่อตั้ง Cloudflare Tunnel แล้ว)
-    N8N_EVALUATION_EMAIL_WEBHOOK: 'https://192.168.0.88:5678/webhook/evaluation-email',
-    N8N_FOLLOWUP_EMAIL_WEBHOOK: 'https://192.168.0.88:5678/webhook/problem-followup-email',
+    N8N_EVALUATION_EMAIL_WEBHOOK: 'https://n8n.tonyg-automation.com/webhook/evaluation-email',
+    N8N_FOLLOWUP_EMAIL_WEBHOOK: 'https://n8n.tonyg-automation.com/webhook/problem-followup-email',
 
     // Teams Notification via Supabase Edge Function (ป้องกัน CORS)
     TEAMS_EDGE_FUNCTION_URL: 'https://edcxqxbktztoovdnshxr.supabase.co/functions/v1/teams-notify',

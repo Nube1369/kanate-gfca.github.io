@@ -60,7 +60,7 @@ const SUPABASE_CONFIG = {
 
 ใน `js/supabase-config.js`:
 ```javascript
-n8nEvaluationWebhookUrl: 'https://192.168.0.88:5678/webhook/evaluation-email',
+n8nEvaluationWebhookUrl: 'https://n8n.tonyg-automation.com/webhook/evaluation-email',
 n8nProblemFollowupWebhookUrl: 'YOUR_N8N_PROBLEM_FOLLOWUP_WEBHOOK_URL',
 ```
 
