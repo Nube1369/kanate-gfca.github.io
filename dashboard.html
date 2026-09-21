@@ -1408,6 +1408,38 @@
             animation: filterCountPop 0.3s ease;
         }
 
+        .dropdown-menu-dark-custom {
+            background-color: #1e293b;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            padding: 0.5rem;
+            z-index: 1050;
+        }
+
+        .dropdown-menu-dark-custom .dropdown-header {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.4rem 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dropdown-menu-dark-custom .dropdown-item {
+            color: #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.55rem 0.85rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-menu-dark-custom .dropdown-item:hover,
+        .dropdown-menu-dark-custom .dropdown-item:focus {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+
         @keyframes filterCountPop {
             0% { transform: scale(0); }
             50% { transform: scale(1.3); }
@@ -1991,6 +2023,26 @@
                                 </button>
                                 <button id="export-excel-btn" class="btn btn-sm btn-success me-2"><i
                                         class="bi bi-file-earmark-excel me-1"></i>ดาวน์โหลด Excel</button>
+                                <div class="dropdown d-inline-block me-2">
+                                    <button id="export-csv-dropdown" class="btn btn-sm btn-outline-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-filetype-csv me-1"></i>ดาวน์โหลด CSV
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom shadow" aria-labelledby="export-csv-dropdown" style="min-width: 250px;">
+                                        <li><h6 class="dropdown-header"><i class="bi bi-database me-1"></i>คอลัมน์ฐานข้อมูล (UTF-8)</h6></li>
+                                        <li>
+                                            <a class="dropdown-item d-flex justify-content-between align-items-center py-2" href="javascript:void(0)" id="export-csv-all-btn">
+                                                <span><i class="bi bi-collection me-2 text-info"></i>ข้อมูลทั้งหมด</span>
+                                                <span class="badge rounded-pill bg-secondary ms-2" id="csv-count-all">0</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex justify-content-between align-items-center py-2" href="javascript:void(0)" id="export-csv-filtered-btn">
+                                                <span><i class="bi bi-funnel me-2 text-warning"></i>ตามตัวกรองที่เลือก</span>
+                                                <span class="badge rounded-pill bg-secondary ms-2" id="csv-count-filtered">0</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                                 <button id="refresh-btn" class="btn btn-sm btn-outline-secondary"><i
                                         class="bi bi-arrow-clockwise me-1"></i>รีเฟรช</button>
                             </div>
@@ -2487,7 +2539,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // ใช้ Supabase client จาก js/supabase-config.js แทน Google Apps Script
             const TEAMS_WEBHOOK_URL = SUPABASE_CONFIG.TEAMS_WEBHOOK_URL;
-            let allTickets = [], adminUsers = [], problemTypeChart, dailyTrendChart, monthlyTrendChart;
+            let allTickets = [], currentFilteredTickets = [], adminUsers = [], problemTypeChart, dailyTrendChart, monthlyTrendChart;
             let confirmCallback = null;
             let pollingIntervalId = null;
             let lastCheckedTimestamp = 0;
@@ -2519,6 +2571,8 @@
                 adminContent: document.getElementById('admin-content'),
                 refreshBtn: document.getElementById('refresh-btn'),
                 exportExcelBtn: document.getElementById('export-excel-btn'),
+                exportCsvAllBtn: document.getElementById('export-csv-all-btn'),
+                exportCsvFilteredBtn: document.getElementById('export-csv-filtered-btn'),
                 confirmModalBtn: document.getElementById('confirmModalBtn'),
                 newUsernameInput: document.getElementById('newUsername'),
                 newPasswordInput: document.getElementById('newPassword'),
@@ -3039,6 +3093,7 @@
                     }
                 }
 
+                currentFilteredTickets = filtered;
                 updateTicketFilterCount(filtered.length, totalCount);
 
                 if (filtered.length === 0) {
@@ -3484,6 +3539,10 @@
                 if (resultsEl) {
                     resultsEl.innerHTML = `แสดง <strong>${shown}</strong> จาก <strong>${total}</strong> รายการ`;
                 }
+                const csvAllBadge = document.getElementById('csv-count-all');
+                if (csvAllBadge) csvAllBadge.textContent = total;
+                const csvFilteredBadge = document.getElementById('csv-count-filtered');
+                if (csvFilteredBadge) csvFilteredBadge.textContent = shown;
                 // Update active filter count badge
                 const countBadge = document.getElementById('ticket-filter-count');
                 const activeCount = countActiveTicketFilters();
@@ -4197,12 +4256,14 @@
                         ScoreQ: t.score_q,
                         ScoreD: t.score_d,
                         ScoreC: t.score_c,
+                        EvaluationComment: t.evaluation_comment,
                         LastEmailSentDate: t.last_email_sent_date,
                         LastEmailSentTime: t.last_email_sent_time,
                         EmailSendCount: t.email_send_count,
                         EmailProblem: t.email_problem_status,
                         CommentProblem: t.comment_problem,
-                        RowIndex: t.id // ใช้ UUID เป็น RowIndex
+                        RowIndex: t.id, // ใช้ UUID เป็น RowIndex
+                        _raw: t
                     }));
 
                     adminUsers = (usersData || []).map(u => ({
@@ -4249,12 +4310,14 @@
                                 ScoreQ: t.score_q,
                                 ScoreD: t.score_d,
                                 ScoreC: t.score_c,
+                                EvaluationComment: t.evaluation_comment,
                                 LastEmailSentDate: t.last_email_sent_date,
                                 LastEmailSentTime: t.last_email_sent_time,
                                 EmailSendCount: t.email_send_count,
                                 EmailProblem: t.email_problem_status,
                                 CommentProblem: t.comment_problem,
-                                RowIndex: t.id
+                                RowIndex: t.id,
+                                _raw: t
                             };
 
                             const existingTicketIndex = allTickets.findIndex(ticket => ticket.RowIndex === updatedTicket.RowIndex);
@@ -4582,6 +4645,132 @@
             // Event listener for Export Excel button
             if (DOMElements.exportExcelBtn) {
                 DOMElements.exportExcelBtn.addEventListener('click', exportToExcel);
+            }
+
+            // ==================== EXPORT TO CSV (คอลัมน์ตรงกับฐานข้อมูล + UTF-8 BOM รองรับภาษาไทย) ====================
+            const DB_COLUMNS = [
+                'id',
+                'case_id',
+                'submitter_name',
+                'department',
+                'problem_type',
+                'problem_details',
+                'status',
+                'submission_date',
+                'submission_time',
+                'closed_date',
+                'closed_time',
+                'resolution_comment',
+                'contact_number',
+                'last_updated',
+                'closed_by',
+                'email_status',
+                'score_q',
+                'score_d',
+                'score_c',
+                'evaluation_comment',
+                'last_email_sent_date',
+                'last_email_sent_time',
+                'email_send_count',
+                'email_problem_status',
+                'comment_problem',
+                'created_at'
+            ];
+
+            const getTicketDbValue = (ticket, col) => {
+                if (ticket._raw && ticket._raw[col] !== undefined && ticket._raw[col] !== null) {
+                    return ticket._raw[col];
+                }
+                const mapping = {
+                    id: ticket.RowIndex || ticket.id || '',
+                    case_id: ticket.CaseID || ticket.case_id || '',
+                    submitter_name: ticket.SubmitterName || ticket.submitter_name || '',
+                    department: ticket.Department || ticket.department || '',
+                    problem_type: ticket.ProblemType || ticket.problem_type || '',
+                    problem_details: ticket.ProblemDetails || ticket.problem_details || '',
+                    status: ticket.Status || ticket.status || '',
+                    submission_date: ticket.SubmissionDate || ticket.submission_date || '',
+                    submission_time: ticket.SubmissionTime || ticket.submission_time || '',
+                    closed_date: ticket.ClosedDate || ticket.closed_date || '',
+                    closed_time: ticket.ClosedTime || ticket.closed_time || '',
+                    resolution_comment: ticket.ResolutionComment || ticket.resolution_comment || '',
+                    contact_number: ticket.ContactNumber || ticket.contact_number || '',
+                    last_updated: ticket.last_updated || '',
+                    closed_by: ticket.ClosedBy || ticket.closed_by || '',
+                    email_status: ticket.EmailStatus || ticket.email_status || '',
+                    score_q: ticket.ScoreQ !== undefined && ticket.ScoreQ !== null ? ticket.ScoreQ : (ticket.score_q ?? ''),
+                    score_d: ticket.ScoreD !== undefined && ticket.ScoreD !== null ? ticket.ScoreD : (ticket.score_d ?? ''),
+                    score_c: ticket.ScoreC !== undefined && ticket.ScoreC !== null ? ticket.ScoreC : (ticket.score_c ?? ''),
+                    evaluation_comment: ticket.EvaluationComment || ticket.evaluation_comment || '',
+                    last_email_sent_date: ticket.LastEmailSentDate || ticket.last_email_sent_date || '',
+                    last_email_sent_time: ticket.LastEmailSentTime || ticket.last_email_sent_time || '',
+                    email_send_count: ticket.EmailSendCount !== undefined && ticket.EmailSendCount !== null ? ticket.EmailSendCount : (ticket.email_send_count ?? 0),
+                    email_problem_status: ticket.EmailProblem || ticket.email_problem_status || '',
+                    comment_problem: ticket.CommentProblem || ticket.comment_problem || '',
+                    created_at: ticket.created_at || ''
+                };
+                return mapping[col] !== undefined && mapping[col] !== null ? mapping[col] : '';
+            };
+
+            const escapeCSV = (val) => {
+                if (val === null || val === undefined) return '';
+                let str = String(val);
+                if (/[",\r\n]/.test(str)) {
+                    str = '"' + str.replace(/"/g, '""') + '"';
+                }
+                return str;
+            };
+
+            const exportToCSV = (ticketsToExport, typeLabel = 'All') => {
+                if (!ticketsToExport || ticketsToExport.length === 0) {
+                    showAlert('ไม่มีข้อมูลให้ดาวน์โหลด', false);
+                    return;
+                }
+
+                // แถวหัวข้อคอลัมน์ตรงกับชื่อคอลัมน์ในฐานข้อมูล (Supabase tickets table)
+                const headerRow = DB_COLUMNS.join(',');
+
+                // แถวข้อมูลพร้อม escape อักขระพิเศษ
+                const dataRows = ticketsToExport.map(ticket => {
+                    return DB_COLUMNS.map(col => escapeCSV(getTicketDbValue(ticket, col))).join(',');
+                });
+
+                const csvString = [headerRow, ...dataRows].join('\r\n');
+
+                // ใส่ UTF-8 BOM (\uFEFF) เพื่อให้โปรแกรมบน Windows (รวมถึง Excel) เปิดไฟล์ CSV ภาษาไทยได้ถูกต้อง ไม่เป็นภาษาต่างด้าว
+                const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+
+                const today = new Date();
+                const dateStr = today.toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).replace(/\//g, '-');
+
+                const fileName = `IT_Helpdesk_Tickets_${typeLabel}_${dateStr}.csv`;
+
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', fileName);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                const labelThai = typeLabel === 'Filtered' ? 'ตามตัวกรอง' : 'ทั้งหมด';
+                showAlert(`ดาวน์โหลดไฟล์ ${fileName} สำเร็จ (${labelThai})<br>จำนวน ${ticketsToExport.length} รายการ (รองรับภาษาไทย UTF-8)`, true);
+            };
+
+            // Event listeners for Export CSV buttons
+            if (DOMElements.exportCsvAllBtn) {
+                DOMElements.exportCsvAllBtn.addEventListener('click', () => exportToCSV(allTickets, 'All'));
+            }
+            if (DOMElements.exportCsvFilteredBtn) {
+                DOMElements.exportCsvFilteredBtn.addEventListener('click', () => {
+                    const toExport = (currentFilteredTickets && currentFilteredTickets.length > 0) ? currentFilteredTickets : allTickets;
+                    exportToCSV(toExport, 'Filtered');
+                });
             }
 
             initializeApp();
