@@ -527,18 +527,6 @@
                 </button>
             </div>
 
-            <!-- QR Code Button -->
-            <button type="button" class="btn-action btn-qr" id="open-qr-btn">
-                <i class="bi bi-qr-code-scan"></i>
-                <span class="label-text">QR Code สแกนเข้าเว็บ</span>
-            </button>
-
-            <!-- Open Original PDF -->
-            <a href="Loing%20up.pdf" target="_blank" rel="noopener" class="btn-action" title="เปิดไฟล์ PDF ต้นฉบับ">
-                <i class="bi bi-box-arrow-up-right"></i>
-                <span class="label-text">เปิดไฟล์เต็ม</span>
-            </a>
-
             <!-- Download PDF -->
             <a href="Loing%20up.pdf" download="Setup-Microsoft-365-2FA.pdf" class="btn-action btn-primary">
                 <i class="bi bi-download"></i>
@@ -552,7 +540,7 @@
         <div class="status-banner">
             <div>
                 <i class="bi bi-info-circle-fill" style="color: var(--accent-emerald); margin-right: 0.4rem;"></i>
-                <strong>คำแนะนำ:</strong> เลื่อนลงเพื่ออ่านขั้นตอนการตั้งค่า Microsoft Authenticator ทั้ง 11 ขั้นตอน หรือกดปุ่ม <strong>QR Code</strong> ด้านบนเพื่อแชร์ให้ผู้ใช้งานสแกนดูผ่านมือถือ
+                <strong>คำแนะนำ:</strong> เลื่อนลงเพื่ออ่านขั้นตอนการตั้งค่า Microsoft Authenticator ทั้ง 11 ขั้นตอน
             </div>
             <span class="page-badge" id="page-count-badge">กำลังโหลดเอกสาร...</span>
         </div>
@@ -566,50 +554,10 @@
         </div>
     </main>
 
-    <!-- QR Code Modal Dialog -->
-    <dialog id="qr-dialog">
-        <div class="modal-inner">
-            <div class="modal-header">
-                <h2><i class="bi bi-qr-code" style="color: var(--accent-cyan);"></i> สแกน QR Code ดูคู่มือ 2FA</h2>
-                <button type="button" class="close-btn" id="close-qr-btn" aria-label="ปิดหน้าต่าง">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-
-            <div class="qr-poster-card" id="printable-qr-card">
-                <span class="poster-tag">GFCA IT Support</span>
-                <h3>คู่มือการตั้งค่า Microsoft 365 (2FA)</h3>
-                <p style="font-size: 0.82rem; color: #475569;">สแกนด้วยกล้องมือถือเพื่อเปิดอ่านคู่มือออนไลน์</p>
-                <div class="qr-image-wrapper">
-                    <img id="qr-code-img" src="" alt="QR Code สำหรับเข้าหน้าคู่มือ 2FA" crossorigin="anonymous">
-                </div>
-                <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Microsoft Authenticator Setup Guide</p>
-            </div>
-
-            <div class="qr-url-box">
-                <input type="text" id="share-url-input" readonly value="">
-                <button type="button" class="btn-action" id="copy-url-btn" style="padding: 0.35rem 0.7rem; font-size: 0.78rem;">
-                    <i class="bi bi-clipboard"></i> คัดลอกลิงก์
-                </button>
-            </div>
-
-            <div class="modal-footer-btns">
-                <button type="button" class="btn-action" id="download-qr-btn" style="justify-content: center;">
-                    <i class="bi bi-image"></i> บันทึกรูป QR
-                </button>
-                <button type="button" class="btn-action btn-primary" id="print-qr-btn" style="justify-content: center;">
-                    <i class="bi bi-printer"></i> พิมพ์ป้าย QR
-                </button>
-            </div>
-        </div>
-    </dialog>
-
     <!-- PDF.js from CDN for crisp multi-page mobile & desktop rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         const PDF_FILE_URL = 'Loing%20up.pdf';
-        // Canonical GitHub Pages URL for 2FA viewer
-        const CANONICAL_WEB_URL = 'https://nube1369.github.io/kanate-gfca.github.io/2FA/';
 
         const viewerContainer = document.getElementById('pdf-viewer-container');
         const loadingIndicator = document.getElementById('loading-indicator');
@@ -621,87 +569,6 @@
         let pdfDoc = null;
         let currentZoom = 1.0;
         const BASE_MAX_WIDTH = 860;
-
-        // Setup QR Code URL (uses live URL if hosted on http/https, otherwise canonical GitHub Pages URL)
-        function getTargetWebUrl() {
-            if (window.location.protocol.startsWith('http') && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
-                return window.location.href.split('#')[0];
-            }
-            return CANONICAL_WEB_URL;
-        }
-
-        function initQrCodeModal() {
-            const targetUrl = getTargetWebUrl();
-            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(targetUrl)}`;
-
-            const qrImg = document.getElementById('qr-code-img');
-            const urlInput = document.getElementById('share-url-input');
-            const qrDialog = document.getElementById('qr-dialog');
-            const openQrBtn = document.getElementById('open-qr-btn');
-            const closeQrBtn = document.getElementById('close-qr-btn');
-            const copyUrlBtn = document.getElementById('copy-url-btn');
-            const downloadQrBtn = document.getElementById('download-qr-btn');
-            const printQrBtn = document.getElementById('print-qr-btn');
-
-            qrImg.src = qrApiUrl;
-            urlInput.value = targetUrl;
-
-            openQrBtn.addEventListener('click', () => {
-                qrDialog.showModal();
-            });
-
-            closeQrBtn.addEventListener('click', () => {
-                qrDialog.close();
-            });
-
-            // Light dismiss when clicking backdrop
-            qrDialog.addEventListener('click', (e) => {
-                const rect = qrDialog.getBoundingClientRect();
-                const clickedInDialog = (
-                    rect.top <= e.clientY &&
-                    e.clientY <= rect.top + rect.height &&
-                    rect.left <= e.clientX &&
-                    e.clientX <= rect.left + rect.width
-                );
-                if (!clickedInDialog) {
-                    qrDialog.close();
-                }
-            });
-
-            copyUrlBtn.addEventListener('click', async () => {
-                try {
-                    await navigator.clipboard.writeText(targetUrl);
-                    copyUrlBtn.innerHTML = '<i class="bi bi-check2"></i> คัดลอกแล้ว';
-                    setTimeout(() => {
-                        copyUrlBtn.innerHTML = '<i class="bi bi-clipboard"></i> คัดลอกลิงก์';
-                    }, 2000);
-                } catch {
-                    urlInput.select();
-                    document.execCommand('copy');
-                }
-            });
-
-            downloadQrBtn.addEventListener('click', async () => {
-                try {
-                    const response = await fetch(qrApiUrl);
-                    const blob = await response.blob();
-                    const blobUrl = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = blobUrl;
-                    link.download = 'QR-Code-2FA-Guide.png';
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                    URL.revokeObjectURL(blobUrl);
-                } catch {
-                    window.open(qrApiUrl, '_blank');
-                }
-            });
-
-            printQrBtn.addEventListener('click', () => {
-                window.print();
-            });
-        }
 
         function updateZoomUI() {
             zoomLevelText.textContent = `${Math.round(currentZoom * 100)}%`;
@@ -789,9 +656,9 @@
             `;
         }
 
-        initQrCodeModal();
         renderAllPages();
     </script>
 </body>
 
 </html>
+
