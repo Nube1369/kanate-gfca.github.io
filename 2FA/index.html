@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คู่มือตั้งค่า Microsoft 365 Two-Factor Authentication (2FA) | GFCA IT</title>
+    <link rel="icon" href="../assets/images/IT_Logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/bootstrap-icons.min.css">
+
+    <style>
+        :root {
+            --bg-base: #090d16;
+            --bg-surface: #111827;
+            --bg-elevated: #1e293b;
+            --border-subtle: rgba(148, 163, 184, 0.16);
+            --border-accent: rgba(16, 185, 129, 0.45);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-emerald: #10b981;
+            --accent-emerald-hover: #059669;
+            --accent-cyan: #06b6d4;
+            --accent-amber: #f59e0b;
+            --font-display: 'Chakra Petch', 'Sarabun', sans-serif;
+            --font-body: 'Sarabun', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-base);
+            background-image:
+                radial-gradient(circle at 12% 18%, rgba(16, 185, 129, 0.12), transparent 40%),
+                radial-gradient(circle at 88% 12%, rgba(6, 182, 212, 0.10), transparent 38%),
+                linear-gradient(180deg, #090d16 0%, #0d1322 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Navigation Header */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            object-fit: contain;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .brand-text h1 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            line-height: 1.25;
+            color: #ffffff;
+        }
+
+        .brand-text span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.8rem;
+            color: var(--accent-emerald);
+            font-weight: 500;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Page & Zoom Controls */
+        .viewer-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border-subtle);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.65rem;
+        }
+
+        .ctrl-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            width: 32px;
+            height: 32px;
+            border-radius: 0.45rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+            font-size: 0.95rem;
+        }
+
+        .ctrl-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent-emerald);
+        }
+
+        .ctrl-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .zoom-label {
+            font-family: var(--font-display);
+            font-size: 0.82rem;
+            min-width: 48px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.5rem 0.9rem;
+            border-radius: 0.65rem;
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-action:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-action.btn-qr {
+            background: rgba(6, 182, 212, 0.14);
+            border-color: rgba(6, 182, 212, 0.4);
+            color: #67e8f9;
+        }
+
+        .btn-action.btn-qr:hover {
+            background: rgba(6, 182, 212, 0.24);
+        }
+
+        .btn-action.btn-primary {
+            background: linear-gradient(135deg, var(--accent-emerald) 0%, #059669 100%);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);
+        }
+
+        .btn-action.btn-primary:hover {
+            filter: brightness(1.08);
+        }
+
+        /* Main Workspace */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 1rem 3rem;
+            gap: 1.5rem;
+        }
+
+        .status-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            width: 100%;
+            max-width: 900px;
+            background: rgba(17, 24, 39, 0.75);
+            border: 1px solid var(--border-subtle);
+            border-left: 4px solid var(--accent-emerald);
+            border-radius: 0.75rem;
+            padding: 0.85rem 1.2rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .status-banner strong {
+            color: var(--text-primary);
+        }
+
+        .page-badge {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.14);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            white-space: nowrap;
+        }
+
+        /* PDF Pages Container */
+        #pdf-viewer-container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.75rem;
+        }
+
+        .pdf-page-card {
+            position: relative;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            transition: transform 0.2s ease;
+            max-width: 100%;
+        }
+
+        .pdf-page-card canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .page-number-pill {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(6px);
+            color: #f8fafc;
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+        }
+
+        /* Loading State */
+        .loading-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            gap: 1rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .spinner {
+            width: 42px;
+            height: 42px;
+            border: 3px solid rgba(16, 185, 129, 0.2);
+            border-top-color: var(--accent-emerald);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Fallback Iframe if PDF.js fails */
+        .fallback-iframe {
+            width: 100%;
+            max-width: 900px;
+            height: 82vh;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        /* QR Code Dialog Modal */
+        dialog#qr-dialog {
+            margin: auto;
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1.25rem;
+            padding: 0;
+            width: 92%;
+            max-width: 440px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+        }
+
+        dialog#qr-dialog::backdrop {
+            background: rgba(9, 13, 22, 0.78);
+            backdrop-filter: blur(6px);
+        }
+
+        .modal-inner {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1.1rem;
+        }
+
+        .modal-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.85rem;
+        }
+
+        .modal-header h2 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffffff;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.2rem;
+            line-height: 1;
+            border-radius: 0.4rem;
+        }
+
+        .close-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Printable QR Poster Card inside Modal */
+        .qr-poster-card {
+            background: #ffffff;
+            color: #0f172a;
+            padding: 1.5rem 1.25rem;
+            border-radius: 1rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: inset 0 0 0 1px #e2e8f0;
+        }
+
+        .qr-poster-card .poster-tag {
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #059669;
+            background: #ecfdf5;
+            padding: 0.2rem 0.65rem;
+            border-radius: 999px;
+        }
+
+        .qr-poster-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.3;
+        }
+
+        .qr-image-wrapper {
+            padding: 0.65rem;
+            background: #ffffff;
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-image-wrapper img {
+            width: 200px;
+            height: 200px;
+            display: block;
+        }
+
+        .qr-url-box {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--bg-base);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.6rem;
+            padding: 0.45rem 0.65rem;
+        }
+
+        .qr-url-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-family: monospace;
+            outline: none;
+            width: 100%;
+        }
+
+        .modal-footer-btns {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+        }
+
+        /* Print Mode: Print QR Poster Cleanly */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            dialog#qr-dialog,
+            dialog#qr-dialog .qr-poster-card,
+            dialog#qr-dialog .qr-poster-card * {
+                visibility: visible;
+            }
+            dialog#qr-dialog {
+                position: fixed;
+                inset: 0;
+                border: none;
+                box-shadow: none;
+                background: #ffffff;
+                max-width: 100%;
+                width: 100%;
+            }
+            dialog#qr-dialog .qr-poster-card {
+                border: 2px solid #0f172a;
+                max-width: 420px;
+                margin: 2rem auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .topbar {
+                padding: 0.65rem 0.9rem;
+            }
+            .brand-text h1 {
+                font-size: 0.95rem;
+            }
+            .btn-action span.label-text {
+                display: none;
+            }
+            .status-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top Navigation Bar -->
+    <header class="topbar">
+        <a href="../Index.html" class="brand" title="กลับหน้าหลัก IT Helpdesk">
+            <img src="../assets/images/IT_Logo.png" alt="IT Logo" class="brand-logo" onerror="this.style.display='none'">
+            <div class="brand-text">
+                <h1>Setup Microsoft 365 (2FA)</h1>
+                <span><i class="bi bi-shield-lock-fill"></i> คู่มือการตั้งค่ายืนยันตัวตน 2 ชั้น</span>
+            </div>
+        </a>
+
+        <div class="toolbar-actions">
+            <!-- Zoom Controls -->
+            <div class="viewer-controls" aria-label="เครื่องมือย่อขยายเอกสาร">
+                <button type="button" class="ctrl-btn" id="zoom-out-btn" title="ย่อขนาด">
+                    <i class="bi bi-dash-lg"></i>
+                </button>
+                <span class="zoom-label" id="zoom-level-text">100%</span>
+                <button type="button" class="ctrl-btn" id="zoom-in-btn" title="ขยายขนาด">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+            </div>
+
+            <!-- QR Code Button -->
+            <button type="button" class="btn-action btn-qr" id="open-qr-btn">
+                <i class="bi bi-qr-code-scan"></i>
+                <span class="label-text">QR Code สแกนเข้าเว็บ</span>
+            </button>
+
+            <!-- Open Original PDF -->
+            <a href="Loing%20up.pdf" target="_blank" rel="noopener" class="btn-action" title="เปิดไฟล์ PDF ต้นฉบับ">
+                <i class="bi bi-box-arrow-up-right"></i>
+                <span class="label-text">เปิดไฟล์เต็ม</span>
+            </a>
+
+            <!-- Download PDF -->
+            <a href="Loing%20up.pdf" download="Setup-Microsoft-365-2FA.pdf" class="btn-action btn-primary">
+                <i class="bi bi-download"></i>
+                <span class="label-text">ดาวน์โหลด PDF</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="workspace">
+        <div class="status-banner">
+            <div>
+                <i class="bi bi-info-circle-fill" style="color: var(--accent-emerald); margin-right: 0.4rem;"></i>
+                <strong>คำแนะนำ:</strong> เลื่อนลงเพื่ออ่านขั้นตอนการตั้งค่า Microsoft Authenticator ทั้ง 11 ขั้นตอน หรือกดปุ่ม <strong>QR Code</strong> ด้านบนเพื่อแชร์ให้ผู้ใช้งานสแกนดูผ่านมือถือ
+            </div>
+            <span class="page-badge" id="page-count-badge">กำลังโหลดเอกสาร...</span>
+        </div>
+
+        <!-- PDF Canvas Container -->
+        <div id="pdf-viewer-container">
+            <div class="loading-box" id="loading-indicator">
+                <div class="spinner"></div>
+                <p>กำลังเปิดเอกสาร PDF ออนไลน์...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- QR Code Modal Dialog -->
+    <dialog id="qr-dialog">
+        <div class="modal-inner">
+            <div class="modal-header">
+                <h2><i class="bi bi-qr-code" style="color: var(--accent-cyan);"></i> สแกน QR Code ดูคู่มือ 2FA</h2>
+                <button type="button" class="close-btn" id="close-qr-btn" aria-label="ปิดหน้าต่าง">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="qr-poster-card" id="printable-qr-card">
+                <span class="poster-tag">GFCA IT Support</span>
+                <h3>คู่มือการตั้งค่า Microsoft 365 (2FA)</h3>
+                <p style="font-size: 0.82rem; color: #475569;">สแกนด้วยกล้องมือถือเพื่อเปิดอ่านคู่มือออนไลน์</p>
+                <div class="qr-image-wrapper">
+                    <img id="qr-code-img" src="" alt="QR Code สำหรับเข้าหน้าคู่มือ 2FA" crossorigin="anonymous">
+                </div>
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Microsoft Authenticator Setup Guide</p>
+            </div>
+
+            <div class="qr-url-box">
+                <input type="text" id="share-url-input" readonly value="">
+                <button type="button" class="btn-action" id="copy-url-btn" style="padding: 0.35rem 0.7rem; font-size: 0.78rem;">
+                    <i class="bi bi-clipboard"></i> คัดลอกลิงก์
+                </button>
+            </div>
+
+            <div class="modal-footer-btns">
+                <button type="button" class="btn-action" id="download-qr-btn" style="justify-content: center;">
+                    <i class="bi bi-image"></i> บันทึกรูป QR
+                </button>
+                <button type="button" class="btn-action btn-primary" id="print-qr-btn" style="justify-content: center;">
+                    <i class="bi bi-printer"></i> พิมพ์ป้าย QR
+                </button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- PDF.js from CDN for crisp multi-page mobile & desktop rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        const PDF_FILE_URL = 'Loing%20up.pdf';
+        // Canonical GitHub Pages URL for 2FA viewer
+        const CANONICAL_WEB_URL = 'https://nube1369.github.io/kanate-gfca.github.io/2FA/';
+
+        const viewerContainer = document.getElementById('pdf-viewer-container');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const pageCountBadge = document.getElementById('page-count-badge');
+        const zoomInBtn = document.getElementById('zoom-in-btn');
+        const zoomOutBtn = document.getElementById('zoom-out-btn');
+        const zoomLevelText = document.getElementById('zoom-level-text');
+
+        let pdfDoc = null;
+        let currentZoom = 1.0;
+        const BASE_MAX_WIDTH = 860;
+
+        // Setup QR Code URL (uses live URL if hosted on http/https, otherwise canonical GitHub Pages URL)
+        function getTargetWebUrl() {
+            if (window.location.protocol.startsWith('http') && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
+                return window.location.href.split('#')[0];
+            }
+            return CANONICAL_WEB_URL;
+        }
+
+        function initQrCodeModal() {
+            const targetUrl = getTargetWebUrl();
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(targetUrl)}`;
+
+            const qrImg = document.getElementById('qr-code-img');
+            const urlInput = document.getElementById('share-url-input');
+            const qrDialog = document.getElementById('qr-dialog');
+            const openQrBtn = document.getElementById('open-qr-btn');
+            const closeQrBtn = document.getElementById('close-qr-btn');
+            const copyUrlBtn = document.getElementById('copy-url-btn');
+            const downloadQrBtn = document.getElementById('download-qr-btn');
+            const printQrBtn = document.getElementById('print-qr-btn');
+
+            qrImg.src = qrApiUrl;
+            urlInput.value = targetUrl;
+
+            openQrBtn.addEventListener('click', () => {
+                qrDialog.showModal();
+            });
+
+            closeQrBtn.addEventListener('click', () => {
+                qrDialog.close();
+            });
+
+            // Light dismiss when clicking backdrop
+            qrDialog.addEventListener('click', (e) => {
+                const rect = qrDialog.getBoundingClientRect();
+                const clickedInDialog = (
+                    rect.top <= e.clientY &&
+                    e.clientY <= rect.top + rect.height &&
+                    rect.left <= e.clientX &&
+                    e.clientX <= rect.left + rect.width
+                );
+                if (!clickedInDialog) {
+                    qrDialog.close();
+                }
+            });
+
+            copyUrlBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(targetUrl);
+                    copyUrlBtn.innerHTML = '<i class="bi bi-check2"></i> คัดลอกแล้ว';
+                    setTimeout(() => {
+                        copyUrlBtn.innerHTML = '<i class="bi bi-clipboard"></i> คัดลอกลิงก์';
+                    }, 2000);
+                } catch {
+                    urlInput.select();
+                    document.execCommand('copy');
+                }
+            });
+
+            downloadQrBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch(qrApiUrl);
+                    const blob = await response.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = 'QR-Code-2FA-Guide.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    URL.revokeObjectURL(blobUrl);
+                } catch {
+                    window.open(qrApiUrl, '_blank');
+                }
+            });
+
+            printQrBtn.addEventListener('click', () => {
+                window.print();
+            });
+        }
+
+        function updateZoomUI() {
+            zoomLevelText.textContent = `${Math.round(currentZoom * 100)}%`;
+            const cards = viewerContainer.querySelectorAll('.pdf-page-card');
+            const targetWidth = Math.round(BASE_MAX_WIDTH * currentZoom);
+            viewerContainer.style.maxWidth = `${targetWidth}px`;
+            cards.forEach(card => {
+                card.style.width = '100%';
+            });
+            zoomOutBtn.disabled = currentZoom <= 0.6;
+            zoomInBtn.disabled = currentZoom >= 1.8;
+        }
+
+        zoomInBtn.addEventListener('click', () => {
+            if (currentZoom < 1.8) {
+                currentZoom = +(currentZoom + 0.2).toFixed(1);
+                updateZoomUI();
+            }
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            if (currentZoom > 0.6) {
+                currentZoom = +(currentZoom - 0.2).toFixed(1);
+                updateZoomUI();
+            }
+        });
+
+        async function renderAllPages() {
+            if (typeof pdfjsLib === 'undefined') {
+                showFallbackViewer();
+                return;
+            }
+
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+            try {
+                const loadingTask = pdfjsLib.getDocument(PDF_FILE_URL);
+                pdfDoc = await loadingTask.promise;
+                const totalPages = pdfDoc.numPages;
+
+                pageCountBadge.textContent = `ทั้งหมด ${totalPages} หน้า`;
+                loadingIndicator.remove();
+
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+                for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                    const page = await pdfDoc.getPage(pageNum);
+                    const unscaledViewport = page.getViewport({ scale: 1 });
+                    const renderScale = (BASE_MAX_WIDTH / unscaledViewport.width) * dpr;
+                    const viewport = page.getViewport({ scale: renderScale });
+
+                    const card = document.createElement('div');
+                    card.className = 'pdf-page-card';
+
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+
+                    const badge = document.createElement('span');
+                    badge.className = 'page-number-pill';
+                    badge.textContent = `หน้า ${pageNum} / ${totalPages}`;
+
+                    card.appendChild(canvas);
+                    card.appendChild(badge);
+                    viewerContainer.appendChild(card);
+
+                    await page.render({
+                        canvasContext: ctx,
+                        viewport: viewport
+                    }).promise;
+                }
+
+                updateZoomUI();
+            } catch (err) {
+                console.warn('PDF.js rendering fallback triggered:', err);
+                showFallbackViewer();
+            }
+        }
+
+        function showFallbackViewer() {
+            pageCountBadge.textContent = 'โหมดดูเอกสารมาตรฐาน';
+            viewerContainer.innerHTML = `
+                <iframe class="fallback-iframe" src="${PDF_FILE_URL}#toolbar=1&navpanes=0" title="Setup Microsoft 365 2FA PDF"></iframe>
+            `;
+        }
+
+        initQrCodeModal();
+        renderAllPages();
+    </script>
+</body>
+
+</html>
