@@ -2827,6 +2827,86 @@
             color: var(--pc-text-main);
             line-height: 1.25;
         }
+
+        /* Quarterly Monthly Overview (Option 3: Q1-Q4 + Right Summary Cards) */
+        .pc-quarterly-split {
+            display: grid;
+            grid-template-columns: 1.95fr 1fr;
+            gap: 20px;
+            align-items: stretch;
+        }
+        .pc-qcards-list {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .pc-qcard-item {
+            background: rgba(148, 163, 184, 0.06);
+            border: 1px solid var(--pc-border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+        .pc-qcard-item:hover {
+            transform: translateX(3px);
+            background: rgba(148, 163, 184, 0.12);
+        }
+        .pc-qcard-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--pc-text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pc-qcard-sub {
+            font-size: 11.5px;
+            color: var(--pc-text-muted);
+            margin-top: 2px;
+        }
+        .pc-qcard-right {
+            text-align: right;
+        }
+        .pc-qcard-val {
+            font-family: 'Courier New', monospace;
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--pc-text-main);
+            line-height: 1.1;
+        }
+        .pc-qcard-delta {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 3px;
+        }
+        .pc-q-legend {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 12px;
+            color: var(--pc-text-muted);
+        }
+        .pc-q-legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .pc-q-legend i {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        @media (max-width: 991px) {
+            .pc-quarterly-split {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -3167,13 +3247,24 @@
                                 <div class="row g-4 mb-4">
                                     <div class="col-lg-8">
                                         <div class="card h-100"
-                                            data-tippy-content="กราฟแท่งเปรียบเทียบจำนวนเคสที่แจ้งเข้ามาในแต่ละเดือนของปีปัจจุบัน">
-                                            <div class="card-header d-flex justify-content-between align-items-center">
-                                                <span><i class="bi bi-bar-chart-line-fill me-2" style="color:var(--pc-primary);"></i>ภาพรวมเคสรายเดือน</span>
-                                                <span class="badge bg-info-subtle text-info" id="monthly-peak-badge">Monthly Analytics</span>
+                                            data-tippy-content="กราฟแท่งเปรียบเทียบจำนวนเคสที่แจ้งเข้ามาในแต่ละเดือน แบ่งสีตามไตรมาส (Q1–Q4) พร้อมสรุปยอดรายไตรมาส">
+                                            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                                <span><i class="bi bi-calendar3 me-2" style="color:var(--pc-primary);"></i>ภาพรวมเคสรายเดือนแยกตามไตรมาส (Q1–Q4)</span>
+                                                <div class="d-flex align-items-center gap-3 flex-wrap">
+                                                    <div class="pc-q-legend">
+                                                        <span><i style="background:#4680ff;"></i>Q1</span>
+                                                        <span><i style="background:#2ed8b6;"></i>Q2</span>
+                                                        <span><i style="background:#ffb64d;"></i>Q3</span>
+                                                        <span><i style="background:#a855f7;"></i>Q4</span>
+                                                    </div>
+                                                    <span class="badge bg-info-subtle text-info" id="monthly-peak-badge">รวม 0 เคส</span>
+                                                </div>
                                             </div>
                                             <div class="card-body">
-                                                <div class="chart-container"><canvas id="monthlyTrendChart"></canvas></div>
+                                                <div class="pc-quarterly-split">
+                                                    <div class="chart-container" style="height:290px;"><canvas id="monthlyTrendChart"></canvas></div>
+                                                    <div class="pc-qcards-list" id="quarterly-summary-cards"></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -4609,40 +4700,187 @@
                 const labels = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
                 const monthlyData = Array(12).fill(0);
                 const today = new Date();
-                tickets.forEach(t => { const d = parseThaiDateTime(t.SubmissionDate, t.SubmissionTime); if (d && d.getFullYear() === today.getFullYear()) monthlyData[d.getMonth()]++; });
+                const targetYear = today.getFullYear();
+
+                tickets.forEach(t => {
+                    const d = parseThaiDateTime(t.SubmissionDate, t.SubmissionTime);
+                    if (d && d.getFullYear() === targetYear) monthlyData[d.getMonth()]++;
+                });
+
+                const qColors = ['#4680ff', '#2ed8b6', '#ffb64d', '#a855f7'];
+                const qBgColors = [
+                    'rgba(70, 128, 255, 0.85)',
+                    'rgba(46, 216, 182, 0.85)',
+                    'rgba(255, 182, 77, 0.85)',
+                    'rgba(168, 85, 247, 0.85)'
+                ];
+                const curMonth = today.getMonth();
+
+                const barBg = monthlyData.map((_, i) => {
+                    const q = Math.floor(i / 3);
+                    if (i === curMonth) return qColors[q];
+                    return qBgColors[q];
+                });
+                const barBorder = monthlyData.map((_, i) => qColors[Math.floor(i / 3)]);
+
+                // Quarterly totals
+                const qTotals = [0, 0, 0, 0];
+                monthlyData.forEach((v, i) => { qTotals[Math.floor(i / 3)] += v; });
+                const yearTotal = qTotals.reduce((a, b) => a + b, 0);
+
+                const peakBadge = document.getElementById('monthly-peak-badge');
+                if (peakBadge) peakBadge.textContent = `รวมทั้งปี ${yearTotal} เคส`;
+
+                // Render 4 Quarter summary cards on the right
+                const qCardsEl = document.getElementById('quarterly-summary-cards');
+                if (qCardsEl) {
+                    const qMeta = [
+                        { title: 'ไตรมาส 1 (Q1)', range: 'ม.ค. – มี.ค.' },
+                        { title: 'ไตรมาส 2 (Q2)', range: 'เม.ย. – มิ.ย.' },
+                        { title: 'ไตรมาส 3 (Q3)', range: 'ก.ค. – ก.ย.' },
+                        { title: 'ไตรมาส 4 (Q4)', range: 'ต.ค. – ธ.ค.' }
+                    ];
+                    const curQ = Math.floor(curMonth / 3);
+                    qCardsEl.innerHTML = qMeta.map((m, q) => {
+                        const count = qTotals[q];
+                        const share = yearTotal > 0 ? Math.round((count / yearTotal) * 100) : 0;
+                        let deltaHtml = `<span style="color:var(--pc-text-muted);">${share}% ของทั้งปี</span>`;
+                        if (q > 0) {
+                            const prevCount = qTotals[q - 1];
+                            const diff = count - prevCount;
+                            if (diff > 0) {
+                                deltaHtml = `<span style="color:#ff5370;">▲ +${diff} จาก Q${q}</span> · <span style="color:var(--pc-text-muted);">${share}%</span>`;
+                            } else if (diff < 0) {
+                                deltaHtml = `<span style="color:#2ed8b6;">▼ ${diff} จาก Q${q}</span> · <span style="color:var(--pc-text-muted);">${share}%</span>`;
+                            } else {
+                                deltaHtml = `<span style="color:var(--pc-text-muted);">เท่ากับ Q${q} · ${share}%</span>`;
+                            }
+                        }
+                        const currentTag = q === curQ
+                            ? `<span class="badge" style="background:${qColors[q]}22;color:${qColors[q]};font-size:10px;padding:2px 6px;">ปัจจุบัน</span>`
+                            : '';
+                        return `
+                            <div class="pc-qcard-item" style="border-left:4px solid ${qColors[q]};">
+                                <div>
+                                    <div class="pc-qcard-title">${m.title} ${currentTag}</div>
+                                    <div class="pc-qcard-sub">${m.range}</div>
+                                </div>
+                                <div class="pc-qcard-right">
+                                    <div class="pc-qcard-val">${count} <span style="font-size:12px;font-weight:400;color:var(--pc-text-muted);">เคส</span></div>
+                                    <div class="pc-qcard-delta">${deltaHtml}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
 
                 if (monthlyTrendChart) monthlyTrendChart.destroy();
                 const ctx = DOMElements.monthlyTrendChartCanvas.getContext('2d');
-                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                gradient.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
-                gradient.addColorStop(1, 'rgba(59, 130, 246, 0.4)');
+                const maxBarVal = Math.max(...monthlyData, 0);
+
+                // Custom plugin: draw bar top values, dashed quarter dividers, and Q1–Q4 header tags
+                const quarterlyChartEnhancements = {
+                    id: 'quarterlyChartEnhancements',
+                    afterDatasetsDraw(chart) {
+                        const { ctx: c, chartArea, scales } = chart;
+                        const meta = chart.getDatasetMeta(0);
+                        if (!meta || !meta.data || meta.data.length === 0) return;
+
+                        c.save();
+
+                        // 1. Draw vertical dashed dividers between Q1|Q2, Q2|Q3, Q3|Q4
+                        c.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+                        c.lineWidth = 1;
+                        c.setLineDash([4, 4]);
+                        [2, 5, 8].forEach(idx => {
+                            const barA = meta.data[idx];
+                            const barB = meta.data[idx + 1];
+                            if (barA && barB) {
+                                const midX = (barA.x + barB.x) / 2;
+                                c.beginPath();
+                                c.moveTo(midX, chartArea.top);
+                                c.lineTo(midX, chartArea.bottom);
+                                c.stroke();
+                            }
+                        });
+                        c.setLineDash([]);
+
+                        // 2. Draw Q1, Q2, Q3, Q4 labels at top of each quarter zone
+                        c.font = '700 11px Inter, Sarabun, sans-serif';
+                        c.textAlign = 'center';
+                        c.textBaseline = 'top';
+                        [0, 1, 2, 3].forEach(q => {
+                            const midBar = meta.data[q * 3 + 1];
+                            if (midBar) {
+                                c.fillStyle = qColors[q];
+                                c.fillText(`Q${q + 1}`, midBar.x, Math.max(chartArea.top - 18, 2));
+                            }
+                        });
+
+                        // 3. Draw value numbers above each non-zero bar
+                        const textColor = document.documentElement.getAttribute('data-pc-theme') === 'light' ? '#1e293b' : '#f1f5f9';
+                        c.font = '700 11px Courier New, monospace';
+                        c.textAlign = 'center';
+                        c.textBaseline = 'bottom';
+                        meta.data.forEach((bar, i) => {
+                            const val = monthlyData[i];
+                            if (val > 0) {
+                                c.fillStyle = i === curMonth ? qColors[Math.floor(i / 3)] : textColor;
+                                c.fillText(String(val), bar.x, bar.y - 5);
+                            }
+                        });
+
+                        c.restore();
+                    }
+                };
 
                 monthlyTrendChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels,
                         datasets: [{
-                            label: 'Cases',
+                            label: 'จำนวนเคส',
                             data: monthlyData,
-                            backgroundColor: gradient,
-                            borderColor: '#3b82f6',
-                            borderWidth: 1,
+                            backgroundColor: barBg,
+                            borderColor: barBorder,
+                            borderWidth: 1.5,
                             borderRadius: 6,
-                            hoverBackgroundColor: '#3b82f6'
+                            hoverBackgroundColor: barBorder
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        layout: {
+                            padding: { top: 24, right: 6, left: 4, bottom: 0 }
+                        },
                         scales: {
-                            y: { beginAtZero: true, ticks: { stepSize: 1, color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.15)' } },
-                            x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                            y: {
+                                beginAtZero: true,
+                                suggestedMax: maxBarVal > 0 ? Math.ceil(maxBarVal * 1.15) : 10,
+                                ticks: { precision: 0, color: '#94a3b8' },
+                                grid: { color: 'rgba(148, 163, 184, 0.14)' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8', font: { size: 11 } },
+                                grid: { display: false }
+                            }
                         },
                         plugins: {
                             legend: { display: false },
-                            tooltip: { backgroundColor: '#334155', titleColor: '#fff', bodyColor: '#e2e8f0', cornerRadius: 8, padding: 12 }
+                            tooltip: {
+                                backgroundColor: '#1e293b',
+                                titleColor: '#fff',
+                                bodyColor: '#e2e8f0',
+                                cornerRadius: 8,
+                                padding: 12,
+                                callbacks: {
+                                    label: (ctxItem) => ` ${ctxItem.parsed.y} เคส (Q${Math.floor(ctxItem.dataIndex / 3) + 1})`
+                                }
+                            }
                         }
-                    }
+                    },
+                    plugins: [quarterlyChartEnhancements]
                 });
             };
 
