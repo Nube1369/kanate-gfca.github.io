@@ -4237,7 +4237,20 @@
             const renderAdmindekLiveFeed = (tickets) => {
                 const feedEl = document.getElementById('pc-live-activity-list');
                 if (!feedEl) return;
-                const recent = [...tickets].slice(0, 5);
+
+                // Sort by actual Thai submission/closed date (newest first), keeping Open cases at top
+                const sortedByNewest = [...tickets].sort((a, b) => {
+                    if (a.Status === 'Open' && b.Status !== 'Open') return -1;
+                    if (a.Status !== 'Open' && b.Status === 'Open') return 1;
+                    const dateA = parseThaiDateTime(a.SubmissionDate, a.SubmissionTime) || parseThaiDateTime(a.ClosedDate, a.ClosedTime);
+                    const dateB = parseThaiDateTime(b.SubmissionDate, b.SubmissionTime) || parseThaiDateTime(b.ClosedDate, b.ClosedTime);
+                    if (!dateA && !dateB) return 0;
+                    if (!dateA) return 1;
+                    if (!dateB) return -1;
+                    return dateB - dateA;
+                });
+
+                const recent = sortedByNewest.slice(0, 5);
                 if (recent.length === 0) {
                     feedEl.innerHTML = '<div class="text-muted small">ยังไม่มีรายการเคลื่อนไหว</div>';
                     return;
@@ -4245,16 +4258,19 @@
                 const colors = ['#4680ff', '#2ed8b6', '#ffb64d', '#00bcd4', '#7c4dff'];
                 feedEl.innerHTML = recent.map((t, idx) => {
                     const isClosed = t.Status === 'Closed';
-                    const dotColor = isClosed ? '#2ed8b6' : colors[idx % colors.length];
+                    const dotColor = isClosed ? '#2ed8b6' : '#ffb64d';
                     const statusBadge = isClosed
                         ? '<span class="badge bg-success-subtle text-success ms-1">Closed</span>'
                         : '<span class="badge bg-warning-subtle text-warning ms-1">Open</span>';
+                    const closedInfo = (isClosed && t.ClosedDate)
+                        ? ` · ปิดเคส ${sanitizeHTML(t.ClosedDate)} ${sanitizeHTML(t.ClosedTime || '')}`
+                        : '';
                     return `
                         <div class="pc-tl-item">
                             <div class="pc-tl-dot" style="background:${dotColor};"></div>
                             <div style="font-size:13px;font-weight:600;">${sanitizeHTML(t.CaseID)} · ${sanitizeHTML(t.ProblemType || 'แจ้งซ่อม')} ${statusBadge}</div>
                             <div style="font-size:12px;color:var(--pc-text-muted);">${sanitizeHTML(t.SubmitterName || '-')}</div>
-                            <div style="font-size:11px;color:var(--pc-text-muted);">${sanitizeHTML(t.SubmissionDate || '')} ${sanitizeHTML(t.SubmissionTime || '')}</div>
+                            <div style="font-size:11px;color:var(--pc-text-muted);">แจ้ง ${sanitizeHTML(t.SubmissionDate || '')} ${sanitizeHTML(t.SubmissionTime || '')}${closedInfo}</div>
                         </div>
                     `;
                 }).join('');
