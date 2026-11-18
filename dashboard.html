@@ -2668,6 +2668,75 @@
                 transform: translateX(0);
             }
         }
+
+        /* Ranked Progress Bars for Problem Types (Option 2) */
+        .pc-ranked-bars-list {
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .pc-hbar-row {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .pc-hbar-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+        .pc-hbar-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            color: var(--pc-text-main);
+            min-width: 0;
+        }
+        .pc-hbar-label span.name-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pc-hbar-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: inline-grid;
+            place-items: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .pc-hbar-stats {
+            font-family: 'Courier New', monospace;
+            font-size: 12.5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .pc-hbar-stats b {
+            color: var(--pc-text-main);
+            font-weight: 700;
+        }
+        .pc-hbar-stats span {
+            color: var(--pc-text-muted);
+            margin-left: 5px;
+        }
+        .pc-hbar-track {
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.14);
+            overflow: hidden;
+        }
+        .pc-hbar-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
     </style>
 </head>
 
@@ -2967,13 +3036,14 @@
                                     </div>
                                     <div class="col-lg-5">
                                         <div class="card h-100"
-                                            data-tippy-content="แผนภูมิวงกลมแสดงสัดส่วนของปัญหาแต่ละประเภทจากเคสทั้งหมด">
+                                            data-tippy-content="แสดงสัดส่วนปัญหาแต่ละประเภทเรียงลำดับจากมากไปน้อย">
                                             <div class="card-header d-flex justify-content-between align-items-center">
-                                                <span><i class="bi bi-pie-chart-fill me-2" style="color:#2ed8b6;"></i>สัดส่วนประเภทปัญหา</span>
-                                                <span class="badge bg-success-subtle text-success">Categories</span>
+                                                <span><i class="bi bi-bar-chart-steps me-2" style="color:#2ed8b6;"></i>สัดส่วนประเภทปัญหา (เรียงมาก → น้อย)</span>
+                                                <span class="badge bg-success-subtle text-success" id="problem-type-total-badge">Categories</span>
                                             </div>
                                             <div class="card-body">
-                                                <div class="chart-container"><canvas id="problemTypeChart"></canvas></div>
+                                                <div id="problem-type-ranked-bars" class="pc-ranked-bars-list"></div>
+                                                <canvas id="problemTypeChart" style="display:none;"></canvas>
                                             </div>
                                         </div>
                                     </div>
@@ -4152,30 +4222,72 @@
             };
 
             const renderProblemTypeChart = (tickets) => {
-                const typeCounts = tickets.reduce((acc, { ProblemType }) => { if (ProblemType) acc[ProblemType] = (acc[ProblemType] || 0) + 1; return acc; }, {});
-                if (problemTypeChart) problemTypeChart.destroy();
-                problemTypeChart = new Chart(DOMElements.problemTypeChartCanvas, {
-                    type: 'doughnut',
-                    data: {
-                        labels: Object.keys(typeCounts),
-                        datasets: [{
-                            data: Object.values(typeCounts),
-                            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
-                            borderColor: '#1f2937',
-                            borderWidth: 4,
-                            hoverOffset: 12
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '65%',
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: '#e2e8f0', padding: 15, font: { size: 14 } } },
-                            tooltip: { backgroundColor: '#334155', titleColor: '#fff', bodyColor: '#e2e8f0', cornerRadius: 8, padding: 12 }
-                        }
+                const typeCounts = tickets.reduce((acc, { ProblemType }) => {
+                    if (ProblemType && ProblemType.trim()) {
+                        const key = ProblemType.trim();
+                        acc[key] = (acc[key] || 0) + 1;
                     }
-                });
+                    return acc;
+                }, {});
+
+                const sortedEntries = Object.entries(typeCounts).sort((a, b) => b[1] - a[1]);
+                const total = Math.max(tickets.length, 1);
+                const maxCount = sortedEntries.length > 0 ? Math.max(sortedEntries[0][1], 1) : 1;
+
+                const badgeEl = document.getElementById('problem-type-total-badge');
+                if (badgeEl) badgeEl.textContent = `${sortedEntries.length} หมวด · ${tickets.length} เคส`;
+
+                const palette = [
+                    '#f59e0b', '#ef4444', '#8b5cf6', '#3b82f6', '#10b981',
+                    '#06b6d4', '#ec4899', '#14b8a6', '#eab308', '#f97316',
+                    '#6366f1', '#84cc16'
+                ];
+
+                const getCategoryIcon = (name) => {
+                    const n = name.toLowerCase();
+                    if (n.includes('outlook') || n.includes('mail') || n.includes('อีเมล')) return 'bi-envelope-paper';
+                    if (n.includes('network') || n.includes('เครือข่าย') || n.includes('อินเทอร์เน็ต') || n.includes('wifi')) return 'bi-hdd-network';
+                    if (n.includes('software') || n.includes('โปรแกรม')) return 'bi-window-stack';
+                    if (n.includes('hardware') || n.includes('อุปกรณ์คอม')) return 'bi-pc-display';
+                    if (n.includes('vpn')) return 'bi-shield-lock';
+                    if (n.includes('claim') || n.includes('เคลม')) return 'bi-tools';
+                    if (n.includes('โฟลเดอร์') || n.includes('folder') || n.includes('สิทธิ์')) return 'bi-folder-check';
+                    if (n.includes('printer') || n.includes('พิมพ์')) return 'bi-printer';
+                    if (n.includes('เปิดไม่ติด')) return 'bi-power';
+                    return 'bi-three-dots';
+                };
+
+                const barsContainer = document.getElementById('problem-type-ranked-bars');
+                if (barsContainer) {
+                    if (sortedEntries.length === 0) {
+                        barsContainer.innerHTML = '<div class="text-muted small text-center py-4">ยังไม่มีข้อมูลประเภทปัญหา</div>';
+                    } else {
+                        barsContainer.innerHTML = sortedEntries.map(([name, count], idx) => {
+                            const color = palette[idx % palette.length];
+                            const icon = getCategoryIcon(name);
+                            const pct = ((count / total) * 100).toFixed(1);
+                            const barWidth = Math.max((count / maxCount) * 100, 4);
+                            return `
+                                <div class="pc-hbar-row">
+                                    <div class="pc-hbar-top">
+                                        <span class="pc-hbar-label" title="${sanitizeHTML(name)}">
+                                            <span class="pc-hbar-icon" style="background:${color}22;color:${color};">
+                                                <i class="bi ${icon}"></i>
+                                            </span>
+                                            <span class="name-text">${sanitizeHTML(name)}</span>
+                                        </span>
+                                        <span class="pc-hbar-stats">
+                                            <b>${count} เคส</b><span>(${pct}%)</span>
+                                        </span>
+                                    </div>
+                                    <div class="pc-hbar-track">
+                                        <div class="pc-hbar-fill" style="width:${barWidth}%;background:${color};"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
             };
 
             const renderDailyTrendChart = (tickets) => {
