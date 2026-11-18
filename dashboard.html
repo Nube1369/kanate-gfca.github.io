@@ -2594,24 +2594,52 @@
         }
 
         /* Floating Admindek Customizer Button & Offcanvas Drawer */
-        .pc-customizer-fab {
+        .pc-customizer-fab-group {
             position: fixed;
             right: 0;
             top: 50%;
             transform: translateY(-50%);
+            z-index: 1045;
+            display: flex;
+            align-items: stretch;
+            border-radius: 10px 0 0 10px;
+            overflow: hidden;
+            box-shadow: -4px 4px 16px rgba(var(--pc-primary-rgb), 0.45);
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+        .pc-customizer-fab-group.fab-hidden {
+            transform: translate(110%, -50%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .pc-customizer-fab {
             background: var(--pc-primary);
             color: #ffffff;
             border: 0;
-            border-radius: 10px 0 0 10px;
-            padding: 11px 14px;
+            padding: 10px 12px 10px 14px;
             cursor: pointer;
-            box-shadow: -4px 4px 16px rgba(var(--pc-primary-rgb), 0.45);
-            z-index: 1045;
             display: flex;
             align-items: center;
             gap: 7px;
             font-weight: 600;
             font-size: 13px;
+        }
+        .pc-customizer-fab-hide {
+            background: rgba(0, 0, 0, 0.22);
+            color: rgba(255, 255, 255, 0.85);
+            border: 0;
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0 9px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .pc-customizer-fab-hide:hover {
+            background: rgba(239, 68, 68, 0.85);
+            color: #ffffff;
         }
         .pc-customizer-drawer {
             position: fixed;
@@ -3660,10 +3688,15 @@
     </div>
 
     <!-- ==================== ADMINDEK FLOATING THEME CUSTOMIZER ==================== -->
-    <button type="button" class="pc-customizer-fab" onclick="document.getElementById('pc-customizer-drawer').classList.toggle('open')" title="ปรับแต่งธีม">
-        <i class="bi bi-palette-fill"></i>
-        <span>Customize</span>
-    </button>
+    <div class="pc-customizer-fab-group" id="pc-customizer-fab-group">
+        <button type="button" class="pc-customizer-fab" onclick="document.getElementById('pc-customizer-drawer').classList.toggle('open')" title="ปรับแต่งธีม">
+            <i class="bi bi-palette-fill"></i>
+            <span>Customize</span>
+        </button>
+        <button type="button" class="pc-customizer-fab-hide" onclick="window.toggleCustomizerFab(false)" title="ซ่อนปุ่ม Customize ลอย (เปิดใหม่ได้ที่ไอคอนจานสีด้านบนขวา)">
+            <i class="bi bi-eye-slash"></i>
+        </button>
+    </div>
 
     <aside class="pc-customizer-drawer" id="pc-customizer-drawer">
         <div class="d-flex justify-content-between align-items-center pb-3" style="border-bottom:1px solid var(--pc-border);">
@@ -3674,6 +3707,18 @@
             <button type="button" class="pc-icon-btn" onclick="document.getElementById('pc-customizer-drawer').classList.remove('open')" style="width:32px;height:32px;">
                 <i class="bi bi-x-lg"></i>
             </button>
+        </div>
+
+        <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Floating Button (ปุ่มลอยข้างจอ)</div>
+            <div class="d-grid gap-2" style="grid-template-columns:1fr 1fr;">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.toggleCustomizerFab(true)">
+                    <i class="bi bi-eye me-1"></i> แสดงปุ่มลอย
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="window.toggleCustomizerFab(false)">
+                    <i class="bi bi-eye-slash me-1"></i> ซ่อนปุ่มลอย
+                </button>
+            </div>
         </div>
 
         <div>
@@ -6141,13 +6186,23 @@
                 });
             };
 
+            window.toggleCustomizerFab = (show) => {
+                const fabGroup = document.getElementById('pc-customizer-fab-group');
+                if (fabGroup) {
+                    fabGroup.classList.toggle('fab-hidden', !show);
+                }
+                localStorage.setItem('admindek_fab_visible', show ? 'true' : 'false');
+            };
+
             // Restore saved Admindek preferences
             const savedTheme = localStorage.getItem('admindek_theme_mode') || 'dark';
             const savedSidebar = localStorage.getItem('admindek_sidebar_mode') || 'dark';
             const savedPreset = localStorage.getItem('admindek_preset') || 'preset-1';
+            const savedFabVisible = localStorage.getItem('admindek_fab_visible') !== 'false';
             window.setAdmindekThemeMode(savedTheme);
             window.setAdmindekSidebarMode(savedSidebar);
             window.setAdmindekPreset(savedPreset);
+            window.toggleCustomizerFab(savedFabVisible);
 
             const themeModeBtn = document.getElementById('pc-theme-mode-btn');
             if (themeModeBtn) {
