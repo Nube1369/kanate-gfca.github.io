@@ -2907,6 +2907,67 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Positive User Comments Card (Row 5, Col 1) */
+        .pc-positive-feedback-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 255px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .pc-feedback-item {
+            background: rgba(148, 163, 184, 0.06);
+            border: 1px solid var(--pc-border);
+            border-left: 3px solid #2ed8b6;
+            border-radius: 9px;
+            padding: 9px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+        .pc-feedback-item:hover {
+            transform: translateX(2px);
+            background: rgba(148, 163, 184, 0.12);
+        }
+        .pc-feedback-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+        .pc-feedback-user {
+            font-weight: 600;
+            color: var(--pc-text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pc-feedback-stars {
+            color: #ffb64d;
+            font-size: 11px;
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+        .pc-feedback-quote {
+            font-size: 12.5px;
+            color: var(--pc-text-main);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .pc-feedback-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10.5px;
+            color: var(--pc-text-muted);
+        }
     </style>
 </head>
 
@@ -3285,16 +3346,17 @@
                                     </div>
                                 </div>
 
-                                <!-- ROW 5: WEEKLY STATS + RESOLUTION TIME + TOP SUBMITTERS + DEPARTMENT/ADMIN BREAKDOWN -->
+                                <!-- ROW 5: POSITIVE FEEDBACK + RESOLUTION TIME + TOP SUBMITTERS + DEPARTMENT/ADMIN BREAKDOWN -->
                                 <div class="row g-4">
                                     <div class="col-lg-3 col-md-6">
                                         <div class="card h-100">
-                                            <div class="card-header"
-                                                data-tippy-content="สรุปภาพรวมของเคสที่เกิดขึ้นในสัปดาห์ปัจจุบัน (นับวันจันทร์เป็นวันเริ่มต้น)">
-                                                <i class="bi bi-calendar-week me-2" style="color:var(--pc-primary);"></i>สถิติสัปดาห์นี้
+                                            <div class="card-header d-flex justify-content-between align-items-center"
+                                                data-tippy-content="ความคิดเห็นและผลตอบรับทางบวกจากผู้ใช้งานหลังได้รับการแก้ไขปัญหา">
+                                                <span><i class="bi bi-chat-heart-fill me-2" style="color:#2ed8b6;"></i>คอมเมนต์ทางบวกจากผู้ใช้งาน</span>
+                                                <span class="badge bg-success-subtle text-success" id="positive-feedback-badge" style="font-size:10.5px;">5.0 ★</span>
                                             </div>
                                             <div class="card-body">
-                                                <ul class="stats-list" id="weekly-stats-list"></ul>
+                                                <ul class="pc-positive-feedback-list" id="weekly-stats-list"></ul>
                                             </div>
                                         </div>
                                     </div>
@@ -4885,38 +4947,94 @@
             };
 
             const renderWeeklyStats = (tickets) => {
-                const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0);
-                const firstDayOfWeek = new Date(todayMidnight);
-                firstDayOfWeek.setDate(todayMidnight.getDate() - todayMidnight.getDay() + (todayMidnight.getDay() === 0 ? -6 : 1));
-                const newThisWeek = tickets.filter(t => parseThaiDateTime(t.SubmissionDate, t.SubmissionTime) >= firstDayOfWeek).length;
-                const closedThisWeek = tickets.filter(t => t.Status === 'Closed' && parseThaiDateTime(t.ClosedDate, t.ClosedTime) >= firstDayOfWeek).length;
-                const overdue = tickets.filter(t => t.Status === 'Open' && parseThaiDateTime(t.SubmissionDate, t.SubmissionTime) < firstDayOfWeek).length;
+                if (!DOMElements.weeklyStatsList) return;
+                const negativeKeywords = ['ไม่', 'ช้า', 'ยังไม่ได้', 'พัง', 'แย่', 'เสีย', 'ยังมีปัญหาอยู่'];
 
-                const closedTickets = tickets.filter(t => t.Status === 'Closed');
-                let avgClosedPerDay = 0;
-                if (tickets.length > 0) {
-                    const firstTicketDate = tickets.map(t => parseThaiDateTime(t.SubmissionDate, t.SubmissionTime)).filter(d => d).sort((a, b) => a - b)[0];
-                    if (firstTicketDate) {
-                        const calculateWorkingDays = (start, end) => {
-                            let count = 0;
-                            const current = new Date(start);
-                            while (current <= end) {
-                                const day = current.getDay();
-                                if (day !== 0 && day !== 6) { count++; }
-                                current.setDate(current.getDate() + 1);
-                            }
-                            return count;
-                        };
-                        const workingDays = calculateWorkingDays(firstTicketDate, new Date());
-                        if (workingDays > 0) {
-                            avgClosedPerDay = closedTickets.length / workingDays;
-                        } else {
-                            avgClosedPerDay = closedTickets.length;
-                        }
+                const items = [];
+                (tickets || []).forEach(t => {
+                    const hasScore = t.ScoreQ !== undefined && t.ScoreQ !== null && t.ScoreQ.toString().trim() !== '';
+                    const q = parseFloat(t.ScoreQ) || 0;
+                    const d = parseFloat(t.ScoreD) || 0;
+                    const c = parseFloat(t.ScoreC) || 0;
+                    const avgScore = hasScore ? (q + d + c) / 3 : 0;
+
+                    const rawEvalComment = (t.EvaluationComment || '').toString().trim();
+                    const rawFollowup = (t.CommentProblem || '').toString().trim();
+                    const isFollowupOk = rawFollowup.includes('ใช้งานได้ปกติแล้ว');
+
+                    const isPositive = (hasScore && avgScore >= 4) || isFollowupOk;
+                    if (!isPositive) return;
+
+                    let displayComment = '';
+                    let hasWrittenComment = false;
+
+                    if (rawEvalComment && rawEvalComment !== '-' && rawEvalComment.toLowerCase() !== 'n/a') {
+                        if (negativeKeywords.some(kw => rawEvalComment.includes(kw))) return;
+                        displayComment = rawEvalComment;
+                        hasWrittenComment = true;
+                    } else if (isFollowupOk) {
+                        const cleaned = rawFollowup.replace(/^\[[^\]]+\]\s*/, '').trim();
+                        if (negativeKeywords.some(kw => cleaned.includes(kw))) return;
+                        const extraNote = cleaned.replace(/^ใช้งานได้ปกติแล้ว\s*:?\s*/, '').trim();
+                        displayComment = extraNote || 'ใช้งานได้ปกติแล้วหลังได้รับการแก้ไข';
+                        hasWrittenComment = true;
+                    } else if (hasScore && avgScore >= 4.5) {
+                        displayComment = `ประเมินความพึงพอใจ ${avgScore.toFixed(1)} ★ (แก้ไขถูกต้อง รวดเร็ว ขั้นตอนสะดวก)`;
+                    } else {
+                        return;
                     }
+
+                    const dateObj = parseThaiDateTime(t.ClosedDate, t.ClosedTime) || parseThaiDateTime(t.SubmissionDate, t.SubmissionTime);
+                    items.push({
+                        ticket: t,
+                        displayComment,
+                        hasWrittenComment,
+                        avgScore: hasScore ? avgScore : 5,
+                        dateObj,
+                        dateStr: t.ClosedDate || t.SubmissionDate || ''
+                    });
+                });
+
+                items.sort((a, b) => {
+                    if (a.hasWrittenComment !== b.hasWrittenComment) return a.hasWrittenComment ? -1 : 1;
+                    const ta = a.dateObj ? a.dateObj.getTime() : 0;
+                    const tb = b.dateObj ? b.dateObj.getTime() : 0;
+                    return tb - ta;
+                });
+
+                const badgeEl = document.getElementById('positive-feedback-badge');
+                if (badgeEl) {
+                    badgeEl.textContent = `${items.length} รีวิวเชิงบวก`;
                 }
 
-                DOMElements.weeklyStatsList.innerHTML = `<li class="stats-list-item" data-tippy-content="เคสใหม่ที่แจ้งเข้ามาตั้งแต่วันจันทร์ของสัปดาห์นี้"><span class="label">เคสใหม่ (สัปดาห์นี้)</span> <span class="value">${newThisWeek} เคส</span></li><li class="stats-list-item" data-tippy-content="เคสที่ปิดไปแล้วตั้งแต่วันจันทร์ของสัปดาห์นี้"><span class="label">เคสปิด (สัปดาห์นี้)</span> <span class="value">${closedThisWeek} เคส</span></li><li class="stats-list-item" data-tippy-content="ค่าเฉลี่ยเคสที่ปิดได้ต่อวันทำการ (จ-ศ)"><span class="label">เฉลี่ยปิด/วันทำการ</span> <span class="value">${avgClosedPerDay.toFixed(1)} เคส</span></li><li class="stats-list-item" data-tippy-content="เคสที่เปิดค้างมาจากสัปดาห์ก่อนๆ"><span class="label">เคสค้าง</span> <span class="value">${overdue} เคส</span></li>`;
+                const topItems = items.slice(0, 5);
+                if (topItems.length === 0) {
+                    DOMElements.weeklyStatsList.innerHTML = `<li class="stats-list-item text-muted justify-content-center py-4">ยังไม่มีคอมเมนต์ทางบวกจากผู้ใช้งาน</li>`;
+                    return;
+                }
+
+                DOMElements.weeklyStatsList.innerHTML = topItems.map(item => {
+                    const t = item.ticket;
+                    const filledCount = Math.min(Math.max(Math.round(item.avgScore), 1), 5);
+                    const stars = '★'.repeat(filledCount) + '☆'.repeat(5 - filledCount);
+                    const userName = sanitizeHTML(t.SubmitterName || t.CaseID || 'ผู้ใช้งาน');
+                    const problemType = sanitizeHTML(t.ProblemType || 'IT Support');
+                    const quote = sanitizeHTML(item.displayComment);
+                    const dateLabel = sanitizeHTML(item.dateStr);
+                    return `
+                        <li class="pc-feedback-item">
+                            <div class="pc-feedback-top">
+                                <span class="pc-feedback-user" title="${userName}">${userName}</span>
+                                <span class="pc-feedback-stars" title="คะแนนเฉลี่ย ${item.avgScore.toFixed(1)} / 5">${stars}</span>
+                            </div>
+                            <div class="pc-feedback-quote">“${quote}”</div>
+                            <div class="pc-feedback-meta">
+                                <span>${problemType}</span>
+                                <span>${dateLabel}</span>
+                            </div>
+                        </li>
+                    `;
+                }).join('');
             };
             const renderResolutionTimeStats = (tickets) => {
                 const resTimes = tickets.filter(t => t.Status === 'Closed').map(t => (parseThaiDateTime(t.ClosedDate, t.ClosedTime) - parseThaiDateTime(t.SubmissionDate, t.SubmissionTime)) / 60000).filter(d => d >= 0);
