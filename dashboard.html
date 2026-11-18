@@ -289,6 +289,162 @@
             box-shadow: var(--shadow-primary);
         }
 
+        /* ==================== ASSET DELIVERY CARDS ==================== */
+        .asset-card {
+            background: var(--bs-card-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .asset-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #22c55e, #059669, #0ea5e9);
+        }
+
+        .asset-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(34, 197, 94, 0.15);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .asset-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--bs-border-color);
+        }
+
+        .asset-card-id {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .asset-card-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-weight: 600;
+        }
+
+        .asset-card-status.delivered {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
+
+        .asset-card-status.returned {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .asset-card-body .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0;
+            font-size: 0.9rem;
+            color: #d1d5db;
+        }
+
+        .asset-card-body .info-row i {
+            color: #9ca3af;
+            width: 18px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .asset-card-body .info-row .label {
+            color: #9ca3af;
+            min-width: 80px;
+        }
+
+        .asset-card-body .info-row .value {
+            color: #f3f4f6;
+            font-weight: 500;
+        }
+
+        .asset-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--bs-border-color);
+        }
+
+        .asset-card-actions .btn {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.5rem;
+        }
+
+        .asset-form-card {
+            background: var(--bs-card-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .asset-form-card .form-label {
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .asset-form-card .form-control,
+        .asset-form-card .form-select {
+            background: var(--bs-input-bg);
+            border: 1px solid var(--bs-border-color);
+            color: #f3f4f6;
+            border-radius: 0.5rem;
+        }
+
+        .asset-form-card .form-control:focus,
+        .asset-form-card .form-select:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+        }
+
+        .asset-stats-bar {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .asset-stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #9ca3af;
+        }
+
+        .asset-stat-item .stat-value {
+            font-weight: 700;
+            color: #22c55e;
+            font-size: 1.1rem;
+        }
+
+        /* PDF Template (hidden, used for html2canvas) */
+        .pdf-template-container {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+        }
+
         .loading-spinner {
             display: none;
             position: fixed;
@@ -1854,6 +2010,664 @@
                 align-items: flex-start;
             }
         }
+
+        /* =========================================================================
+           ADMINDEK 2026 ADAPTATION LAYER (DashboardPack #357190)
+           Supports Dark/Light Mode + Dark/Light Sidebar + 8 Color Presets
+           ========================================================================= */
+        :root {
+            --pc-primary: #4680ff;
+            --pc-primary-rgb: 70, 128, 255;
+            --pc-success: #2ed8b6;
+            --pc-info: #00bcd4;
+            --pc-warning: #ffb64d;
+            --pc-danger: #ff5370;
+            --pc-sidebar-bg: #1c232f;
+            --pc-sidebar-text: #b7c0cd;
+            --pc-sidebar-caption: #768396;
+            --pc-body-bg: #0f172a;
+            --pc-card-bg: #1b2332;
+            --pc-header-bg: #161e2e;
+            --pc-text-main: #f1f5f9;
+            --pc-text-muted: #94a3b8;
+            --pc-border: rgba(148, 163, 184, 0.14);
+            --pc-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.32);
+        }
+
+        html[data-pc-theme="light"] {
+            --pc-body-bg: #f4f7fa;
+            --pc-card-bg: #ffffff;
+            --pc-header-bg: #ffffff;
+            --pc-text-main: #1e293b;
+            --pc-text-muted: #64748b;
+            --pc-border: #e2e8f0;
+            --pc-shadow: 0 2px 12px -1px rgba(69, 90, 100, 0.08);
+            --bs-body-bg: #f4f7fa;
+            --bs-body-color: #1e293b;
+            --bs-card-bg: #ffffff;
+            --bs-input-bg: #f8fafc;
+            --bs-border-color: #e2e8f0;
+        }
+
+        html[data-pc-sidebar="light"] {
+            --pc-sidebar-bg: #ffffff;
+            --pc-sidebar-text: #334155;
+            --pc-sidebar-caption: #94a3b8;
+        }
+
+        html[data-pc-preset="preset-1"] { --pc-primary: #4680ff; --pc-primary-rgb: 70, 128, 255; --bs-primary: #4680ff; }
+        html[data-pc-preset="preset-2"] { --pc-primary: #7c4dff; --pc-primary-rgb: 124, 77, 255; --bs-primary: #7c4dff; }
+        html[data-pc-preset="preset-3"] { --pc-primary: #e91e63; --pc-primary-rgb: 233, 30, 99; --bs-primary: #e91e63; }
+        html[data-pc-preset="preset-4"] { --pc-primary: #dc2626; --pc-primary-rgb: 220, 38, 38; --bs-primary: #dc2626; }
+        html[data-pc-preset="preset-5"] { --pc-primary: #ff9800; --pc-primary-rgb: 255, 152, 0; --bs-primary: #ff9800; }
+        html[data-pc-preset="preset-6"] { --pc-primary: #eab308; --pc-primary-rgb: 234, 179, 8; --bs-primary: #eab308; }
+        html[data-pc-preset="preset-7"] { --pc-primary: #10b981; --pc-primary-rgb: 16, 185, 129; --bs-primary: #10b981; }
+        html[data-pc-preset="preset-8"] { --pc-primary: #00bcd4; --pc-primary-rgb: 0, 188, 212; --bs-primary: #00bcd4; }
+
+        body {
+            background-color: var(--pc-body-bg) !important;
+            color: var(--pc-text-main) !important;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        html[data-pc-theme="light"] .stars-container {
+            display: none !important;
+        }
+
+        /* Hide legacy top navbar when dashboard is active */
+        .navbar.legacy-navbar-hidden {
+            display: none !important;
+        }
+
+        /* Admindek App Shell Layout */
+        .pc-app-shell {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        body.sidebar-collapsed .pc-app-shell {
+            grid-template-columns: 0px 1fr;
+        }
+        body.sidebar-collapsed .pc-sidebar {
+            transform: translateX(-100%);
+            width: 0;
+            overflow: hidden;
+            border-right: 0;
+        }
+
+        .pc-sidebar {
+            background: var(--pc-sidebar-bg);
+            color: var(--pc-sidebar-text);
+            border-right: 1px solid var(--pc-border);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            z-index: 1030;
+            box-shadow: 2px 0 16px rgba(0, 0, 0, 0.14);
+            transition: all 0.25s ease;
+        }
+
+        .pc-sidebar-header {
+            height: 66px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        html[data-pc-sidebar="light"] .pc-sidebar-header {
+            border-bottom-color: #e2e8f0;
+        }
+
+        .pc-brand-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--pc-primary), #2ed8b6);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 4px 12px rgba(var(--pc-primary-rgb), 0.38);
+            flex-shrink: 0;
+        }
+
+        .pc-brand-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+            line-height: 1.2;
+        }
+        html[data-pc-sidebar="light"] .pc-brand-title {
+            color: #0f172a;
+        }
+
+        .pc-brand-sub {
+            font-size: 11px;
+            color: var(--pc-sidebar-caption);
+            display: block;
+        }
+
+        .pc-sidebar-body {
+            padding: 16px 14px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .pc-nav-caption {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--pc-sidebar-caption);
+            padding: 14px 12px 6px;
+        }
+
+        /* Style the existing .admin-nav inside the sidebar */
+        .pc-sidebar .admin-nav {
+            background: transparent !important;
+            border: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .pc-sidebar .admin-nav .nav-item {
+            width: 100%;
+        }
+
+        .pc-sidebar .admin-nav .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px !important;
+            border-radius: 9px !important;
+            color: var(--pc-sidebar-text) !important;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.18s ease;
+            width: 100%;
+        }
+
+        .pc-sidebar .admin-nav .nav-link i {
+            font-size: 17px;
+            width: 22px;
+            text-align: center;
+        }
+
+        .pc-sidebar .admin-nav .nav-link:hover {
+            background: rgba(var(--pc-primary-rgb), 0.14) !important;
+            color: #ffffff !important;
+            transform: translateX(2px);
+        }
+        html[data-pc-sidebar="light"] .pc-sidebar .admin-nav .nav-link:hover {
+            color: var(--pc-primary) !important;
+        }
+
+        .pc-sidebar .admin-nav .nav-link.active {
+            background: var(--pc-primary) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(var(--pc-primary-rgb), 0.4) !important;
+        }
+
+        .pc-nav-badge {
+            margin-left: auto;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            color: #fff;
+        }
+        html[data-pc-sidebar="light"] .pc-nav-badge {
+            background: rgba(15, 23, 42, 0.08);
+            color: #334155;
+        }
+        .pc-sidebar .admin-nav .nav-link.active .pc-nav-badge {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        .pc-ext-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 9px;
+            color: var(--pc-sidebar-text);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            transition: all 0.18s ease;
+        }
+        .pc-ext-link:hover {
+            background: rgba(var(--pc-primary-rgb), 0.12);
+            color: #fff;
+        }
+        html[data-pc-sidebar="light"] .pc-ext-link:hover {
+            color: var(--pc-primary);
+        }
+
+        .pc-sidebar-footer {
+            padding: 14px 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        html[data-pc-sidebar="light"] .pc-sidebar-footer {
+            border-top-color: #e2e8f0;
+        }
+
+        /* Top Header (.pc-header) */
+        .pc-main-area {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .pc-header {
+            height: 66px;
+            background: var(--pc-header-bg);
+            border-bottom: 1px solid var(--pc-border);
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            box-shadow: var(--pc-shadow);
+        }
+
+        .pc-header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+        }
+
+        .pc-icon-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            border: 1px solid var(--pc-border);
+            background: var(--pc-card-bg);
+            color: var(--pc-text-main);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            font-size: 16px;
+        }
+        .pc-icon-btn:hover {
+            border-color: var(--pc-primary);
+            color: var(--pc-primary);
+        }
+
+        .pc-global-search {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--pc-body-bg);
+            border: 1px solid var(--pc-border);
+            border-radius: 9px;
+            padding: 7px 14px;
+            width: 100%;
+            max-width: 420px;
+        }
+        .pc-global-search input {
+            background: transparent;
+            border: 0;
+            outline: none;
+            color: var(--pc-text-main);
+            font-size: 13.5px;
+            width: 100%;
+        }
+        .pc-global-search kbd {
+            font-size: 10.5px;
+            padding: 2px 6px;
+            border-radius: 5px;
+            background: var(--pc-card-bg);
+            color: var(--pc-text-muted);
+            border: 1px solid var(--pc-border);
+        }
+
+        .pc-header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pc-live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(46, 216, 182, 0.12);
+            border: 1px solid rgba(46, 216, 182, 0.3);
+            color: #2ed8b6;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .pc-live-badge .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #2ed8b6;
+            box-shadow: 0 0 8px #2ed8b6;
+        }
+
+        .pc-content-inner {
+            padding: 24px 28px 48px;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb Header */
+        .pc-page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+        .pc-page-header h4 {
+            font-size: 21px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--pc-text-main);
+        }
+        .pc-breadcrumb {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+            padding: 0;
+            margin: 3px 0 0;
+            font-size: 12.5px;
+            color: var(--pc-text-muted);
+        }
+        .pc-breadcrumb li + li::before {
+            content: '/';
+            margin-right: 8px;
+            opacity: 0.5;
+        }
+
+        /* ROW 1: Admindek 4 Gradient KPI Cards with Sparklines */
+        .admindek-kpi-card {
+            border-radius: 12px;
+            padding: 22px;
+            color: #ffffff !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 22px -6px rgba(0, 0, 0, 0.22);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            border: 0 !important;
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+        .admindek-kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.32);
+        }
+        .admindek-kpi-card.kpi-blue { background: linear-gradient(45deg, var(--pc-primary), #73b4ff) !important; }
+        .admindek-kpi-card.kpi-green { background: linear-gradient(45deg, #2ed8b6, #59e0c5) !important; }
+        .admindek-kpi-card.kpi-amber { background: linear-gradient(45deg, #ffb64d, #ffcb80) !important; }
+        .admindek-kpi-card.kpi-cyan { background: linear-gradient(45deg, #00bcd4, #4dd0e1) !important; }
+
+        .admindek-kpi-card .kpi-title {
+            font-size: 13.5px;
+            font-weight: 500;
+            opacity: 0.92;
+            margin-bottom: 6px;
+            color: #fff !important;
+        }
+        .admindek-kpi-card .card-value {
+            font-size: 32px !important;
+            font-weight: 600 !important;
+            line-height: 1.1;
+            margin-bottom: 6px;
+            color: #fff !important;
+            font-variant-numeric: tabular-nums;
+        }
+        .admindek-kpi-card .kpi-sub {
+            font-size: 12px;
+            opacity: 0.9;
+            margin: 0;
+            color: rgba(255, 255, 255, 0.92) !important;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ROW 2: Admindek Helpdesk 3 "Support-Bar" Cards */
+        .support-bar-card {
+            background: var(--pc-card-bg);
+            border: 1px solid var(--pc-border);
+            border-radius: 12px;
+            box-shadow: var(--pc-shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+        .support-bar-body {
+            padding: 20px 22px 8px;
+        }
+        .support-bar-body h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 2px;
+            color: var(--pc-text-main);
+        }
+        .support-bar-body .sb-tag {
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+        .support-bar-body p {
+            font-size: 12.5px;
+            color: var(--pc-text-muted);
+            margin: 6px 0 0;
+        }
+        .support-bar-footer {
+            padding: 12px 8px;
+            color: #ffffff;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            text-align: center;
+        }
+        .support-bar-footer > div {
+            border-right: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .support-bar-footer > div:last-child {
+            border-right: 0;
+        }
+        .support-bar-footer h5 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+            color: #fff;
+        }
+        .support-bar-footer span {
+            font-size: 11.5px;
+            opacity: 0.92;
+        }
+
+        /* Clean Admindek Cards Override */
+        .card {
+            background: var(--pc-card-bg) !important;
+            border: 1px solid var(--pc-border) !important;
+            border-radius: 12px !important;
+            box-shadow: var(--pc-shadow) !important;
+        }
+        .card:hover {
+            transform: none;
+        }
+        .card-header {
+            background: transparent !important;
+            color: var(--pc-text-main) !important;
+            border-bottom: 1px solid var(--pc-border) !important;
+            padding: 16px 20px !important;
+            font-weight: 600;
+        }
+
+        html[data-pc-theme="light"] .stats-list-item,
+        html[data-pc-theme="light"] .ticket-card,
+        html[data-pc-theme="light"] .evaluation-summary-card,
+        html[data-pc-theme="light"] .monthly-score-item,
+        html[data-pc-theme="light"] .asset-card,
+        html[data-pc-theme="light"] .asset-form-card {
+            background: #ffffff !important;
+            color: #1e293b !important;
+            border-color: #e2e8f0 !important;
+        }
+        html[data-pc-theme="light"] .asset-card-body .info-row .value,
+        html[data-pc-theme="light"] .summary-value,
+        html[data-pc-theme="light"] .monthly-score-value {
+            color: #0f172a !important;
+        }
+
+        /* Live Activity Timeline & Department Progress */
+        .pc-timeline {
+            position: relative;
+            padding-left: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .pc-timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: var(--pc-border);
+        }
+        .pc-tl-item {
+            position: relative;
+        }
+        .pc-tl-dot {
+            position: absolute;
+            left: -21px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--pc-card-bg);
+        }
+
+        .pc-dept-row {
+            margin-bottom: 12px;
+        }
+        .pc-dept-row:last-child {
+            margin-bottom: 0;
+        }
+        .pc-dept-bar {
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.15);
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .pc-dept-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+        }
+
+        /* Floating Admindek Customizer Button & Offcanvas Drawer */
+        .pc-customizer-fab {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--pc-primary);
+            color: #ffffff;
+            border: 0;
+            border-radius: 10px 0 0 10px;
+            padding: 11px 14px;
+            cursor: pointer;
+            box-shadow: -4px 4px 16px rgba(var(--pc-primary-rgb), 0.45);
+            z-index: 1045;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .pc-customizer-drawer {
+            position: fixed;
+            top: 0;
+            right: -340px;
+            width: 320px;
+            height: 100vh;
+            background: var(--pc-card-bg);
+            color: var(--pc-text-main);
+            border-left: 1px solid var(--pc-border);
+            box-shadow: -10px 0 35px rgba(0, 0, 0, 0.3);
+            z-index: 1055;
+            padding: 22px;
+            transition: right 0.28s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            overflow-y: auto;
+        }
+        .pc-customizer-drawer.open {
+            right: 0;
+        }
+        .pc-swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .pc-swatch-btn {
+            height: 36px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            color: #fff;
+        }
+        .pc-swatch-btn.active {
+            border-color: var(--pc-text-main);
+            transform: scale(1.06);
+        }
+
+        @media (max-width: 991px) {
+            .pc-app-shell {
+                grid-template-columns: 1fr;
+            }
+            .pc-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 260px;
+                transform: translateX(-100%);
+            }
+            body.mobile-sidebar-open .pc-sidebar {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 
@@ -1883,133 +2697,366 @@
         </div>
     </nav>
 
-    <div class="container main-container">
+    <div class="pc-container">
         <div id="admin-dashboard" style="display: none;">
-            <ul class="nav nav-pills admin-nav">
-                <li class="nav-item"><a class="nav-link active" id="nav-dashboard" href="#"><i
-                            class="bi bi-grid-1x2-fill me-1"></i> ภาพรวม</a></li>
-                <li class="nav-item"><a class="nav-link" id="nav-tickets" href="#"><i class="bi bi-list-task me-1"></i>
-                        รายการปัญหา</a></li>
-                <li class="nav-item"><a class="nav-link" id="nav-evaluation" href="#"><i
-                            class="bi bi-star-fill me-1"></i>
-                        ประเมิน</a></li>
-                <li class="nav-item super-admin-only"><a class="nav-link" id="nav-users" href="#"><i
-                            class="bi bi-people me-1"></i>
-                        จัดการผู้ใช้</a></li>
-            </ul>
-            <div id="admin-content">
-                <div id="admin-view-dashboard">
-                    <div class="row g-4 mb-4">
-                        <div class="col-lg-3 col-md-6">
-                            <div id="open-cases-card" class="dashboard-card h-100"
-                                data-tippy-content="จำนวนเคสทั้งหมดที่ยังคงอยู่ในสถานะ 'Open' และรอการแก้ไข">
-                                <div class="icon-circle bg-warning-soft"><i class="bi bi-folder2-open"></i></div>
-                                <div>
-                                    <div id="open-cases-count" class="card-value">0</div>
-                                    <div class="card-label">เคสที่เปิดอยู่</div>
-                                </div>
+            <div class="pc-app-shell">
+                <!-- ==================== ADMINDEK LEFT SIDEBAR ==================== -->
+                <aside class="pc-sidebar">
+                    <div class="pc-sidebar-header">
+                        <div class="pc-brand-badge">IT</div>
+                        <div>
+                            <h4 class="pc-brand-title">GFCA Admindek</h4>
+                            <span class="pc-brand-sub">IT Service & Asset OS</span>
+                        </div>
+                    </div>
+
+                    <div class="pc-sidebar-body">
+                        <div class="pc-nav-caption">Navigation</div>
+                        <ul class="nav nav-pills admin-nav">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="nav-dashboard" href="#">
+                                    <i class="bi bi-grid-1x2-fill"></i>
+                                    <span>ภาพรวม (Overview)</span>
+                                    <span class="pc-nav-badge" style="background:#2ed8b6;color:#0f172a;">Live</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="nav-tickets" href="#">
+                                    <i class="bi bi-life-preserver"></i>
+                                    <span>รายการปัญหา</span>
+                                    <span class="pc-nav-badge" id="sidebar-ticket-badge">0</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="nav-evaluation" href="#">
+                                    <i class="bi bi-star-fill"></i>
+                                    <span>ประเมิน (CSAT)</span>
+                                    <span class="pc-nav-badge" id="sidebar-csat-badge" style="background:#ffb64d;color:#1c232f;">★</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="nav-asset" href="#">
+                                    <i class="bi bi-laptop"></i>
+                                    <span>ส่งมอบทรัพย์สิน</span>
+                                    <span class="pc-nav-badge" id="sidebar-asset-badge">0</span>
+                                </a>
+                            </li>
+                            <li class="nav-item super-admin-only">
+                                <a class="nav-link" id="nav-users" href="#">
+                                    <i class="bi bi-people-fill"></i>
+                                    <span>จัดการผู้ใช้</span>
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="pc-nav-caption">Quick Links & Tools</div>
+                        <div class="d-flex flex-column gap-1">
+                            <a href="Index.html" target="_blank" class="pc-ext-link">
+                                <i class="bi bi-plus-circle"></i>
+                                <span>หน้าแจ้งซ่อม (User Form)</span>
+                            </a>
+                            <a href="2FA/index.html" target="_blank" class="pc-ext-link">
+                                <i class="bi bi-shield-lock"></i>
+                                <span>คู่มือตั้งค่า 2FA (PDF)</span>
+                            </a>
+                            <a href="New_employee_delivery_slip/ใบส่งมอบ-รับคืนทรัพย์สิน.html" target="_blank" class="pc-ext-link">
+                                <i class="bi bi-file-earmark-text"></i>
+                                <span>ฟอร์มใบส่งมอบทรัพย์สิน</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="pc-sidebar-footer">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="pc-brand-badge" style="width:32px;height:32px;font-size:12px;" id="sidebar-user-avatar">IT</div>
+                            <div style="line-height:1.2;">
+                                <div style="font-size:13px;font-weight:600;color:#fff;" id="sidebar-username-label">Admin</div>
+                                <small style="font-size:11px;color:var(--pc-sidebar-caption);" id="sidebar-role-label">IT Support</small>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div id="closed-cases-card" class="dashboard-card h-100"
-                                data-tippy-content="จำนวนเคสทั้งหมดที่ได้รับการแก้ไขเรียบร้อยแล้ว (สถานะ 'Closed')">
-                                <div class="icon-circle bg-primary-soft"><i class="bi bi-patch-check-fill"></i></div>
-                                <div>
-                                    <div id="closed-cases-count" class="card-value">0</div>
-                                    <div class="card-label">เคสที่ปิดแล้ว</div>
-                                </div>
+                        <button type="button" class="pc-icon-btn" id="sidebar-logout-trigger" title="ออกจากระบบ" style="width:34px;height:34px;">
+                            <i class="bi bi-box-arrow-right text-danger"></i>
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- ==================== ADMINDEK MAIN AREA ==================== -->
+                <div class="pc-main-area">
+                    <!-- Top Header Bar -->
+                    <header class="pc-header">
+                        <div class="pc-header-left">
+                            <button type="button" class="pc-icon-btn" id="pc-sidebar-toggle" title="พับ/กางแถบเมนู">
+                                <i class="bi bi-list"></i>
+                            </button>
+                            <div class="pc-global-search">
+                                <i class="bi bi-search" style="color:var(--pc-text-muted);"></i>
+                                <input type="text" id="pc-quick-search-input" placeholder="ค้นหาด่วน Case ID, ชื่อผู้แจ้ง, แผนก (กด Enter เพื่อกรอง)...">
+                                <kbd>Enter</kbd>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div id="total-cases-card" class="dashboard-card h-100"
-                                data-tippy-content="จำนวนเคสทั้งหมดที่เคยแจ้งเข้ามาในระบบ">
-                                <div class="icon-circle bg-info-soft"><i class="bi bi-journal-text"></i></div>
-                                <div>
-                                    <div id="total-cases-count" class="card-value">0</div>
-                                    <div class="card-label">เคสทั้งหมด</div>
-                                </div>
-                            </div>
+
+                        <div class="pc-header-right">
+                            <span class="pc-live-badge d-none d-md-inline-flex">
+                                <span class="dot"></span>
+                                <span id="pc-last-sync-text">Realtime Sync</span>
+                            </span>
+                            <button type="button" class="pc-icon-btn" id="pc-theme-mode-btn" title="สลับโหมด มืด / สว่าง">
+                                <i class="bi bi-circle-half"></i>
+                            </button>
+                            <button type="button" class="pc-icon-btn" id="pc-top-refresh-btn" title="รีเฟรชข้อมูล">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                            <button type="button" class="pc-icon-btn" onclick="document.getElementById('pc-customizer-drawer').classList.toggle('open')" title="ปรับแต่งธีมและสี">
+                                <i class="bi bi-palette"></i>
+                            </button>
                         </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div id="avg-close-time-card-wrapper" class="h-100 playing"
-                                data-tippy-content="ค่าเฉลี่ยของเวลาที่ใช้ในการปิดเคสทั้งหมด นับตั้งแต่เวลาแจ้งจนถึงเวลาปิด">
-                                <div class="wave"></div>
-                                <div class="wave"></div>
-                                <div class="wave"></div>
-                                <div class="dashboard-card-inner-content">
-                                    <div class="icon-circle"><i class="bi bi-clock-history"></i></div>
+                    </header>
+
+                    <div class="pc-content-inner">
+                        <div id="admin-content">
+                            <div id="admin-view-dashboard">
+                                <!-- Page Header & Breadcrumb -->
+                                <div class="pc-page-header">
                                     <div>
-                                        <div id="avg-close-time" class="card-value">N/A</div>
-                                        <div class="card-label">เวลาเฉลี่ยในการปิดเคส</div>
+                                        <h4>Analytics & Helpdesk Overview</h4>
+                                        <ul class="pc-breadcrumb">
+                                            <li>Home</li>
+                                            <li>IT Helpdesk</li>
+                                            <li id="pc-current-month-crumb">Analytics Dashboard (2026)</li>
+                                        </ul>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <button type="button" class="btn btn-sm btn-outline-success" onclick="document.getElementById('export-excel-btn')?.click()">
+                                            <i class="bi bi-file-earmark-excel me-1"></i>ดาวน์โหลด Excel
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-primary" onclick="document.getElementById('nav-tickets')?.click()" style="background:var(--pc-primary);border-color:var(--pc-primary);">
+                                            <i class="bi bi-list-task me-1"></i>จัดการรายการปัญหา
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- ROW 1: 4 ADMINDEK GRADIENT KPI CARDS WITH SPARKLINES -->
+                                <div class="row g-4 mb-4">
+                                    <div class="col-lg-3 col-md-6">
+                                        <div id="open-cases-card" class="admindek-kpi-card kpi-amber"
+                                            data-tippy-content="จำนวนเคสทั้งหมดที่ยังคงอยู่ในสถานะ 'Open' และรอการแก้ไข">
+                                            <div>
+                                                <div class="kpi-title">เคสที่เปิดอยู่ (Open Queue)</div>
+                                                <div id="open-cases-count" class="card-value">0</div>
+                                                <p class="kpi-sub" id="open-cases-sub"><i class="bi bi-folder2-open"></i> รอการดำเนินการ</p>
+                                            </div>
+                                            <svg width="82" height="48" viewBox="0 0 82 48" aria-hidden="true">
+                                                <path d="M2,36 L18,28 L34,32 L50,18 L66,24 L80,10" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="2.5" stroke-linecap="round"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6">
+                                        <div id="closed-cases-card" class="admindek-kpi-card kpi-green"
+                                            data-tippy-content="จำนวนเคสทั้งหมดที่ได้รับการแก้ไขเรียบร้อยแล้ว (สถานะ 'Closed')">
+                                            <div>
+                                                <div class="kpi-title">เคสที่ปิดแล้ว (Resolved)</div>
+                                                <div id="closed-cases-count" class="card-value">0</div>
+                                                <p class="kpi-sub" id="closed-cases-sub"><i class="bi bi-patch-check-fill"></i> อัตราปิดเคสสำเร็จ</p>
+                                            </div>
+                                            <svg width="82" height="48" viewBox="0 0 82 48" aria-hidden="true">
+                                                <path d="M2,40 L18,32 L34,26 L50,20 L66,12 L80,6" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="2.5" stroke-linecap="round"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6">
+                                        <div id="total-cases-card" class="admindek-kpi-card kpi-blue"
+                                            data-tippy-content="จำนวนเคสทั้งหมดที่เคยแจ้งเข้ามาในระบบ">
+                                            <div>
+                                                <div class="kpi-title">เคสทั้งหมด (Total Tickets)</div>
+                                                <div id="total-cases-count" class="card-value">0</div>
+                                                <p class="kpi-sub" id="total-cases-sub"><i class="bi bi-journal-text"></i> สะสมในระบบทั้งหมด</p>
+                                            </div>
+                                            <svg width="82" height="48" viewBox="0 0 82 48" aria-hidden="true">
+                                                <path d="M2,38 L18,24 L34,30 L50,14 L66,20 L80,8" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="2.5" stroke-linecap="round"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6">
+                                        <div id="avg-close-time-card-wrapper" class="admindek-kpi-card kpi-cyan"
+                                            data-tippy-content="ค่าเฉลี่ยของเวลาที่ใช้ในการปิดเคสทั้งหมด นับตั้งแต่เวลาแจ้งจนถึงเวลาปิด">
+                                            <div>
+                                                <div class="kpi-title">เวลาเฉลี่ยในการปิดเคส</div>
+                                                <div id="avg-close-time" class="card-value">N/A</div>
+                                                <p class="kpi-sub" id="avg-close-sub"><i class="bi bi-clock-history"></i> ประสิทธิภาพการแก้ไข</p>
+                                            </div>
+                                            <svg width="82" height="48" viewBox="0 0 82 48" aria-hidden="true">
+                                                <path d="M2,16 L18,22 L34,18 L50,30 L66,24 L80,34" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="2.5" stroke-linecap="round"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ROW 2: 3 ADMINDEK HELPDESK "SUPPORT-BAR" CARDS WITH 3-COLUMN COLORED FOOTERS -->
+                                <div class="row g-4 mb-4">
+                                    <div class="col-lg-4 col-md-6">
+                                        <div class="support-bar-card">
+                                            <div class="support-bar-body">
+                                                <h3 id="sb-resolution-rate">100%</h3>
+                                                <span class="sb-tag" style="color:#00bcd4;">อัตราการแก้ไขสำเร็จ (SLA & Flow)</span>
+                                                <p>สัดส่วนเคสที่แก้ไขเสร็จสิ้นและสถานะการส่งอีเมลแจ้งผู้ใช้งาน</p>
+                                            </div>
+                                            <svg viewBox="0 0 300 55" style="width:100%;height:55px;display:block">
+                                                <path d="M0,42 Q50,14 100,34 T200,18 T300,28 L300,55 L0,55 Z" fill="rgba(0,188,212,0.18)"/>
+                                                <path d="M0,42 Q50,14 100,34 T200,18 T300,28" fill="none" stroke="#00bcd4" stroke-width="2.2"/>
+                                            </svg>
+                                            <div class="support-bar-footer" style="background:#00bcd4;">
+                                                <div><h5 id="sb-open-foot">0</h5><span>Open ค้าง</span></div>
+                                                <div><h5 id="sb-week-foot">0</h5><span>เคสสัปดาห์นี้</span></div>
+                                                <div><h5 id="sb-email-foot">0</h5><span>ส่งเมลสำเร็จ</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 col-md-6">
+                                        <div class="support-bar-card">
+                                            <div class="support-bar-body">
+                                                <h3 id="sb-csat-overall">0.0 / 5</h3>
+                                                <span class="sb-tag" style="color:var(--pc-primary);">ความพึงพอใจผู้ใช้งาน (CSAT Score)</span>
+                                                <p>คะแนนเฉลี่ยรวมทั้ง 3 มิติ (Quality, Delivery, Cost) จากผู้ประเมิน</p>
+                                            </div>
+                                            <svg viewBox="0 0 300 55" style="width:100%;height:55px;display:block">
+                                                <path d="M0,40 Q60,22 120,26 T220,14 T300,10 L300,55 L0,55 Z" fill="rgba(70,128,255,0.18)"/>
+                                                <path d="M0,40 Q60,22 120,26 T220,14 T300,10" fill="none" stroke="var(--pc-primary)" stroke-width="2.2"/>
+                                            </svg>
+                                            <div class="support-bar-footer" style="background:var(--pc-primary);">
+                                                <div><h5 id="sb-q-foot">0.0</h5><span>Quality</span></div>
+                                                <div><h5 id="sb-d-foot">0.0</h5><span>Delivery</span></div>
+                                                <div><h5 id="sb-c-foot">0.0</h5><span>Cost</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 col-md-12">
+                                        <div class="support-bar-card">
+                                            <div class="support-bar-body">
+                                                <h3 id="sb-asset-total">0 รายการ</h3>
+                                                <span class="sb-tag" style="color:#2ed8b6;">ทะเบียนส่งมอบทรัพย์สิน (IT Assets)</span>
+                                                <p>สรุปยอดส่งมอบและรับคืนอุปกรณ์ Notebook / Mouse พนักงาน</p>
+                                            </div>
+                                            <svg viewBox="0 0 300 55" style="width:100%;height:55px;display:block">
+                                                <path d="M0,44 Q75,24 150,30 T300,14 L300,55 L0,55 Z" fill="rgba(46,216,182,0.2)"/>
+                                                <path d="M0,44 Q75,24 150,30 T300,14" fill="none" stroke="#2ed8b6" stroke-width="2.2"/>
+                                            </svg>
+                                            <div class="support-bar-footer" style="background:#2ed8b6;">
+                                                <div><h5 id="sb-asset-deliv">0</h5><span>ส่งมอบแล้ว</span></div>
+                                                <div><h5 id="sb-asset-ret">0</h5><span>รับคืนแล้ว</span></div>
+                                                <div><h5 id="sb-asset-pdf">0</h5><span>มีไฟล์ PDF</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ROW 3: DAILY TREND (7 COLS) + PROBLEM TYPE DOUGHNUT (5 COLS) -->
+                                <div class="row g-4 mb-4">
+                                    <div class="col-lg-7">
+                                        <div class="card h-100"
+                                            data-tippy-content="กราฟเส้นแสดงจำนวนเคสที่ถูกแจ้งเข้ามาในแต่ละวัน ย้อนหลัง 7 วัน">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <span><i class="bi bi-graph-up me-2" style="color:var(--pc-primary);"></i>แนวโน้มเคสรายวัน (7 วันล่าสุด)</span>
+                                                <span class="badge bg-primary-subtle text-primary">7 Days Trend</span>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="chart-container"><canvas id="dailyTrendChart"></canvas></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <div class="card h-100"
+                                            data-tippy-content="แผนภูมิวงกลมแสดงสัดส่วนของปัญหาแต่ละประเภทจากเคสทั้งหมด">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <span><i class="bi bi-pie-chart-fill me-2" style="color:#2ed8b6;"></i>สัดส่วนประเภทปัญหา</span>
+                                                <span class="badge bg-success-subtle text-success">Categories</span>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="chart-container"><canvas id="problemTypeChart"></canvas></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ROW 4: MONTHLY OVERVIEW (8 COLS) + LIVE ACTIVITY FEED (4 COLS) -->
+                                <div class="row g-4 mb-4">
+                                    <div class="col-lg-8">
+                                        <div class="card h-100"
+                                            data-tippy-content="กราฟแท่งเปรียบเทียบจำนวนเคสที่แจ้งเข้ามาในแต่ละเดือนของปีปัจจุบัน">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <span><i class="bi bi-bar-chart-line-fill me-2" style="color:var(--pc-primary);"></i>ภาพรวมเคสรายเดือน</span>
+                                                <span class="badge bg-info-subtle text-info" id="monthly-peak-badge">Monthly Analytics</span>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="chart-container"><canvas id="monthlyTrendChart"></canvas></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="card h-100">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <span><i class="bi bi-activity me-2" style="color:#2ed8b6;"></i>ความเคลื่อนไหวล่าสุด (Live Feed)</span>
+                                                <span class="d-inline-flex align-items-center gap-1" style="font-size:12px;color:#2ed8b6;">
+                                                    <span style="width:7px;height:7px;border-radius:50%;background:#2ed8b6;"></span> Live
+                                                </span>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="pc-timeline" id="pc-live-activity-list">
+                                                    <div class="text-muted small">กำลังโหลดความเคลื่อนไหวล่าสุด...</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ROW 5: WEEKLY STATS + RESOLUTION TIME + TOP SUBMITTERS + DEPARTMENT/ADMIN BREAKDOWN -->
+                                <div class="row g-4">
+                                    <div class="col-lg-3 col-md-6">
+                                        <div class="card h-100">
+                                            <div class="card-header"
+                                                data-tippy-content="สรุปภาพรวมของเคสที่เกิดขึ้นในสัปดาห์ปัจจุบัน (นับวันจันทร์เป็นวันเริ่มต้น)">
+                                                <i class="bi bi-calendar-week me-2" style="color:var(--pc-primary);"></i>สถิติสัปดาห์นี้
+                                            </div>
+                                            <div class="card-body">
+                                                <ul class="stats-list" id="weekly-stats-list"></ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6">
+                                        <div class="card h-100">
+                                            <div class="card-header"
+                                                data-tippy-content="วิเคราะห์ประสิทธิภาพในการแก้ไขปัญหา โดยวัดระยะเวลาตั้งแต่แจ้งจนปิดเคส">
+                                                <i class="bi bi-hourglass-split me-2" style="color:#ffb64d;"></i>สถิติเวลาในการแก้ไข
+                                            </div>
+                                            <div class="card-body">
+                                                <ul class="stats-list" id="resolution-time-stats-list"></ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6">
+                                        <div class="card h-100">
+                                            <div class="card-header"
+                                                data-tippy-content="แสดงรายชื่อ 5 อันดับแรกของผู้ใช้ที่แจ้งปัญหาเข้ามาบ่อยที่สุด"><i
+                                                    class="bi bi-person-check-fill me-2" style="color:#2ed8b6;"></i>5 ผู้ที่แจ้งปัญหาบ่อยสุด</div>
+                                            <div class="card-body">
+                                                <ul class="stats-list" id="top-submitters-list"></ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6">
+                                        <div class="card h-100">
+                                            <div class="card-header"
+                                                data-tippy-content="สัดส่วนผู้ปิดเคส (Admin) และแผนกที่แจ้งเข้ามา">
+                                                <i class="bi bi-shield-check me-2" style="color:#00bcd4;"></i>ผู้ปิดเคส & แผนกหลัก
+                                            </div>
+                                            <div class="card-body" id="pc-admin-dept-breakdown">
+                                                <div class="text-muted small">กำลังคำนวณสัดส่วน...</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="row g-4 mb-4">
-                        <div class="col-lg-7">
-                            <div class="card h-100"
-                                data-tippy-content="กราฟเส้นแสดงจำนวนเคสที่ถูกแจ้งเข้ามาในแต่ละวัน ย้อนหลัง 7 วัน">
-                                <div class="card-header"><i class="bi bi-graph-up me-2"></i>แนวโน้มเคสรายวัน (7
-                                    วันล่าสุด)</div>
-                                <div class="card-body">
-                                    <div class="chart-container"><canvas id="dailyTrendChart"></canvas></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-5">
-                            <div class="card h-100"
-                                data-tippy-content="แผนภูมิวงกลมแสดงสัดส่วนของปัญหาแต่ละประเภทจากเคสทั้งหมด">
-                                <div class="card-header"><i class="bi bi-pie-chart-fill me-2"></i>สัดส่วนประเภทปัญหา
-                                </div>
-                                <div class="card-body">
-                                    <div class="chart-container"><canvas id="problemTypeChart"></canvas></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card mb-4"
-                        data-tippy-content="กราฟแท่งเปรียบเทียบจำนวนเคสที่แจ้งเข้ามาในแต่ละเดือนของปีปัจจุบัน">
-                        <div class="card-header"><i class="bi bi-bar-chart-line-fill me-2"></i>ภาพรวมเคสรายเดือน</div>
-                        <div class="card-body">
-                            <div class="chart-container"><canvas id="monthlyTrendChart"></canvas></div>
-                        </div>
-                    </div>
-                    <div class="row g-4">
-                        <div class="col-lg-4 col-md-6">
-                            <div class="card h-100">
-                                <div class="card-header"
-                                    data-tippy-content="สรุปภาพรวมของเคสที่เกิดขึ้นในสัปดาห์ปัจจุบัน (นับวันจันทร์เป็นวันเริ่มต้น)">
-                                    <i class="bi bi-calendar-week me-2"></i>สถิติสัปดาห์นี้
-                                </div>
-                                <div class="card-body">
-                                    <ul class="stats-list" id="weekly-stats-list"></ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="card h-100">
-                                <div class="card-header"
-                                    data-tippy-content="วิเคราะห์ประสิทธิภาพในการแก้ไขปัญหา โดยวัดระยะเวลาตั้งแต่แจ้งจนปิดเคส">
-                                    <i class="bi bi-hourglass-split me-2"></i>สถิติเวลาในการแก้ไข
-                                </div>
-                                <div class="card-body">
-                                    <ul class="stats-list" id="resolution-time-stats-list"></ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-12">
-                            <div class="card h-100">
-                                <div class="card-header"
-                                    data-tippy-content="แสดงรายชื่อ 5 อันดับแรกของผู้ใช้ที่แจ้งปัญหาเข้ามาบ่อยที่สุด"><i
-                                        class="bi bi-person-check-fill me-2"></i>5 ผู้ที่แจ้งปัญหาบ่อยสุด</div>
-                                <div class="card-body">
-                                    <ul class="stats-list" id="top-submitters-list"></ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div id="admin-view-tickets" style="display: none;">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center"><span><i
@@ -2370,9 +3417,147 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- ==================== ASSET DELIVERY VIEW ==================== -->
+                <div id="admin-view-asset" style="display: none;">
+                    <!-- Stats Bar -->
+                    <div class="asset-stats-bar">
+                        <div class="asset-stat-item">
+                            <i class="bi bi-box-seam" style="color: #22c55e;"></i>
+                            <span>ทั้งหมด:</span>
+                            <span class="stat-value" id="asset-total-count">0</span>
+                        </div>
+                        <div class="asset-stat-item">
+                            <i class="bi bi-check-circle" style="color: #22c55e;"></i>
+                            <span>ส่งมอบแล้ว:</span>
+                            <span class="stat-value" id="asset-delivered-count">0</span>
+                        </div>
+                        <div class="asset-stat-item">
+                            <i class="bi bi-arrow-return-left" style="color: #f59e0b;"></i>
+                            <span>รับคืนแล้ว:</span>
+                            <span class="stat-value" id="asset-returned-count" style="color: #f59e0b;">0</span>
+                        </div>
+                    </div>
+
+                    <!-- New Delivery Form -->
+                    <div class="asset-form-card">
+                        <h5 class="mb-3"><i class="bi bi-plus-circle me-2" style="color: #22c55e;"></i>สร้างใบส่งมอบใหม่</h5>
+                        <form id="asset-delivery-form">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">ชื่อ-นามสกุล <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="asset-employee-name" required placeholder="กรอกชื่อ-นามสกุล">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">ตำแหน่ง</label>
+                                    <input type="text" class="form-control" id="asset-position" placeholder="กรอกตำแหน่ง">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">บริษัท</label>
+                                    <input type="text" class="form-control" id="asset-company" placeholder="กรอกชื่อบริษัท">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">วันที่ส่งมอบ</label>
+                                    <input type="date" class="form-control" id="asset-delivery-date">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Notebook Model</label>
+                                    <input type="text" class="form-control" id="asset-notebook-model" placeholder="เช่น Dell Latitude 5540">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Service Tag</label>
+                                    <input type="text" class="form-control" id="asset-service-tag" placeholder="เช่น ABCD123">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Passwords</label>
+                                    <input type="text" class="form-control" id="asset-passwords" placeholder="รหัสผ่านเครื่อง">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mouse</label>
+                                    <input type="text" class="form-control" id="asset-mouse" placeholder="เช่น Dell Mouse MS3320W">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">หมายเหตุ</label>
+                                    <textarea class="form-control" id="asset-notes" rows="2" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
+                                </div>
+                                <div class="col-12 d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save me-1"></i> บันทึกใบส่งมอบ
+                                    </button>
+                                    <button type="reset" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle me-1"></i> ล้างฟอร์ม
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Asset Cards Grid -->
+                    <div id="asset-delivery-list" class="row g-4"></div>
+                </div>
+
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- ==================== ADMINDEK FLOATING THEME CUSTOMIZER ==================== -->
+    <button type="button" class="pc-customizer-fab" onclick="document.getElementById('pc-customizer-drawer').classList.toggle('open')" title="ปรับแต่งธีม">
+        <i class="bi bi-palette-fill"></i>
+        <span>Customize</span>
+    </button>
+
+    <aside class="pc-customizer-drawer" id="pc-customizer-drawer">
+        <div class="d-flex justify-content-between align-items-center pb-3" style="border-bottom:1px solid var(--pc-border);">
+            <div>
+                <h5 class="mb-0" style="font-size:16px;font-weight:700;">Theme Customizer</h5>
+                <small style="color:var(--pc-text-muted);font-size:12px;">ปรับแต่งโหมดและสีตามสไตล์ Admindek</small>
+            </div>
+            <button type="button" class="pc-icon-btn" onclick="document.getElementById('pc-customizer-drawer').classList.remove('open')" style="width:32px;height:32px;">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Theme Mode (โหมดสว่าง / มืด)</div>
+            <div class="d-grid gap-2" style="grid-template-columns:1fr 1fr;">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.setAdmindekThemeMode('light')">
+                    <i class="bi bi-sun me-1"></i> Light
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.setAdmindekThemeMode('dark')">
+                    <i class="bi bi-moon-stars me-1"></i> Dark
+                </button>
+            </div>
+        </div>
+
+        <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Sidebar Theme (สีแถบเมนูซ้าย)</div>
+            <div class="d-grid gap-2" style="grid-template-columns:1fr 1fr;">
+                <button type="button" class="btn btn-sm" style="background:#1c232f;color:#fff;" onclick="window.setAdmindekSidebarMode('dark')">
+                    Dark Sidebar
+                </button>
+                <button type="button" class="btn btn-sm" style="background:#f8fafc;color:#0f172a;border:1px solid #cbd5e1;" onclick="window.setAdmindekSidebarMode('light')">
+                    Light Sidebar
+                </button>
+            </div>
+        </div>
+
+        <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Primary Color (8 สีหลัก)</div>
+            <div class="pc-swatch-grid" id="pc-preset-swatches">
+                <button type="button" class="pc-swatch-btn active" data-preset="preset-1" style="background:#4680ff;" onclick="window.setAdmindekPreset('preset-1', this)" title="Ocean Blue"><i class="bi bi-check2"></i></button>
+                <button type="button" class="pc-swatch-btn" data-preset="preset-2" style="background:#7c4dff;" onclick="window.setAdmindekPreset('preset-2', this)" title="Royal Purple"></button>
+                <button type="button" class="pc-swatch-btn" data-preset="preset-3" style="background:#e91e63;" onclick="window.setAdmindekPreset('preset-3', this)" title="Rose Pink"></button>
+                <button type="button" class="pc-swatch-btn" data-preset="preset-4" style="background:#dc2626;" onclick="window.setAdmindekPreset('preset-4', this)" title="Crimson Red"></button>
+                <button type="button" class="pc-swatch-btn" data-preset="preset-5" style="background:#ff9800;" onclick="window.setAdmindekPreset('preset-5', this)" title="Vibrant Orange"></button>
+                <button type="button" class="pc-swatch-btn" data-preset="preset-6" style="background:#eab308;" onclick="window.setAdmindekPreset('preset-6', this)" title="Golden Yellow"></button>
+                <button type="button" class="pc-swatch-btn" data-preset="preset-7" style="background:#10b981;" onclick="window.setAdmindekPreset('preset-7', this)" title="Forest Green"></button>
+                <button type="button" class="pc-swatch-btn" data-preset="preset-8" style="background:#00bcd4;" onclick="window.setAdmindekPreset('preset-8', this)" title="Aqua Cyan"></button>
+            </div>
+        </div>
+    </aside>
 
     <!-- Modals and Spinner -->
     <div class="loading-spinner">
@@ -2532,6 +3717,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- SheetJS for Excel Export with Thai language support -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF + html2canvas for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Supabase Client -->
     <script src="js/supabase-config.js"></script>
 
@@ -2640,6 +3828,7 @@
                 if (targetId === 'admin-view-dashboard') renderDashboard(allTickets);
                 if (targetId === 'admin-view-tickets') renderTickets(allTickets);
                 if (targetId === 'admin-view-evaluation') renderEvaluationCards(allTickets);
+                if (targetId === 'admin-view-asset') loadAndRenderAssetDeliveries();
             };
 
             const postToAction = async (action, data) => {
@@ -2796,9 +3985,28 @@
 
             const renderDashboard = (tickets) => {
                 if (!tickets) return;
-                DOMElements.openCasesCount.textContent = tickets.filter(t => t.Status === 'Open').length;
-                DOMElements.closedCasesCount.textContent = tickets.filter(t => t.Status === 'Closed').length;
-                DOMElements.totalCasesCount.textContent = tickets.length;
+                const openCount = tickets.filter(t => t.Status === 'Open').length;
+                const closedCount = tickets.filter(t => t.Status === 'Closed').length;
+                const totalCount = tickets.length;
+
+                DOMElements.openCasesCount.textContent = openCount;
+                DOMElements.closedCasesCount.textContent = closedCount;
+                DOMElements.totalCasesCount.textContent = totalCount;
+
+                // Update Admindek KPI subtitles & sidebar badges
+                const openSub = document.getElementById('open-cases-sub');
+                if (openSub) {
+                    openSub.innerHTML = openCount === 0
+                        ? '<i class="bi bi-check2-circle"></i> เคลียร์ครบ 100% (ไม่มีเคสค้าง)'
+                        : `<i class="bi bi-exclamation-circle"></i> รอการแก้ไข ${openCount} เคส`;
+                }
+                const closedSub = document.getElementById('closed-cases-sub');
+                const resRate = totalCount > 0 ? ((closedCount / totalCount) * 100).toFixed(1) : '100.0';
+                if (closedSub) {
+                    closedSub.innerHTML = `<i class="bi bi-patch-check-fill"></i> ปิดสำเร็จ ${resRate}% ของทั้งหมด`;
+                }
+                const sideTicketBadge = document.getElementById('sidebar-ticket-badge');
+                if (sideTicketBadge) sideTicketBadge.textContent = totalCount;
 
                 const durationsInMinutes = tickets.filter(t => t.Status === 'Closed')
                     .map(t => {
@@ -2818,6 +4026,49 @@
                     DOMElements.avgCloseTime.style.fontSize = '2.25rem';
                 }
 
+                const avgCloseSub = document.getElementById('avg-close-sub');
+                if (avgCloseSub && durationsInMinutes.length > 0) {
+                    avgCloseSub.innerHTML = `<i class="bi bi-lightning-charge"></i> เร็วสุด ${formatDuration(Math.min(...durationsInMinutes))} · ช้าสุด ${formatDuration(Math.max(...durationsInMinutes))}`;
+                }
+
+                // Populate Admindek Support-Bar 1 (SLA & Email Flow)
+                const sbResRate = document.getElementById('sb-resolution-rate');
+                if (sbResRate) sbResRate.textContent = `${resRate}%`;
+                const sbOpenFoot = document.getElementById('sb-open-foot');
+                if (sbOpenFoot) sbOpenFoot.textContent = openCount;
+                const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0);
+                const firstDayOfWeek = new Date(todayMidnight);
+                firstDayOfWeek.setDate(todayMidnight.getDate() - todayMidnight.getDay() + (todayMidnight.getDay() === 0 ? -6 : 1));
+                const weekCount = tickets.filter(t => parseThaiDateTime(t.SubmissionDate, t.SubmissionTime) >= firstDayOfWeek).length;
+                const sbWeekFoot = document.getElementById('sb-week-foot');
+                if (sbWeekFoot) sbWeekFoot.textContent = weekCount;
+                const sentEmails = tickets.filter(t => t.EmailStatus && (t.EmailStatus === 'Sent' || t.EmailStatus === 'Resent')).length;
+                const sbEmailFoot = document.getElementById('sb-email-foot');
+                if (sbEmailFoot) sbEmailFoot.textContent = sentEmails;
+
+                // Populate Admindek Support-Bar 2 (CSAT Q/D/C)
+                const evalTickets = tickets.filter(t => t.ScoreQ && !isNaN(parseFloat(t.ScoreQ)));
+                if (evalTickets.length > 0) {
+                    const qAvg = evalTickets.reduce((s, t) => s + parseFloat(t.ScoreQ || 0), 0) / evalTickets.length;
+                    const dAvg = evalTickets.reduce((s, t) => s + parseFloat(t.ScoreD || 0), 0) / evalTickets.length;
+                    const cAvg = evalTickets.reduce((s, t) => s + parseFloat(t.ScoreC || 0), 0) / evalTickets.length;
+                    const overallCsat = ((qAvg + dAvg + cAvg) / 3).toFixed(2);
+                    const sbCsatOverall = document.getElementById('sb-csat-overall');
+                    if (sbCsatOverall) sbCsatOverall.textContent = `${overallCsat} / 5`;
+                    const sbQ = document.getElementById('sb-q-foot');
+                    const sbD = document.getElementById('sb-d-foot');
+                    const sbC = document.getElementById('sb-c-foot');
+                    if (sbQ) sbQ.textContent = qAvg.toFixed(1);
+                    if (sbD) sbD.textContent = dAvg.toFixed(1);
+                    if (sbC) sbC.textContent = cAvg.toFixed(1);
+                    const sideCsatBadge = document.getElementById('sidebar-csat-badge');
+                    if (sideCsatBadge) sideCsatBadge.textContent = `${overallCsat}★`;
+                }
+
+                // Populate Live Activity Feed & Admin/Department Breakdown
+                renderAdmindekLiveFeed(tickets);
+                renderAdmindekDeptAndCloserStats(tickets);
+
                 renderProblemTypeChart(tickets);
                 renderDailyTrendChart(tickets);
                 renderMonthlyTrendChart(tickets);
@@ -2825,6 +4076,79 @@
                 renderResolutionTimeStats(tickets);
                 renderTopSubmitters(tickets);
                 initializeTooltips();
+            };
+
+            const renderAdmindekLiveFeed = (tickets) => {
+                const feedEl = document.getElementById('pc-live-activity-list');
+                if (!feedEl) return;
+                const recent = [...tickets].slice(0, 5);
+                if (recent.length === 0) {
+                    feedEl.innerHTML = '<div class="text-muted small">ยังไม่มีรายการเคลื่อนไหว</div>';
+                    return;
+                }
+                const colors = ['#4680ff', '#2ed8b6', '#ffb64d', '#00bcd4', '#7c4dff'];
+                feedEl.innerHTML = recent.map((t, idx) => {
+                    const isClosed = t.Status === 'Closed';
+                    const dotColor = isClosed ? '#2ed8b6' : colors[idx % colors.length];
+                    const statusBadge = isClosed
+                        ? '<span class="badge bg-success-subtle text-success ms-1">Closed</span>'
+                        : '<span class="badge bg-warning-subtle text-warning ms-1">Open</span>';
+                    return `
+                        <div class="pc-tl-item">
+                            <div class="pc-tl-dot" style="background:${dotColor};"></div>
+                            <div style="font-size:13px;font-weight:600;">${sanitizeHTML(t.CaseID)} · ${sanitizeHTML(t.ProblemType || 'แจ้งซ่อม')} ${statusBadge}</div>
+                            <div style="font-size:12px;color:var(--pc-text-muted);">${sanitizeHTML(t.SubmitterName || '-')}</div>
+                            <div style="font-size:11px;color:var(--pc-text-muted);">${sanitizeHTML(t.SubmissionDate || '')} ${sanitizeHTML(t.SubmissionTime || '')}</div>
+                        </div>
+                    `;
+                }).join('');
+            };
+
+            const renderAdmindekDeptAndCloserStats = (tickets) => {
+                const container = document.getElementById('pc-admin-dept-breakdown');
+                if (!container) return;
+                const closerCounts = {};
+                const deptCounts = {};
+                tickets.forEach(t => {
+                    if (t.ClosedBy && t.ClosedBy.trim()) {
+                        const k = t.ClosedBy.trim();
+                        closerCounts[k] = (closerCounts[k] || 0) + 1;
+                    }
+                    if (t.Department && t.Department.trim()) {
+                        const d = t.Department.trim();
+                        deptCounts[d] = (deptCounts[d] || 0) + 1;
+                    }
+                });
+                const topClosers = Object.entries(closerCounts).sort((a, b) => b[1] - a[1]).slice(0, 2);
+                const topDepts = Object.entries(deptCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+                const total = Math.max(tickets.length, 1);
+                let html = '';
+                topClosers.forEach(([name, count]) => {
+                    const pct = Math.round((count / total) * 100);
+                    html += `
+                        <div class="pc-dept-row">
+                            <div class="d-flex justify-content-between" style="font-size:12.5px;">
+                                <span><i class="bi bi-person-badge me-1 text-info"></i>ปิดโดย ${sanitizeHTML(name)}</span>
+                                <strong>${count} เคส (${pct}%)</strong>
+                            </div>
+                            <div class="pc-dept-bar"><div class="pc-dept-bar-fill" style="width:${pct}%;background:#00bcd4;"></div></div>
+                        </div>
+                    `;
+                });
+                topDepts.forEach(([dept, count], i) => {
+                    const pct = Math.round((count / total) * 100);
+                    const barColors = ['var(--pc-primary)', '#2ed8b6', '#ffb64d'];
+                    html += `
+                        <div class="pc-dept-row">
+                            <div class="d-flex justify-content-between" style="font-size:12.5px;">
+                                <span><i class="bi bi-building me-1 text-secondary"></i>รหัส/แผนก ${sanitizeHTML(dept)}</span>
+                                <strong>${count} เคส</strong>
+                            </div>
+                            <div class="pc-dept-bar"><div class="pc-dept-bar-fill" style="width:${Math.max(pct, 8)}%;background:${barColors[i % barColors.length]};"></div></div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<div class="text-muted small">ไม่มีข้อมูลเพิ่มเติม</div>';
             };
 
             const renderProblemTypeChart = (tickets) => {
@@ -4352,9 +5676,20 @@
             function showDashboard() {
                 const currentRole = supabase.getCurrentRole();
                 const isSuperAdmin = currentRole === 'superadmin';
+                const currentUser = supabase.getCurrentUser() || 'Admin';
 
                 DOMElements.adminDashboard.style.display = 'block';
                 DOMElements.logoutBtn.style.display = 'inline-flex';
+                const legacyNav = document.querySelector('nav.navbar');
+                if (legacyNav) legacyNav.classList.add('legacy-navbar-hidden');
+
+                // Update Admindek sidebar user info
+                const sideUserLabel = document.getElementById('sidebar-username-label');
+                const sideRoleLabel = document.getElementById('sidebar-role-label');
+                const sideAvatar = document.getElementById('sidebar-user-avatar');
+                if (sideUserLabel) sideUserLabel.textContent = currentUser;
+                if (sideRoleLabel) sideRoleLabel.textContent = isSuperAdmin ? 'Super Admin' : 'IT Admin';
+                if (sideAvatar) sideAvatar.textContent = currentUser.substring(0, 2).toUpperCase();
 
                 // ซ่อน/แสดง แท็บจัดการผู้ใช้ ตาม role
                 document.querySelectorAll('.super-admin-only').forEach(el => {
@@ -4369,6 +5704,28 @@
                 renderTickets(allTickets);
                 if (isSuperAdmin) renderUsers(adminUsers);
                 renderEvaluationCards(allTickets);
+
+                // Load Asset Summary for Support-Bar 3 & Sidebar badge silently
+                supabase.getAssetDeliveries().then(deliveries => {
+                    if (Array.isArray(deliveries)) {
+                        allAssetDeliveries = deliveries;
+                        const totalA = deliveries.length;
+                        const delivA = deliveries.filter(d => d.status === 'Delivered').length;
+                        const retA = deliveries.filter(d => d.status === 'Returned').length;
+                        const pdfA = deliveries.filter(d => d.pdf_url).length;
+                        const sbAssetTotal = document.getElementById('sb-asset-total');
+                        const sbAssetDeliv = document.getElementById('sb-asset-deliv');
+                        const sbAssetRet = document.getElementById('sb-asset-ret');
+                        const sbAssetPdf = document.getElementById('sb-asset-pdf');
+                        const sideAssetBadge = document.getElementById('sidebar-asset-badge');
+                        if (sbAssetTotal) sbAssetTotal.textContent = `${totalA} รายการ`;
+                        if (sbAssetDeliv) sbAssetDeliv.textContent = delivA;
+                        if (sbAssetRet) sbAssetRet.textContent = retA;
+                        if (sbAssetPdf) sbAssetPdf.textContent = pdfA;
+                        if (sideAssetBadge) sideAssetBadge.textContent = totalA;
+                    }
+                }).catch(() => {});
+
                 startPolling();
                 startCountdownTimers();
                 startProblemFollowupCountdownTimers();
@@ -4384,6 +5741,8 @@
                 supabase.logout();
                 DOMElements.adminDashboard.style.display = 'none';
                 DOMElements.logoutBtn.style.display = 'none';
+                const legacyNav = document.querySelector('nav.navbar');
+                if (legacyNav) legacyNav.classList.remove('legacy-navbar-hidden');
                 if (pollingIntervalId) clearInterval(pollingIntervalId);
                 stopCountdownTimers();
                 stopProblemFollowupCountdownTimers();
@@ -4391,6 +5750,82 @@
             }
 
             DOMElements.logoutBtn.addEventListener('click', handleLogout);
+            const sidebarLogoutBtn = document.getElementById('sidebar-logout-trigger');
+            if (sidebarLogoutBtn) sidebarLogoutBtn.addEventListener('click', handleLogout);
+
+            // Admindek Header & Customizer Controls
+            const sidebarToggleBtn = document.getElementById('pc-sidebar-toggle');
+            if (sidebarToggleBtn) {
+                sidebarToggleBtn.addEventListener('click', () => {
+                    if (window.innerWidth <= 991) {
+                        document.body.classList.toggle('mobile-sidebar-open');
+                    } else {
+                        document.body.classList.toggle('sidebar-collapsed');
+                    }
+                });
+            }
+
+            const topRefreshBtn = document.getElementById('pc-top-refresh-btn');
+            if (topRefreshBtn) {
+                topRefreshBtn.addEventListener('click', () => initializeApp(false));
+            }
+
+            const quickSearchInput = document.getElementById('pc-quick-search-input');
+            if (quickSearchInput) {
+                quickSearchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const q = quickSearchInput.value.trim();
+                        switchAdminView('admin-view-tickets');
+                        const ticketSearch = document.getElementById('ticket-filter-search');
+                        const filterPanel = document.getElementById('ticket-filter-panel');
+                        if (ticketSearch) {
+                            ticketSearch.value = q;
+                            if (q && filterPanel && !filterPanel.classList.contains('open')) {
+                                filterPanel.classList.add('open');
+                            }
+                            renderTickets(allTickets);
+                        }
+                    }
+                });
+            }
+
+            window.setAdmindekThemeMode = (mode) => {
+                document.documentElement.setAttribute('data-pc-theme', mode);
+                document.documentElement.setAttribute('data-bs-theme', mode);
+                localStorage.setItem('admindek_theme_mode', mode);
+            };
+
+            window.setAdmindekSidebarMode = (mode) => {
+                document.documentElement.setAttribute('data-pc-sidebar', mode);
+                localStorage.setItem('admindek_sidebar_mode', mode);
+            };
+
+            window.setAdmindekPreset = (preset, btnEl) => {
+                document.documentElement.setAttribute('data-pc-preset', preset);
+                localStorage.setItem('admindek_preset', preset);
+                document.querySelectorAll('#pc-preset-swatches .pc-swatch-btn').forEach(b => {
+                    const isMatch = b.dataset.preset === preset || b === btnEl;
+                    b.classList.toggle('active', isMatch);
+                    b.innerHTML = isMatch ? '<i class="bi bi-check2"></i>' : '';
+                });
+            };
+
+            // Restore saved Admindek preferences
+            const savedTheme = localStorage.getItem('admindek_theme_mode') || 'dark';
+            const savedSidebar = localStorage.getItem('admindek_sidebar_mode') || 'dark';
+            const savedPreset = localStorage.getItem('admindek_preset') || 'preset-1';
+            window.setAdmindekThemeMode(savedTheme);
+            window.setAdmindekSidebarMode(savedSidebar);
+            window.setAdmindekPreset(savedPreset);
+
+            const themeModeBtn = document.getElementById('pc-theme-mode-btn');
+            if (themeModeBtn) {
+                themeModeBtn.addEventListener('click', () => {
+                    const cur = document.documentElement.getAttribute('data-pc-theme') === 'light' ? 'dark' : 'light';
+                    window.setAdmindekThemeMode(cur);
+                });
+            }
 
             DOMElements.loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -4422,7 +5857,12 @@
                 }
             });
 
-            document.querySelectorAll('.admin-nav .nav-link').forEach(l => l.addEventListener('click', (e) => { e.preventDefault(); switchAdminView(`admin-view-${e.target.id.split('-')[1]}`); }));
+            document.querySelectorAll('.admin-nav .nav-link').forEach(l => l.addEventListener('click', (e) => {
+                e.preventDefault();
+                const linkEl = e.currentTarget;
+                switchAdminView(`admin-view-${linkEl.id.split('-')[1]}`);
+                document.body.classList.remove('mobile-sidebar-open');
+            }));
 
             if (DOMElements.refreshBtn) {
                 DOMElements.refreshBtn.addEventListener('click', () => initializeApp(false));
@@ -4771,6 +6211,361 @@
                     const toExport = (currentFilteredTickets && currentFilteredTickets.length > 0) ? currentFilteredTickets : allTickets;
                     exportToCSV(toExport, 'Filtered');
                 });
+            }
+
+            // ==================== ASSET DELIVERY FUNCTIONS ====================
+            let allAssetDeliveries = [];
+
+            const loadAndRenderAssetDeliveries = async () => {
+                try {
+                    showLoading(true);
+                    const data = await supabase.getAssetDeliveries();
+                    allAssetDeliveries = Array.isArray(data) ? data : [];
+                    renderAssetCards(allAssetDeliveries);
+                } catch (error) {
+                    console.error('Error loading asset deliveries:', error);
+                    showAlert('ไม่สามารถโหลดข้อมูลใบส่งมอบได้: ' + error.message, false);
+                } finally {
+                    showLoading(false);
+                }
+            };
+
+            const renderAssetCards = (deliveries) => {
+                const container = document.getElementById('asset-delivery-list');
+                if (!container) return;
+
+                // Update stats
+                const totalEl = document.getElementById('asset-total-count');
+                const deliveredEl = document.getElementById('asset-delivered-count');
+                const returnedEl = document.getElementById('asset-returned-count');
+                const delivered = deliveries.filter(d => d.status === 'Delivered').length;
+                const returned = deliveries.filter(d => d.status === 'Returned').length;
+                if (totalEl) totalEl.textContent = deliveries.length;
+                if (deliveredEl) deliveredEl.textContent = delivered;
+                if (returnedEl) returnedEl.textContent = returned;
+
+                // Sync Admindek Overview Support-Bar 3 & Sidebar badge
+                const sbAssetTotal = document.getElementById('sb-asset-total');
+                const sbAssetDeliv = document.getElementById('sb-asset-deliv');
+                const sbAssetRet = document.getElementById('sb-asset-ret');
+                const sbAssetPdf = document.getElementById('sb-asset-pdf');
+                const sideAssetBadge = document.getElementById('sidebar-asset-badge');
+                if (sbAssetTotal) sbAssetTotal.textContent = `${deliveries.length} รายการ`;
+                if (sbAssetDeliv) sbAssetDeliv.textContent = delivered;
+                if (sbAssetRet) sbAssetRet.textContent = returned;
+                if (sbAssetPdf) sbAssetPdf.textContent = deliveries.filter(d => d.pdf_url).length;
+                if (sideAssetBadge) sideAssetBadge.textContent = deliveries.length;
+
+                if (deliveries.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-12 text-center py-5">
+                            <i class="bi bi-inbox" style="font-size: 3rem; color: #4b5563;"></i>
+                            <p class="text-muted mt-2">ยังไม่มีใบส่งมอบ กรอกฟอร์มด้านบนเพื่อสร้างใหม่</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = deliveries.map(d => {
+                    const statusClass = d.status === 'Returned' ? 'returned' : 'delivered';
+                    const statusText = d.status === 'Returned' ? 'รับคืนแล้ว' : 'ส่งมอบแล้ว';
+                    const dateDisplay = d.delivery_date ? new Date(d.delivery_date).toLocaleDateString('th-TH', {year:'numeric',month:'short',day:'numeric'}) : '-';
+
+                    return `
+                    <div class="col-lg-4 col-md-6">
+                        <div class="asset-card">
+                            <div class="asset-card-header">
+                                <span class="asset-card-id">${d.delivery_id}</span>
+                                <span class="asset-card-status ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="asset-card-body">
+                                <div class="info-row"><i class="bi bi-person-fill"></i><span class="label">ชื่อ:</span><span class="value">${d.employee_name || '-'}</span></div>
+                                <div class="info-row"><i class="bi bi-briefcase-fill"></i><span class="label">ตำแหน่ง:</span><span class="value">${d.position || '-'}</span></div>
+                                <div class="info-row"><i class="bi bi-building"></i><span class="label">บริษัท:</span><span class="value">${d.company || '-'}</span></div>
+                                <div class="info-row"><i class="bi bi-calendar-event"></i><span class="label">วันที่:</span><span class="value">${dateDisplay}</span></div>
+                                <div class="info-row"><i class="bi bi-laptop"></i><span class="label">Notebook:</span><span class="value">${d.notebook_model || '-'}</span></div>
+                                <div class="info-row"><i class="bi bi-tag"></i><span class="label">S/Tag:</span><span class="value">${d.service_tag || '-'}</span></div>
+                                <div class="info-row"><i class="bi bi-key"></i><span class="label">Password:</span><span class="value">${d.passwords || '-'}</span></div>
+                                <div class="info-row"><i class="bi bi-mouse2"></i><span class="label">Mouse:</span><span class="value">${d.mouse_model || '-'}</span></div>
+                                ${d.notes ? `<div class="info-row"><i class="bi bi-chat-left-text"></i><span class="label">หมายเหตุ:</span><span class="value">${d.notes}</span></div>` : ''}
+                            </div>
+                            <div class="asset-card-actions">
+                                <button class="btn btn-outline-primary btn-sm generate-pdf-btn" data-delivery-id="${d.delivery_id}" title="สร้าง PDF">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i>สร้าง PDF
+                                </button>
+                                ${d.pdf_url ? `<a href="${d.pdf_url}" target="_blank" class="btn btn-outline-info btn-sm"><i class="bi bi-eye me-1"></i>ดู PDF</a>` : ''}
+                                ${d.status === 'Delivered' ? `<button class="btn btn-outline-warning btn-sm return-asset-btn" data-delivery-id="${d.delivery_id}" title="รับคืน"><i class="bi bi-arrow-return-left me-1"></i>รับคืน</button>` : ''}
+                                <button class="btn btn-outline-danger btn-sm delete-asset-btn" data-delivery-id="${d.delivery_id}" title="ลบ">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            };
+
+            const generateAssetPDF = async (delivery) => {
+                try {
+                    showLoading(true);
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+                    // Load Thai font (Sarabun) from CDN
+                    const fontUrl = 'https://cdn.jsdelivr.net/gh/nicematt/thai-fonts-for-jspdf@main/fonts/THSarabunNew-normal.js';
+                    try {
+                        const fontScript = document.createElement('script');
+                        fontScript.src = fontUrl;
+                        document.head.appendChild(fontScript);
+                        await new Promise((resolve, reject) => {
+                            fontScript.onload = resolve;
+                            fontScript.onerror = reject;
+                            setTimeout(reject, 5000);
+                        });
+                        doc.addFont('THSarabunNew-normal.ttf', 'THSarabunNew', 'normal');
+                        doc.setFont('THSarabunNew');
+                    } catch (fontErr) {
+                        console.warn('Thai font not loaded, using default:', fontErr);
+                    }
+
+                    const dateDisplay = delivery.delivery_date
+                        ? new Date(delivery.delivery_date).toLocaleDateString('th-TH', {year:'numeric', month:'long', day:'numeric'})
+                        : '-';
+
+                    // Header
+                    doc.setFontSize(20);
+                    doc.text('ใบส่งมอบ-รับคืนทรัพย์สิน IT', 105, 25, { align: 'center' });
+                    doc.setFontSize(12);
+                    doc.text(`เลขที่: ${delivery.delivery_id}`, 105, 33, { align: 'center' });
+
+                    doc.setDrawColor(34, 197, 94);
+                    doc.setLineWidth(0.5);
+                    doc.line(20, 37, 190, 37);
+
+                    // Employee Info
+                    let y = 47;
+                    doc.setFontSize(14);
+                    doc.setTextColor(34, 197, 94);
+                    doc.text('ข้อมูลพนักงาน', 20, y);
+                    doc.setTextColor(0, 0, 0);
+                    y += 10;
+                    doc.setFontSize(12);
+
+                    const fields = [
+                        ['ชื่อ-นามสกุล', delivery.employee_name || '-'],
+                        ['ตำแหน่ง', delivery.position || '-'],
+                        ['บริษัท', delivery.company || '-'],
+                        ['วันที่ส่งมอบ', dateDisplay]
+                    ];
+
+                    fields.forEach(([label, value]) => {
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(`${label}:`, 25, y);
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(value, 80, y);
+                        y += 8;
+                    });
+
+                    y += 5;
+                    doc.setFontSize(14);
+                    doc.setTextColor(34, 197, 94);
+                    doc.text('รายการทรัพย์สิน IT', 20, y);
+                    doc.setTextColor(0, 0, 0);
+                    y += 10;
+                    doc.setFontSize(12);
+
+                    // Table
+                    const items = [
+                        ['Notebook Model', delivery.notebook_model || '-'],
+                        ['Service Tag', delivery.service_tag || '-'],
+                        ['Passwords', delivery.passwords || '-'],
+                        ['Mouse', delivery.mouse_model || '-']
+                    ];
+
+                    // Table Header
+                    doc.setFillColor(34, 197, 94);
+                    doc.setTextColor(255, 255, 255);
+                    doc.rect(20, y - 5, 170, 8, 'F');
+                    doc.text('รายการ', 25, y);
+                    doc.text('รายละเอียด', 90, y);
+                    y += 8;
+                    doc.setTextColor(0, 0, 0);
+
+                    items.forEach(([item, detail], i) => {
+                        if (i % 2 === 0) {
+                            doc.setFillColor(245, 245, 245);
+                            doc.rect(20, y - 5, 170, 8, 'F');
+                        }
+                        doc.text(item, 25, y);
+                        doc.text(detail, 90, y);
+                        y += 8;
+                    });
+
+                    // Notes
+                    if (delivery.notes) {
+                        y += 10;
+                        doc.setFontSize(14);
+                        doc.setTextColor(34, 197, 94);
+                        doc.text('หมายเหตุ', 20, y);
+                        doc.setTextColor(0, 0, 0);
+                        y += 8;
+                        doc.setFontSize(12);
+                        doc.text(delivery.notes, 25, y);
+                    }
+
+                    // Signature area
+                    y = Math.max(y + 30, 220);
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0);
+
+                    // Left: ผู้รับมอบ
+                    doc.text('ลงชื่อ .....................................', 25, y);
+                    doc.text('(ผู้รับมอบ)', 45, y + 8);
+                    doc.text('วันที่ .....................................', 25, y + 16);
+
+                    // Right: ผู้ส่งมอบ
+                    doc.text('ลงชื่อ .....................................', 115, y);
+                    doc.text('(ผู้ส่งมอบ)', 135, y + 8);
+                    doc.text('วันที่ .....................................', 115, y + 16);
+
+                    // Footer
+                    doc.setFontSize(8);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text(`Generated: ${new Date().toLocaleString('th-TH')}`, 105, 287, { align: 'center' });
+
+                    // Save or upload
+                    const fileName = `${delivery.delivery_id}_${delivery.employee_name || 'unknown'}.pdf`;
+                    const pdfBase64 = doc.output('datauristring').split(',')[1];
+
+                    // Download locally
+                    doc.save(fileName);
+
+                    // Try to upload to SharePoint via n8n
+                    try {
+                        const uploadResult = await supabase.uploadPDFToSharePoint(pdfBase64, fileName, {
+                            deliveryId: delivery.delivery_id,
+                            employeeName: delivery.employee_name
+                        });
+
+                        if (uploadResult && uploadResult.success && uploadResult.pdfUrl) {
+                            await supabase.updateAssetDelivery(delivery.delivery_id, { pdf_url: uploadResult.pdfUrl });
+                            showAlert(`PDF สร้างเรียบร้อย และอัปโหลดไป SharePoint แล้ว<br><a href="${uploadResult.pdfUrl}" target="_blank" class="text-primary">เปิด PDF บน SharePoint</a>`, true);
+                        } else {
+                            showAlert(`PDF ดาวน์โหลดในเครื่องแล้ว<br><small class="text-muted">SharePoint upload: ${uploadResult?.message || 'ยังไม่ได้ตั้งค่า n8n workflow'}</small>`, true);
+                        }
+                    } catch (uploadErr) {
+                        console.warn('SharePoint upload skipped:', uploadErr);
+                        showAlert('PDF ดาวน์โหลดในเครื่องแล้ว<br><small class="text-muted">SharePoint upload ยังไม่ได้ตั้งค่า</small>', true);
+                    }
+
+                    await loadAndRenderAssetDeliveries();
+                } catch (error) {
+                    console.error('PDF generation failed:', error);
+                    showAlert('สร้าง PDF ไม่สำเร็จ: ' + error.message, false);
+                } finally {
+                    showLoading(false);
+                }
+            };
+
+            // Asset Delivery Form Submit
+            const assetForm = document.getElementById('asset-delivery-form');
+            if (assetForm) {
+                assetForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    showLoading(true);
+
+                    try {
+                        const deliveryData = {
+                            delivery_id: supabase.generateDeliveryId(),
+                            employee_name: document.getElementById('asset-employee-name').value.trim(),
+                            position: document.getElementById('asset-position').value.trim(),
+                            company: document.getElementById('asset-company').value.trim(),
+                            delivery_date: document.getElementById('asset-delivery-date').value,
+                            notebook_model: document.getElementById('asset-notebook-model').value.trim(),
+                            service_tag: document.getElementById('asset-service-tag').value.trim(),
+                            passwords: document.getElementById('asset-passwords').value.trim(),
+                            mouse_model: document.getElementById('asset-mouse').value.trim(),
+                            notes: document.getElementById('asset-notes').value.trim(),
+                            status: 'Delivered'
+                        };
+
+                        if (!deliveryData.employee_name) {
+                            showAlert('กรุณากรอกชื่อ-นามสกุลพนักงาน', false);
+                            return;
+                        }
+
+                        const result = await supabase.createAssetDelivery(deliveryData);
+
+                        if (result && !result.error) {
+                            showAlert(`บันทึกใบส่งมอบ <strong>${deliveryData.delivery_id}</strong> สำเร็จ`, true);
+                            assetForm.reset();
+                            // Set today's date
+                            document.getElementById('asset-delivery-date').value = new Date().toISOString().split('T')[0];
+                            await loadAndRenderAssetDeliveries();
+                        } else {
+                            throw new Error(result?.message || result?.error?.message || 'Unknown error');
+                        }
+                    } catch (error) {
+                        console.error('Create asset delivery error:', error);
+                        showAlert('บันทึกใบส่งมอบไม่สำเร็จ: ' + error.message, false);
+                    } finally {
+                        showLoading(false);
+                    }
+                });
+            }
+
+            // Asset Card Actions (Event Delegation)
+            const assetList = document.getElementById('asset-delivery-list');
+            if (assetList) {
+                assetList.addEventListener('click', async (e) => {
+                    const generateBtn = e.target.closest('.generate-pdf-btn');
+                    const returnBtn = e.target.closest('.return-asset-btn');
+                    const deleteBtn = e.target.closest('.delete-asset-btn');
+
+                    if (generateBtn) {
+                        const deliveryId = generateBtn.dataset.deliveryId;
+                        const delivery = allAssetDeliveries.find(d => d.delivery_id === deliveryId);
+                        if (delivery) {
+                            await generateAssetPDF(delivery);
+                        }
+                    }
+
+                    if (returnBtn) {
+                        const deliveryId = returnBtn.dataset.deliveryId;
+                        showConfirm(`ต้องการเปลี่ยนสถานะเป็น "รับคืน" สำหรับ ${deliveryId}?`, async () => {
+                            try {
+                                showLoading(true);
+                                await supabase.updateAssetDelivery(deliveryId, { status: 'Returned' });
+                                showAlert(`เปลี่ยนสถานะ ${deliveryId} เป็น "รับคืนแล้ว" สำเร็จ`, true);
+                                await loadAndRenderAssetDeliveries();
+                            } catch (err) {
+                                showAlert('เปลี่ยนสถานะไม่สำเร็จ: ' + err.message, false);
+                            } finally {
+                                showLoading(false);
+                            }
+                        });
+                    }
+
+                    if (deleteBtn) {
+                        const deliveryId = deleteBtn.dataset.deliveryId;
+                        showConfirm(`ต้องการลบใบส่งมอบ ${deliveryId} หรือไม่?`, async () => {
+                            try {
+                                showLoading(true);
+                                await supabase.deleteAssetDelivery(deliveryId);
+                                showAlert(`ลบใบส่งมอบ ${deliveryId} สำเร็จ`, true);
+                                await loadAndRenderAssetDeliveries();
+                            } catch (err) {
+                                showAlert('ลบไม่สำเร็จ: ' + err.message, false);
+                            } finally {
+                                showLoading(false);
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Set default date to today
+            const assetDateInput = document.getElementById('asset-delivery-date');
+            if (assetDateInput) {
+                assetDateInput.value = new Date().toISOString().split('T')[0];
             }
 
             initializeApp();
