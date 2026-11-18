@@ -5706,25 +5706,27 @@
                 renderEvaluationCards(allTickets);
 
                 // Load Asset Summary for Support-Bar 3 & Sidebar badge silently
-                supabase.getAssetDeliveries().then(deliveries => {
-                    if (Array.isArray(deliveries)) {
-                        allAssetDeliveries = deliveries;
-                        const totalA = deliveries.length;
-                        const delivA = deliveries.filter(d => d.status === 'Delivered').length;
-                        const retA = deliveries.filter(d => d.status === 'Returned').length;
-                        const pdfA = deliveries.filter(d => d.pdf_url).length;
-                        const sbAssetTotal = document.getElementById('sb-asset-total');
-                        const sbAssetDeliv = document.getElementById('sb-asset-deliv');
-                        const sbAssetRet = document.getElementById('sb-asset-ret');
-                        const sbAssetPdf = document.getElementById('sb-asset-pdf');
-                        const sideAssetBadge = document.getElementById('sidebar-asset-badge');
-                        if (sbAssetTotal) sbAssetTotal.textContent = `${totalA} รายการ`;
-                        if (sbAssetDeliv) sbAssetDeliv.textContent = delivA;
-                        if (sbAssetRet) sbAssetRet.textContent = retA;
-                        if (sbAssetPdf) sbAssetPdf.textContent = pdfA;
-                        if (sideAssetBadge) sideAssetBadge.textContent = totalA;
-                    }
-                }).catch(() => {});
+                if (typeof supabase.getAssetDeliveries === 'function') {
+                    supabase.getAssetDeliveries().then(deliveries => {
+                        if (Array.isArray(deliveries)) {
+                            allAssetDeliveries = deliveries;
+                            const totalA = deliveries.length;
+                            const delivA = deliveries.filter(d => d.status === 'Delivered').length;
+                            const retA = deliveries.filter(d => d.status === 'Returned').length;
+                            const pdfA = deliveries.filter(d => d.pdf_url).length;
+                            const sbAssetTotal = document.getElementById('sb-asset-total');
+                            const sbAssetDeliv = document.getElementById('sb-asset-deliv');
+                            const sbAssetRet = document.getElementById('sb-asset-ret');
+                            const sbAssetPdf = document.getElementById('sb-asset-pdf');
+                            const sideAssetBadge = document.getElementById('sidebar-asset-badge');
+                            if (sbAssetTotal) sbAssetTotal.textContent = `${totalA} รายการ`;
+                            if (sbAssetDeliv) sbAssetDeliv.textContent = delivA;
+                            if (sbAssetRet) sbAssetRet.textContent = retA;
+                            if (sbAssetPdf) sbAssetPdf.textContent = pdfA;
+                            if (sideAssetBadge) sideAssetBadge.textContent = totalA;
+                        }
+                    }).catch(() => {});
+                }
 
                 startPolling();
                 startCountdownTimers();

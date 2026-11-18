@@ -16,6 +16,7 @@ const SUPABASE_CONFIG = {
     // n8n Webhook URLs (TODO: ย้ายไป Edge Function เมื่อตั้ง Cloudflare Tunnel แล้ว)
     N8N_EVALUATION_EMAIL_WEBHOOK: 'https://n8n.tonyg-automation.com/webhook/evaluation-email',
     N8N_FOLLOWUP_EMAIL_WEBHOOK: 'https://n8n.tonyg-automation.com/webhook/problem-followup-email',
+    N8N_ASSET_DELIVERY_PDF_WEBHOOK: 'https://n8n.tonyg-automation.com/webhook/asset-delivery-pdf',
 
     // Teams Notification via Supabase Edge Function (ป้องกัน CORS)
     TEAMS_EDGE_FUNCTION_URL: 'https://edcxqxbktztoovdnshxr.supabase.co/functions/v1/teams-notify',
@@ -357,6 +358,71 @@ class SupabaseClient {
             console.error('Teams notification failed:', e);
             return { success: false, error: e.message };
         }
+    }
+
+    // ==================== ASSET DELIVERIES ====================
+
+    async getAssetDeliveries() {
+        const url = `${this.url}/rest/v1/asset_deliveries?select=*&order=created_at.desc`;
+        const response = await fetch(url, { headers: this.headers });
+        return response.json();
+    }
+
+    async createAssetDelivery(data) {
+        const url = `${this.url}/rest/v1/asset_deliveries`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: this.headers,
+            body: JSON.stringify(data)
+        });
+        return response.json();
+    }
+
+    async updateAssetDelivery(deliveryId, updates) {
+        const url = `${this.url}/rest/v1/asset_deliveries?delivery_id=eq.${deliveryId}`;
+        const response = await fetch(url, {
+            method: 'PATCH',
+            headers: this.headers,
+            body: JSON.stringify({
+                ...updates,
+                last_updated: Date.now()
+            })
+        });
+        return response.json();
+    }
+
+    async deleteAssetDelivery(deliveryId) {
+        const url = `${this.url}/rest/v1/asset_deliveries?delivery_id=eq.${deliveryId}`;
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: this.headers
+        });
+        if (response.status === 204) return { success: true };
+        return response.json();
+    }
+
+    async uploadPDFToSharePoint(pdfBase64, fileName, metadata) {
+        try {
+            const response = await fetch(SUPABASE_CONFIG.N8N_ASSET_DELIVERY_PDF_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pdfBase64,
+                    fileName,
+                    ...metadata
+                })
+            });
+            return response.json();
+        } catch (error) {
+            console.error('SharePoint upload failed:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
+    generateDeliveryId() {
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        return `DEL-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
     }
 
     // ==================== HELPERS ====================
